@@ -16,43 +16,37 @@
  *
  */
 
-// Package main implements a client for Greeter service.
+// Package main implements a server for Greeter service.
 package main
 
 import (
 	"context"
 	"log"
-	"os"
-	"time"
+	"net"
 
-	"google.golang.org/grpc"
 	pb "github.com/Frans-Lukas/checkerboard/pkg/api/v1"
+	"google.golang.org/grpc"
 )
 
 const (
-	address     = "localhost:50051"
-	defaultName = "world"
+	port = ":50051"
 )
 
-func main() {
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := pb.NewGreeterClient(conn)
+// sayHello implements helloworld.GreeterServer.SayHello
+func sayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	log.Printf("Received: %v", in.GetName())
+	return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
+}
 
-	// Contact the server and print out its response.
-	name := defaultName
-	if len(os.Args) > 1 {
-		name = os.Args[1]
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+func main() {
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("failed to listen: %v", err)
 	}
-	log.Printf("Greeting: %s", r.GetMessage())
+	s := grpc.NewServer()
+	//pb.RegisterGreeterServer(s, &pb.GreeterServi)
+	pb.RegisterGreeterService(s, &pb.GreeterService{SayHello: sayHello})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

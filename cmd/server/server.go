@@ -24,7 +24,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/Frans-Lukas/checkerboard/pkg/api/v1"
+	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
 	"google.golang.org/grpc"
 )
 

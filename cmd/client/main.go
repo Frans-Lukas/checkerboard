@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	pb "github.com/Frans-Lukas/checkerboard/pkg/api/v1"
+	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
 )
 
 const (

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package nameserver;
+package cellmanager;
 
-service NameServer {
+service CellManager {
     rpc CreateCell (CellRequest) returns (CellStatusReply) {}
     rpc DeleteCell (CellRequest) returns (CellStatusReply) {}
     rpc ListCells (ListCellsRequest) returns (ListCellsReply) {}

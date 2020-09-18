@@ -9,4 +9,6 @@ type CellManager struct {
 	pb.CellManagerServer
 }
 
-func (s *CellManager) CreateCell (ctx context.Context)
+func (cellManager *CellManager) CreateCell(ctx context.Context, in *pb.CellRequest) (*pb.CellStatusReply, error) {
+	return &pb.CellStatusReply{WasPerformed: true}, nil
+}

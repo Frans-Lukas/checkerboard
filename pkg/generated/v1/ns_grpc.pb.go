@@ -13,173 +13,59 @@ import (
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion7
 
-// CellManagerClient is the client API for CellManager service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CellManagerClient interface {
-	CreateCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error)
-	DeleteCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error)
-	ListCells(ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption) (*ListCellsReply, error)
-	ListPlayersInCell(ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption) (*PlayersReply, error)
-	RequestCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterReply, error)
-	UnregisterCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterStatusReply, error)
-	PlayerLeftCell(ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption) (*PlayerStatusReply, error)
-	RequestCellNeighbours(ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption) (*CellNeighboursReply, error)
-	RequestCellSizeChange(ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption) (*CellChangeStatusReply, error)
-	LockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error)
-	UnlockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error)
-}
-
-type cellManagerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewCellManagerClient(cc grpc.ClientConnInterface) CellManagerClient {
-	return &cellManagerClient{cc}
-}
 
 var cellManagerCreateCellStreamDesc = &grpc.StreamDesc{
 	StreamName: "CreateCell",
-}
-
-func (c *cellManagerClient) CreateCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error) {
-	out := new(CellStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/CreateCell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 var cellManagerDeleteCellStreamDesc = &grpc.StreamDesc{
 	StreamName: "DeleteCell",
 }
 
-func (c *cellManagerClient) DeleteCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error) {
-	out := new(CellStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/DeleteCell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerListCellsStreamDesc = &grpc.StreamDesc{
 	StreamName: "ListCells",
 }
 
-func (c *cellManagerClient) ListCells(ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption) (*ListCellsReply, error) {
-	out := new(ListCellsReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/ListCells", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerListPlayersInCellStreamDesc = &grpc.StreamDesc{
 	StreamName: "ListPlayersInCell",
 }
 
-func (c *cellManagerClient) ListPlayersInCell(ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption) (*PlayersReply, error) {
-	out := new(PlayersReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/ListPlayersInCell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerRequestCellMasterStreamDesc = &grpc.StreamDesc{
 	StreamName: "RequestCellMaster",
-}
-
-func (c *cellManagerClient) RequestCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterReply, error) {
-	out := new(CellMasterReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellMaster", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 var cellManagerUnregisterCellMasterStreamDesc = &grpc.StreamDesc{
 	StreamName: "UnregisterCellMaster",
 }
 
-func (c *cellManagerClient) UnregisterCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterStatusReply, error) {
-	out := new(CellMasterStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/UnregisterCellMaster", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerPlayerLeftCellStreamDesc = &grpc.StreamDesc{
 	StreamName: "PlayerLeftCell",
 }
 
-func (c *cellManagerClient) PlayerLeftCell(ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption) (*PlayerStatusReply, error) {
-	out := new(PlayerStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/PlayerLeftCell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerRequestCellNeighboursStreamDesc = &grpc.StreamDesc{
 	StreamName: "RequestCellNeighbours",
 }
 
-func (c *cellManagerClient) RequestCellNeighbours(ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption) (*CellNeighboursReply, error) {
-	out := new(CellNeighboursReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellNeighbours", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerRequestCellSizeChangeStreamDesc = &grpc.StreamDesc{
 	StreamName: "RequestCellSizeChange",
 }
 
-func (c *cellManagerClient) RequestCellSizeChange(ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption) (*CellChangeStatusReply, error) {
-	out := new(CellChangeStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellSizeChange", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerLockCellsStreamDesc = &grpc.StreamDesc{
 	StreamName: "LockCells",
 }
 
-func (c *cellManagerClient) LockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error) {
-	out := new(CellLockStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/LockCells", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 var cellManagerUnlockCellsStreamDesc = &grpc.StreamDesc{
 	StreamName: "UnlockCells",
 }
 
-func (c *cellManagerClient) UnlockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error) {
-	out := new(CellLockStatusReply)
-	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/UnlockCells", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 // CellManagerService is the service API for CellManager service.
 // Fields should be assigned to their respective handler implementations only before

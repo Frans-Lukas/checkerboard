@@ -7,6 +7,7 @@ import (
 
 type CellManager struct {
 	pb.CellManagerServer
+	Cells *[]Cell
 }
 
 func (cellManager *CellManager) CreateCell(ctx context.Context, in *pb.CellRequest) (*pb.CellStatusReply, error) {

@@ -20,11 +20,11 @@
 package main
 
 import (
-	"log"
-	"net"
 	gen "github.com/Frans-Lukas/checkerboard/pkg/created/v1"
 	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
 	"google.golang.org/grpc"
+	"log"
+	"net"
 )
 
 const (

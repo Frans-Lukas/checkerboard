@@ -2,20 +2,20 @@ package cellmanager
 
 import (
 	"context"
-	"github.com/Frans-Lukas/checkerboard/pkg/created/v1/cell"
-	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated"
 )
 
 type CellManager struct {
-	pb.CellManagerServer
+	generated.CellManagerServer
 	Cells *[]cell.Cell
 }
 
 func (cellManager *CellManager) CreateCell(
-	ctx context.Context, in *pb.CellRequest,
-) (*pb.CellStatusReply, error) {
+	ctx context.Context, in *generated.CellRequest,
+) (*generated.CellStatusReply, error) {
 	cellManager.AppendCell(cell.Cell{CellId: in.CellId})
-	return &pb.CellStatusReply{WasPerformed: true}, nil
+	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
 func (cellManager *CellManager) AppendCell(cell cell.Cell) {

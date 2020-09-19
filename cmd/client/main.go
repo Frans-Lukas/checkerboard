@@ -21,10 +21,10 @@ package main
 
 import (
 	"context"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"log"
 	"time"
 
-	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
 	"google.golang.org/grpc"
 )
 
@@ -40,12 +40,12 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pb.NewCellManagerClient(conn)
+	c := generated.NewCellManagerClient(conn)
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.CreateCell(ctx, &pb.CellRequest{CellId: "new id"})
+	r, err := c.CreateCell(ctx, &generated.CellRequest{CellId: "new id"})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

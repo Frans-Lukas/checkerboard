@@ -1,16 +1,16 @@
-package v1
+package created
 
 import (
 	"context"
 	"errors"
-	"github.com/Frans-Lukas/checkerboard/pkg/created/v1/cellmanager"
-	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"testing"
 )
 
 func TestCreateCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	request := pb.CellRequest{CellId: "testId"}
+	request := generated.CellRequest{CellId: "testId"}
 	_, err := cm.CreateCell(context.Background(), &request)
 	failIf(err, "could not create cell")
 	if (*cm.Cells)[0].CellId != "testId" {

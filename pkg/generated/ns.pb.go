@@ -4,7 +4,7 @@
 // 	protoc        v3.6.1
 // source: ns.proto
 
-package cellmanager
+package generated
 
 import (
 	context "context"

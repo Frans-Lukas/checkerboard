@@ -20,8 +20,8 @@
 package main
 
 import (
-	"github.com/Frans-Lukas/checkerboard/pkg/created/v1/cellmanager"
-	pb "github.com/Frans-Lukas/checkerboard/pkg/generated/v1"
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -38,7 +38,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	cm := cellmanager.NewCellManager()
-	pb.RegisterCellManagerServer(s, &cm)
+	generated.RegisterCellManagerServer(s, &cm)
 	//pb.RegisterGreeterServer(s, &pb.GreeterServi)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

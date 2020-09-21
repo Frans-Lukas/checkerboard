@@ -21,7 +21,7 @@ package main
 
 import (
 	"context"
-	"github.com/Frans-Lukas/checkerboard/pkg/generated"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"log"
 	"time"
 

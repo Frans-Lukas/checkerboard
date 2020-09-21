@@ -1005,9 +1005,11 @@ var (
 )
 
 func file_ns_proto_rawDescGZIP() []byte {
-	file_ns_proto_rawDescOnce.Do(func() {
-		file_ns_proto_rawDescData = protoimpl.X.CompressGZIP(file_ns_proto_rawDescData)
-	})
+	file_ns_proto_rawDescOnce.Do(
+		func() {
+			file_ns_proto_rawDescData = protoimpl.X.CompressGZIP(file_ns_proto_rawDescData)
+		},
+	)
 	return file_ns_proto_rawDescData
 }
 
@@ -1304,17 +1306,39 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CellManagerClient interface {
-	CreateCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error)
-	DeleteCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error)
-	ListCells(ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption) (*ListCellsReply, error)
-	ListPlayersInCell(ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption) (*PlayersReply, error)
-	RequestCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterReply, error)
-	UnregisterCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterStatusReply, error)
-	PlayerLeftCell(ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption) (*PlayerStatusReply, error)
-	RequestCellNeighbours(ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption) (*CellNeighboursReply, error)
-	RequestCellSizeChange(ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption) (*CellChangeStatusReply, error)
-	LockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error)
-	UnlockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error)
+	CreateCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (
+		*CellStatusReply, error,
+	)
+	DeleteCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (
+		*CellStatusReply, error,
+	)
+	ListCells(ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption) (
+		*ListCellsReply, error,
+	)
+	ListPlayersInCell(
+		ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption,
+	) (*PlayersReply, error)
+	RequestCellMaster(
+		ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption,
+	) (*CellMasterReply, error)
+	UnregisterCellMaster(
+		ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption,
+	) (*CellMasterStatusReply, error)
+	PlayerLeftCell(
+		ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption,
+	) (*PlayerStatusReply, error)
+	RequestCellNeighbours(
+		ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption,
+	) (*CellNeighboursReply, error)
+	RequestCellSizeChange(
+		ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption,
+	) (*CellChangeStatusReply, error)
+	LockCells(
+		ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption,
+	) (*CellLockStatusReply, error)
+	UnlockCells(
+		ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption,
+	) (*CellLockStatusReply, error)
 }
 
 type cellManagerClient struct {
@@ -1325,7 +1349,9 @@ func NewCellManagerClient(cc grpc.ClientConnInterface) CellManagerClient {
 	return &cellManagerClient{cc}
 }
 
-func (c *cellManagerClient) CreateCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error) {
+func (c *cellManagerClient) CreateCell(
+	ctx context.Context, in *CellRequest, opts ...grpc.CallOption,
+) (*CellStatusReply, error) {
 	out := new(CellStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/CreateCell", in, out, opts...)
 	if err != nil {
@@ -1334,7 +1360,9 @@ func (c *cellManagerClient) CreateCell(ctx context.Context, in *CellRequest, opt
 	return out, nil
 }
 
-func (c *cellManagerClient) DeleteCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellStatusReply, error) {
+func (c *cellManagerClient) DeleteCell(
+	ctx context.Context, in *CellRequest, opts ...grpc.CallOption,
+) (*CellStatusReply, error) {
 	out := new(CellStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/DeleteCell", in, out, opts...)
 	if err != nil {
@@ -1343,7 +1371,9 @@ func (c *cellManagerClient) DeleteCell(ctx context.Context, in *CellRequest, opt
 	return out, nil
 }
 
-func (c *cellManagerClient) ListCells(ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption) (*ListCellsReply, error) {
+func (c *cellManagerClient) ListCells(
+	ctx context.Context, in *ListCellsRequest, opts ...grpc.CallOption,
+) (*ListCellsReply, error) {
 	out := new(ListCellsReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/ListCells", in, out, opts...)
 	if err != nil {
@@ -1352,7 +1382,9 @@ func (c *cellManagerClient) ListCells(ctx context.Context, in *ListCellsRequest,
 	return out, nil
 }
 
-func (c *cellManagerClient) ListPlayersInCell(ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption) (*PlayersReply, error) {
+func (c *cellManagerClient) ListPlayersInCell(
+	ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption,
+) (*PlayersReply, error) {
 	out := new(PlayersReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/ListPlayersInCell", in, out, opts...)
 	if err != nil {
@@ -1361,7 +1393,9 @@ func (c *cellManagerClient) ListPlayersInCell(ctx context.Context, in *ListPlaye
 	return out, nil
 }
 
-func (c *cellManagerClient) RequestCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterReply, error) {
+func (c *cellManagerClient) RequestCellMaster(
+	ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption,
+) (*CellMasterReply, error) {
 	out := new(CellMasterReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellMaster", in, out, opts...)
 	if err != nil {
@@ -1370,7 +1404,9 @@ func (c *cellManagerClient) RequestCellMaster(ctx context.Context, in *CellMaste
 	return out, nil
 }
 
-func (c *cellManagerClient) UnregisterCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterStatusReply, error) {
+func (c *cellManagerClient) UnregisterCellMaster(
+	ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption,
+) (*CellMasterStatusReply, error) {
 	out := new(CellMasterStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/UnregisterCellMaster", in, out, opts...)
 	if err != nil {
@@ -1379,7 +1415,9 @@ func (c *cellManagerClient) UnregisterCellMaster(ctx context.Context, in *CellMa
 	return out, nil
 }
 
-func (c *cellManagerClient) PlayerLeftCell(ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption) (*PlayerStatusReply, error) {
+func (c *cellManagerClient) PlayerLeftCell(
+	ctx context.Context, in *PlayerLeftCellRequest, opts ...grpc.CallOption,
+) (*PlayerStatusReply, error) {
 	out := new(PlayerStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/PlayerLeftCell", in, out, opts...)
 	if err != nil {
@@ -1388,7 +1426,9 @@ func (c *cellManagerClient) PlayerLeftCell(ctx context.Context, in *PlayerLeftCe
 	return out, nil
 }
 
-func (c *cellManagerClient) RequestCellNeighbours(ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption) (*CellNeighboursReply, error) {
+func (c *cellManagerClient) RequestCellNeighbours(
+	ctx context.Context, in *CellNeighbourRequest, opts ...grpc.CallOption,
+) (*CellNeighboursReply, error) {
 	out := new(CellNeighboursReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellNeighbours", in, out, opts...)
 	if err != nil {
@@ -1397,7 +1437,9 @@ func (c *cellManagerClient) RequestCellNeighbours(ctx context.Context, in *CellN
 	return out, nil
 }
 
-func (c *cellManagerClient) RequestCellSizeChange(ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption) (*CellChangeStatusReply, error) {
+func (c *cellManagerClient) RequestCellSizeChange(
+	ctx context.Context, in *CellChangeSizeRequest, opts ...grpc.CallOption,
+) (*CellChangeStatusReply, error) {
 	out := new(CellChangeStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellSizeChange", in, out, opts...)
 	if err != nil {
@@ -1406,7 +1448,9 @@ func (c *cellManagerClient) RequestCellSizeChange(ctx context.Context, in *CellC
 	return out, nil
 }
 
-func (c *cellManagerClient) LockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error) {
+func (c *cellManagerClient) LockCells(
+	ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption,
+) (*CellLockStatusReply, error) {
 	out := new(CellLockStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/LockCells", in, out, opts...)
 	if err != nil {
@@ -1415,7 +1459,9 @@ func (c *cellManagerClient) LockCells(ctx context.Context, in *LockCellsRequest,
 	return out, nil
 }
 
-func (c *cellManagerClient) UnlockCells(ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption) (*CellLockStatusReply, error) {
+func (c *cellManagerClient) UnlockCells(
+	ctx context.Context, in *LockCellsRequest, opts ...grpc.CallOption,
+) (*CellLockStatusReply, error) {
 	out := new(CellLockStatusReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/UnlockCells", in, out, opts...)
 	if err != nil {
@@ -1443,37 +1489,59 @@ type CellManagerServer interface {
 type UnimplementedCellManagerServer struct {
 }
 
-func (*UnimplementedCellManagerServer) CreateCell(context.Context, *CellRequest) (*CellStatusReply, error) {
+func (*UnimplementedCellManagerServer) CreateCell(context.Context, *CellRequest) (
+	*CellStatusReply, error,
+) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCell not implemented")
 }
-func (*UnimplementedCellManagerServer) DeleteCell(context.Context, *CellRequest) (*CellStatusReply, error) {
+func (*UnimplementedCellManagerServer) DeleteCell(context.Context, *CellRequest) (
+	*CellStatusReply, error,
+) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCell not implemented")
 }
-func (*UnimplementedCellManagerServer) ListCells(context.Context, *ListCellsRequest) (*ListCellsReply, error) {
+func (*UnimplementedCellManagerServer) ListCells(
+	context.Context, *ListCellsRequest,
+) (*ListCellsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCells not implemented")
 }
-func (*UnimplementedCellManagerServer) ListPlayersInCell(context.Context, *ListPlayersRequest) (*PlayersReply, error) {
+func (*UnimplementedCellManagerServer) ListPlayersInCell(
+	context.Context, *ListPlayersRequest,
+) (*PlayersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPlayersInCell not implemented")
 }
-func (*UnimplementedCellManagerServer) RequestCellMaster(context.Context, *CellMasterRequest) (*CellMasterReply, error) {
+func (*UnimplementedCellManagerServer) RequestCellMaster(
+	context.Context, *CellMasterRequest,
+) (*CellMasterReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestCellMaster not implemented")
 }
-func (*UnimplementedCellManagerServer) UnregisterCellMaster(context.Context, *CellMasterRequest) (*CellMasterStatusReply, error) {
+func (*UnimplementedCellManagerServer) UnregisterCellMaster(
+	context.Context, *CellMasterRequest,
+) (*CellMasterStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnregisterCellMaster not implemented")
 }
-func (*UnimplementedCellManagerServer) PlayerLeftCell(context.Context, *PlayerLeftCellRequest) (*PlayerStatusReply, error) {
+func (*UnimplementedCellManagerServer) PlayerLeftCell(
+	context.Context, *PlayerLeftCellRequest,
+) (*PlayerStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PlayerLeftCell not implemented")
 }
-func (*UnimplementedCellManagerServer) RequestCellNeighbours(context.Context, *CellNeighbourRequest) (*CellNeighboursReply, error) {
+func (*UnimplementedCellManagerServer) RequestCellNeighbours(
+	context.Context, *CellNeighbourRequest,
+) (*CellNeighboursReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestCellNeighbours not implemented")
 }
-func (*UnimplementedCellManagerServer) RequestCellSizeChange(context.Context, *CellChangeSizeRequest) (*CellChangeStatusReply, error) {
+func (*UnimplementedCellManagerServer) RequestCellSizeChange(
+	context.Context, *CellChangeSizeRequest,
+) (*CellChangeStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestCellSizeChange not implemented")
 }
-func (*UnimplementedCellManagerServer) LockCells(context.Context, *LockCellsRequest) (*CellLockStatusReply, error) {
+func (*UnimplementedCellManagerServer) LockCells(
+	context.Context, *LockCellsRequest,
+) (*CellLockStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LockCells not implemented")
 }
-func (*UnimplementedCellManagerServer) UnlockCells(context.Context, *LockCellsRequest) (*CellLockStatusReply, error) {
+func (*UnimplementedCellManagerServer) UnlockCells(
+	context.Context, *LockCellsRequest,
+) (*CellLockStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnlockCells not implemented")
 }
 
@@ -1481,7 +1549,10 @@ func RegisterCellManagerServer(s *grpc.Server, srv CellManagerServer) {
 	s.RegisterService(&_CellManager_serviceDesc, srv)
 }
 
-func _CellManager_CreateCell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_CreateCell_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1499,7 +1570,10 @@ func _CellManager_CreateCell_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_DeleteCell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_DeleteCell_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1517,7 +1591,10 @@ func _CellManager_DeleteCell_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_ListCells_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_ListCells_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(ListCellsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1535,7 +1612,10 @@ func _CellManager_ListCells_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_ListPlayersInCell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_ListPlayersInCell_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(ListPlayersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1553,7 +1633,10 @@ func _CellManager_ListPlayersInCell_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_RequestCellMaster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_RequestCellMaster_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellMasterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1571,7 +1654,10 @@ func _CellManager_RequestCellMaster_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_UnregisterCellMaster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_UnregisterCellMaster_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellMasterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1589,7 +1675,10 @@ func _CellManager_UnregisterCellMaster_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_PlayerLeftCell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_PlayerLeftCell_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(PlayerLeftCellRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1607,7 +1696,10 @@ func _CellManager_PlayerLeftCell_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_RequestCellNeighbours_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_RequestCellNeighbours_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellNeighbourRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1625,7 +1717,10 @@ func _CellManager_RequestCellNeighbours_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_RequestCellSizeChange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_RequestCellSizeChange_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(CellChangeSizeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1643,7 +1738,10 @@ func _CellManager_RequestCellSizeChange_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_LockCells_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_LockCells_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(LockCellsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -1661,7 +1759,10 @@ func _CellManager_LockCells_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellManager_UnlockCells_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CellManager_UnlockCells_Handler(
+	srv interface{}, ctx context.Context, dec func(interface{}) error,
+	interceptor grpc.UnaryServerInterceptor,
+) (interface{}, error) {
 	in := new(LockCellsRequest)
 	if err := dec(in); err != nil {
 		return nil, err

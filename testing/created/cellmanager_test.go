@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
-	"github.com/Frans-Lukas/checkerboard/pkg/generated"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"testing"
 )
 
@@ -86,13 +86,15 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestPlayerLeftCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId2"})
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
 	testIp2 := "192.168.16.2"
-	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
-	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp2, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(cell.Player{Ip: testIp2, Port: 1337})
 	reply, err := cm.PlayerLeftCell(
-		context.Background(), &generated.PlayerLeftCellRequest{Port: 1337, Ip: testIp},
+		context.Background(),
+		&generated.PlayerLeftCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
 	)
 	failIfNotNull(err, "could not list players in cell")
 	if !reply.PlayerLeft {

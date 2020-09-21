@@ -21,7 +21,7 @@ package main
 
 import (
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
-	"github.com/Frans-Lukas/checkerboard/pkg/generated"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"google.golang.org/grpc"
 	"log"
 	"net"

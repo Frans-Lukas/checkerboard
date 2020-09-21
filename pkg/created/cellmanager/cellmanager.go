@@ -2,9 +2,8 @@ package cellmanager
 
 import (
 	"context"
-	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
-	"github.com/Frans-Lukas/checkerboard/pkg/generated"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"sort"
 )
 
@@ -29,10 +28,12 @@ func (cellManager *CellManager) DeleteCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
 	length := len(*cellManager.Cells)
-	i := sort.Search(length, func(i int) bool { return in.CellId == (*cellManager.Cells)[i].CellId })
+	i := sort.Search(
+		length, func(i int) bool { return in.CellId == (*cellManager.Cells)[i].CellId },
+	)
 	if i != length {
-		(*cellManager.Cells)[i] = (*cellManager.Cells)[length - 1]
-		*cellManager.Cells = (*cellManager.Cells)[:length - 1]
+		(*cellManager.Cells)[i] = (*cellManager.Cells)[length-1]
+		*cellManager.Cells = (*cellManager.Cells)[:length-1]
 		return &generated.CellStatusReply{WasPerformed: true}, nil
 	} else {
 		return &generated.CellStatusReply{WasPerformed: false}, nil
@@ -103,8 +104,11 @@ func (cellManager *CellManager) LockCells(
 
 	//var indexes []int
 
-	for _, cellId := range *in.cellId {
-		i := sort.Search(len(*cellManager.Cells), func(i int) bool { return cellId == (*cellManager.Cells)[i].CellId })
+	for _, cellId := range in.CellId {
+		i := sort.Search(
+			len(*cellManager.Cells),
+			func(i int) bool { return cellId == (*cellManager.Cells)[i].CellId },
+		)
 		if i != len(*cellManager.Cells) {
 
 		}

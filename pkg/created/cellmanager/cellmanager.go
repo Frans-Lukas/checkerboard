@@ -20,7 +20,7 @@ func NewCellManager() CellManager {
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(cell.Cell{CellId: in.CellId})
+	cellManager.AppendCell(cell.Cell{CellId: in.CellId, Players: make([]cell.Player, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
@@ -41,13 +41,28 @@ func (cellManager *CellManager) DeleteCell(
 func (cellManager *CellManager) ListCells(
 	ctx context.Context, in *generated.ListCellsRequest,
 ) (*generated.ListCellsReply, error) {
-	return &generated.ListCellsReply{CellId: nil}, nil
+	cellIds := make([]string, len(*cellManager.Cells))
+	for index, cell := range *cellManager.Cells {
+		cellIds[index] = cell.CellId
+	}
+	cells := generated.ListCellsReply{CellId: cellIds}
+	return &cells, nil
 }
 
 func (cellManager *CellManager) ListPlayersInCell(
 	ctx context.Context, in *generated.ListPlayersRequest,
 ) (*generated.PlayersReply, error) {
-	return &generated.PlayersReply{}, nil
+	playerIps := make([]string, 0)
+	playerPorts := make([]int32, 0)
+	for _, cell := range *cellManager.Cells {
+		if cell.CellId == in.CellId {
+			for _, player := range cell.Players {
+				playerIps = append(playerIps, player.Ip)
+				playerPorts = append(playerPorts, player.Port)
+			}
+		}
+	}
+	return &generated.PlayersReply{Port: playerPorts, Ip: playerIps}, nil
 }
 
 func (cellManager *CellManager) RequestCellMaster(

@@ -2,25 +2,38 @@ package cellmanager
 
 import (
 	"context"
-	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
+	"errors"
+	created "github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
 )
 
 type CellManager struct {
 	generated.CellManagerServer
-	Cells *[]cell.Cell
+	Cells *[]created.Cell
 }
 
 func NewCellManager() CellManager {
-	cells := make([]cell.Cell, 0)
+	cells := make([]created.Cell, 0)
 	return CellManager{Cells: &cells}
 }
 
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(cell.Cell{CellId: in.CellId, Players: make([]cell.Player, 0)})
+	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]created.Player, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
+}
+
+func (cellManager *CellManager) AddPlayerToCell(
+	ctx context.Context, in *generated.PlayerInCellRequest,
+) (*generated.TransactionSucceeded, error) {
+	for _, cell := range *cellManager.Cells {
+		if cell.CellId == in.CellId {
+			cell.AppendPlayer(created.Player{Ip: in.Ip, Port: in.Port, TrustLevel: 0})
+			return &generated.TransactionSucceeded{Status: true}, nil
+		}
+	}
+	return &generated.TransactionSucceeded{Status: false}, errors.New("Invalid cellID: " + in.CellId)
 }
 
 func (cellManager *CellManager) DeleteCell(
@@ -35,12 +48,12 @@ func (cellManager *CellManager) DeleteCell(
 		}
 	}
 
-	if index != -1 {
+	if index == -1 {
+		return &generated.CellStatusReply{WasPerformed: false}, nil
+	} else {
 		(*cellManager.Cells)[index] = (*cellManager.Cells)[length-1]
 		*cellManager.Cells = (*cellManager.Cells)[:length-1]
 		return &generated.CellStatusReply{WasPerformed: true}, nil
-	} else {
-		return &generated.CellStatusReply{WasPerformed: false}, nil
 	}
 }
 
@@ -88,7 +101,7 @@ func (cellManager *CellManager) PlayerLeftCell(
 ) (*generated.PlayerStatusReply, error) {
 	for _, cellToLeave := range *cellManager.Cells {
 		if cellToLeave.CellId == in.CellId {
-			cellToLeave.DeletePlayer(cell.Player{Port: in.Port, Ip: in.Ip})
+			cellToLeave.DeletePlayer(created.Player{Port: in.Port, Ip: in.Ip})
 		}
 	}
 	return &generated.PlayerStatusReply{PlayerLeft: true}, nil
@@ -168,6 +181,6 @@ func (cellManager *CellManager) UnlockCells(
 	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
 }
 
-func (cellManager *CellManager) AppendCell(cell cell.Cell) {
+func (cellManager *CellManager) AppendCell(cell created.Cell) {
 	*cellManager.Cells = append(*cellManager.Cells, cell)
 }

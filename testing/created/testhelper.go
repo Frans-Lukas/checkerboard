@@ -2,7 +2,7 @@ package created
 
 import "log"
 
-func failIf(err error, msg string) {
+func failIfNotNull(err error, msg string) {
 	if err != nil {
 		log.Fatalf("error "+msg+": %v", err)
 	}

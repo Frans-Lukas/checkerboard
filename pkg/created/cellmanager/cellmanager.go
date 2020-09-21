@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
-	"sort"
 )
 
 type CellManager struct {
@@ -28,11 +27,16 @@ func (cellManager *CellManager) DeleteCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
 	length := len(*cellManager.Cells)
-	i := sort.Search(
-		length, func(i int) bool { return in.CellId == (*cellManager.Cells)[i].CellId },
-	)
-	if i != length {
-		(*cellManager.Cells)[i] = (*cellManager.Cells)[length-1]
+
+	index := -1
+	for i, storedCell := range *cellManager.Cells {
+		if in.CellId == storedCell.CellId {
+			index = i
+		}
+	}
+
+	if index != -1 {
+		(*cellManager.Cells)[index] = (*cellManager.Cells)[length-1]
 		*cellManager.Cells = (*cellManager.Cells)[:length-1]
 		return &generated.CellStatusReply{WasPerformed: true}, nil
 	} else {
@@ -102,19 +106,26 @@ func (cellManager *CellManager) LockCells(
 	ctx context.Context, in *generated.LockCellsRequest,
 ) (*generated.CellLockStatusReply, error) {
 
-	//var indexes []int
+	var indexes []int
 
 	for _, cellId := range in.CellId {
-		i := sort.Search(
-			len(*cellManager.Cells),
-			func(i int) bool { return cellId == (*cellManager.Cells)[i].CellId },
-		)
-		if i != len(*cellManager.Cells) {
-
+		for i, storedCell := range *cellManager.Cells {
+			if cellId == storedCell.CellId {
+				indexes = append(indexes, i)
+				break
+			}
 		}
 	}
 
-	return &generated.CellLockStatusReply{}, nil
+	if len(indexes) != len(in.CellId) {
+		return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
+	}
+
+	for _, j := range indexes {
+		(*cellManager.Cells)[j].Locked = true
+	}
+
+	return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
 }
 
 func (cellManager *CellManager) UnlockCells(

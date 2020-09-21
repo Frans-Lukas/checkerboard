@@ -165,9 +165,9 @@ func TestLockCells(t *testing.T) {
 	}
 
 	if (*cm.Cells)[0].Lockee != "tester" {
-		fatalFail(errors.New("cell testId1 is not locked"))
-	} else if !(*cm.Cells)[1].Locked {
-		fatalFail(errors.New("cell testId2 is not locked"))
+		fatalFail(errors.New("cell testId1 has wrong lockee"))
+	} else if (*cm.Cells)[1].Lockee != "tester" {
+		fatalFail(errors.New("cell testId2 has wrong lockee"))
 	}
 }
 
@@ -242,8 +242,8 @@ func TestCannotUnlockWhenACellIsNotLocked(t *testing.T) {
 
 func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
-	cm.AppendCell(cell.Cell{CellId: "testId2"})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true, Lockee: "tester"})
+	cm.AppendCell(cell.Cell{CellId: "testId2", Locked: true, Lockee: "hacker"})
 	cm.AppendCell(cell.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
@@ -256,8 +256,8 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 
 	if !(*cm.Cells)[0].Locked {
 		fatalFail(errors.New("cell testId1 is unlocked"))
-	} else if (*cm.Cells)[1].Locked {
-		fatalFail(errors.New("cell testId2 is locked"))
+	} else if !(*cm.Cells)[1].Locked {
+		fatalFail(errors.New("cell testId2 is unlocked"))
 	} else if (*cm.Cells)[2].Locked {
 		fatalFail(errors.New("cell testId3 is locked"))
 	}

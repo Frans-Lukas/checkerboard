@@ -27,9 +27,9 @@ func (cellManager *CellManager) CreateCell(
 func (cellManager *CellManager) AddPlayerToCell(
 	ctx context.Context, in *generated.PlayerInCellRequest,
 ) (*generated.TransactionSucceeded, error) {
-	for _, cell := range *cellManager.Cells {
+	for index, cell := range *cellManager.Cells {
 		if cell.CellId == in.CellId {
-			cell.AppendPlayer(created.Player{Ip: in.Ip, Port: in.Port, TrustLevel: 0})
+			(*cellManager.Cells)[index].AppendPlayer(created.Player{Ip: in.Ip, Port: in.Port, TrustLevel: 0})
 			return &generated.TransactionSucceeded{Status: true}, nil
 		}
 	}

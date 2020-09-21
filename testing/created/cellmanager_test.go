@@ -86,22 +86,33 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestAddPlayerToCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
 	testIp := "192.168.16.1"
-	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
-
-
-	playerList, err := cm.ListPlayersInCell(
-		context.Background(), &generated.ListPlayersRequest{CellId: "testId1"},
+	status, err := cm.AddPlayerToCell(
+		context.Background(),
+		&generated.PlayerInCellRequest{CellId: "testId1", Ip: testIp, Port: 1337},
 	)
-	failIfNotNull(err, "could not list players in cell")
-	if len(playerList.Port) == 0 || len(playerList.Ip) == 0 {
-		fatalFail(errors.New("players were not returned from ListPlayersInCell"))
-	}
-	if playerList.Ip[0] == testIp && playerList.Port[0] == 1337 {
+	failIfNotNull(err, "could not add player to cell")
+	addedPlayer := (*cm.Cells)[0].Players[0]
+	if status.Status && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
 		return
 	}
-	fatalFail(errors.New("incorrect players were returned from ListPlayersInCell"))
+	fatalFail(errors.New("player was not added correctly"))
+}
+
+func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
+	testIp := "192.168.16.1"
+	status, err := cm.AddPlayerToCell(
+		context.Background(),
+		&generated.PlayerInCellRequest{CellId: "invalidTestId", Ip: testIp, Port: 1337},
+	)
+	if status.Status == false && err != nil {
+		return
+	} else {
+		fatalFail(errors.New("AddPlayerToCell did not throw on invalid cellId"))
+	}
 }
 
 func TestPlayerLeftCell(t *testing.T) {

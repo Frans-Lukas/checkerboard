@@ -82,8 +82,12 @@ func (cellManager *CellManager) UnregisterCellMaster(
 func (cellManager *CellManager) PlayerLeftCell(
 	ctx context.Context, in *generated.PlayerLeftCellRequest,
 ) (*generated.PlayerStatusReply, error) {
-
-	return &generated.PlayerStatusReply{}, nil
+	for _, cellToLeave := range *cellManager.Cells {
+		if cellToLeave.CellId == in.CellId {
+			cellToLeave.DeletePlayer(cell.Player{Port: in.Port, Ip: in.Ip})
+		}
+	}
+	return &generated.PlayerStatusReply{PlayerLeft: true}, nil
 }
 
 func (cellManager *CellManager) RequestCellNeighbours(

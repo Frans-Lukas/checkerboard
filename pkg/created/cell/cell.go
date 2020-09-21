@@ -3,7 +3,7 @@ package cell
 type Cell struct {
 	CellId  string
 	Players []Player
-	CellMAster Player
+	CellMaster Player
 	Locked bool
 	Lockee string
 }

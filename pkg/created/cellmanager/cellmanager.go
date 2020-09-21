@@ -87,6 +87,17 @@ func (cellManager *CellManager) ListPlayersInCell(
 func (cellManager *CellManager) RequestCellMaster(
 	ctx context.Context, in *generated.CellMasterRequest,
 ) (*generated.CellMasterReply, error) {
+
+	for _, cell := range *cellManager.Cells {
+		if in.CellId == cell.CellId {
+			//if cell.CellMaster != nil {
+				return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
+			//} else {
+			//	return &generated.CellMasterReply{Ip: "", Port: -1}, nil
+			//}
+		}
+	}
+
 	return &generated.CellMasterReply{}, nil
 }
 

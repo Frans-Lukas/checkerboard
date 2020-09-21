@@ -251,3 +251,25 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 		fatalFail(errors.New("cell testId3 is locked"))
 	}
 }
+
+func TestRequestCellMaster(t *testing.T) {
+	cellMaster := cell.Player{Ip: "randomIp", Port: 1337}
+	mainCell := cell.Cell{CellId: "testId2", CellMaster: cellMaster}
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(mainCell)
+
+	request := generated.CellMasterRequest{CellId: "testId2"}
+	reply, err := cm.RequestCellMaster(context.Background(), &request)
+	failIfNotNull(err, "could not lock cells")
+	if reply.Ip == "" {
+		fatalFail(errors.New("returned empty cellMaster"))
+	}
+	if reply.Ip != "randomIp" {
+		fatalFail(errors.New("returned wrong Ip"))
+	}
+	if reply.Port != 1337 {
+		fatalFail(errors.New("returned wrong Port"))
+	}
+}

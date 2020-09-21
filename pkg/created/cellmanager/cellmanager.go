@@ -2,6 +2,7 @@ package cellmanager
 
 import (
 	"context"
+	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/generated"
 	"sort"
@@ -98,6 +99,16 @@ func (cellManager *CellManager) RequestCellSizeChange(
 func (cellManager *CellManager) LockCells(
 	ctx context.Context, in *generated.LockCellsRequest,
 ) (*generated.CellLockStatusReply, error) {
+
+	var indexes []int
+
+	for _, cellId := range *in.cellId {
+		i := sort.Search(len(*cellManager.Cells), func(i int) bool { return cellId == (*cellManager.Cells)[i].CellId })
+		if i != len(*cellManager.Cells) {
+
+		}
+	}
+
 	return &generated.CellLockStatusReply{}, nil
 }
 

@@ -139,7 +139,31 @@ func (cellManager *CellManager) LockCells(
 func (cellManager *CellManager) UnlockCells(
 	ctx context.Context, in *generated.LockCellsRequest,
 ) (*generated.CellLockStatusReply, error) {
-	return &generated.CellLockStatusReply{}, nil
+
+	var indexes []int
+
+	for _, cellId := range in.CellId {
+		cellIsUnlockable := false
+		for i, storedCell := range *cellManager.Cells {
+			if cellId == storedCell.CellId {
+				if !storedCell.Locked {
+					break
+				}
+				indexes = append(indexes, i)
+				cellIsUnlockable = true
+				break
+			}
+		}
+		if !cellIsUnlockable {
+			return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
+		}
+	}
+
+	for _, j := range indexes {
+		(*cellManager.Cells)[j].Locked = false
+	}
+
+	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
 }
 
 func (cellManager *CellManager) AppendCell(cell cell.Cell) {

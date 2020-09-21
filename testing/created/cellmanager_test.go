@@ -84,7 +84,7 @@ func TestListPlayersInCell(t *testing.T) {
 	fatalFail(errors.New("incorrect players were returned from ListPlayersInCell"))
 }
 
-/*func TestPlayerLeftCell(t *testing.T) {
+func TestPlayerLeftCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId2"})
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
@@ -109,7 +109,7 @@ func TestListPlayersInCell(t *testing.T) {
 	if player2Exists {
 		fatalFail(errors.New("player was not removed from cell in playerleftcell"))
 	}
-}*/
+}
 
 func TestLockCells(t *testing.T) {
 	cm := cellmanager.NewCellManager()
@@ -152,6 +152,52 @@ func TestCannotLockWhenACellIsLocked(t *testing.T) {
 		fatalFail(errors.New("cell testId1 is locked"))
 	} else if !(*cm.Cells)[1].Locked {
 		fatalFail(errors.New("cell testId2 is not locked"))
+	} else if (*cm.Cells)[2].Locked {
+		fatalFail(errors.New("cell testId3 is locked"))
+	}
+}
+
+func TestUnlockCells(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
+	cm.AppendCell(cell.Cell{CellId: "testId2", Locked: true})
+	cm.AppendCell(cell.Cell{CellId: "testId3"})
+
+	ids := []string{"testId1", "testId2"}
+	request := generated.LockCellsRequest{CellId: ids}
+	reply, err := cm.UnlockCells(context.Background(), &request)
+	failIfNotNull(err, "could not lock cells")
+	if reply.Locked {
+		fatalFail(errors.New("locked bool is invalid"))
+	}
+
+	if (*cm.Cells)[0].Locked {
+		fatalFail(errors.New("cell testId1 is not unlocked"))
+	} else if (*cm.Cells)[1].Locked {
+		fatalFail(errors.New("cell testId2 is not unlocked"))
+	} else if (*cm.Cells)[2].Locked {
+		fatalFail(errors.New("cell testId3 is locked"))
+	}
+}
+
+func TestCannotUnlockWhenACellIsNotLocked(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
+	cm.AppendCell(cell.Cell{CellId: "testId2"})
+	cm.AppendCell(cell.Cell{CellId: "testId3"})
+
+	ids := []string{"testId1", "testId2"}
+	request := generated.LockCellsRequest{CellId: ids}
+	reply, err := cm.UnlockCells(context.Background(), &request)
+	failIfNotNull(err, "could not lock cells")
+	if !reply.Locked {
+		fatalFail(errors.New("locked bool is invalid"))
+	}
+
+	if !(*cm.Cells)[0].Locked {
+		fatalFail(errors.New("cell testId1 is unlocked"))
+	} else if (*cm.Cells)[1].Locked {
+		fatalFail(errors.New("cell testId2 is locked"))
 	} else if (*cm.Cells)[2].Locked {
 		fatalFail(errors.New("cell testId3 is locked"))
 	}

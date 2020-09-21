@@ -29,7 +29,13 @@ func (cellManager *CellManager) AddPlayerToCell(
 ) (*generated.TransactionSucceeded, error) {
 	for index, cell := range *cellManager.Cells {
 		if cell.CellId == in.CellId {
-			(*cellManager.Cells)[index].AppendPlayer(created.Player{Ip: in.Ip, Port: in.Port, TrustLevel: 0})
+			(*cellManager.Cells)[index].AppendPlayer(
+				created.Player{
+					Ip:         in.Ip,
+					Port:       in.Port,
+					TrustLevel: 0,
+				},
+			)
 			return &generated.TransactionSucceeded{Status: true}, nil
 		}
 	}
@@ -93,7 +99,14 @@ func (cellManager *CellManager) RequestCellMaster(
 func (cellManager *CellManager) UnregisterCellMaster(
 	ctx context.Context, in *generated.CellMasterRequest,
 ) (*generated.CellMasterStatusReply, error) {
-	return &generated.CellMasterStatusReply{}, nil
+	success := false
+	for index, cell := range *cellManager.Cells {
+		if cell.CellId == in.CellId {
+			(*cellManager.Cells)[index].CellMaster = nil
+			success = true
+		}
+	}
+	return &generated.CellMasterStatusReply{WasUnregistered: success}, nil
 }
 
 func (cellManager *CellManager) PlayerLeftCell(

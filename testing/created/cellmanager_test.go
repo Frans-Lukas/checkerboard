@@ -35,6 +35,35 @@ func TestDeleteCell(t *testing.T) {
 	}
 }
 
+func TestUnregisterCellMaster(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	status, err := cm.UnregisterCellMaster(
+		context.Background(), &generated.CellMasterRequest{CellId: "testId1"},
+	)
+	failIfNotNull(err, "could not unregister cell")
+	if status.WasUnregistered == true && (*cm.Cells)[0].CellMaster == nil {
+		return
+	} else {
+		fatalFail(errors.New("CellMaster was not unregistered with UnregisterCellMaster"))
+	}
+}
+
+func TestUnregisterCellMasterReturnsOnFail(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	status, err := cm.UnregisterCellMaster(
+		context.Background(), &generated.CellMasterRequest{CellId: "invalidId"},
+	)
+	failIfNotNull(err, "could not unregister cell")
+	if status.WasUnregistered == false {
+		return
+	}
+	fatalFail(errors.New("unregister succeeded when it should not have"))
+}
+
 func TestCreateCellCreatesEmptyPlayerList(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	request := generated.CellRequest{CellId: "testId"}

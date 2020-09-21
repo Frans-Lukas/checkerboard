@@ -80,6 +80,7 @@ func (cellManager *CellManager) UnregisterCellMaster(
 func (cellManager *CellManager) PlayerLeftCell(
 	ctx context.Context, in *generated.PlayerLeftCellRequest,
 ) (*generated.PlayerStatusReply, error) {
+
 	return &generated.PlayerStatusReply{}, nil
 }
 

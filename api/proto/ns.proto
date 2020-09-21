@@ -6,14 +6,19 @@ service CellManager {
   rpc CreateCell (CellRequest) returns (CellStatusReply) {}
   rpc DeleteCell (CellRequest) returns (CellStatusReply) {}
   rpc ListCells (ListCellsRequest) returns (ListCellsReply) {}
+  rpc AddPlayerToCell (PlayerInCellRequest) returns (TransactionSucceeded) {}
   rpc ListPlayersInCell (ListPlayersRequest) returns (PlayersReply) {}
   rpc RequestCellMaster (CellMasterRequest) returns (CellMasterReply) {}
   rpc UnregisterCellMaster (CellMasterRequest) returns (CellMasterStatusReply) {}
-  rpc PlayerLeftCell (PlayerLeftCellRequest) returns (PlayerStatusReply) {}
+  rpc PlayerLeftCell (PlayerInCellRequest) returns (PlayerStatusReply) {}
   rpc RequestCellNeighbours (CellNeighbourRequest) returns (CellNeighboursReply) {}
   rpc RequestCellSizeChange (CellChangeSizeRequest) returns (CellChangeStatusReply) {}
   rpc LockCells (LockCellsRequest) returns (CellLockStatusReply) {}
   rpc UnlockCells (LockCellsRequest) returns (CellLockStatusReply) {}
+}
+
+message TransactionSucceeded {
+  bool status = 1;
 }
 
 message CellNeighbourRequest {
@@ -30,7 +35,7 @@ message LockCellsRequest {
   repeated string cellId = 1;
 }
 
-message PlayerLeftCellRequest {
+message PlayerInCellRequest {
   string ip = 1;
   int32 port = 2;
   string cellId = 3;
@@ -64,6 +69,7 @@ message CellNeighboursReply {
   repeated string cellId = 1;
 
 }
+
 message CellChangeStatusReply {
   bool succeeded = 1;
 

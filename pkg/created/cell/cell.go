@@ -1,9 +1,10 @@
 package cell
 
 type Cell struct {
-	CellId  string
-	Players []Player
-	Locked bool
+	CellId     string
+	Players    []Player
+	CellMAster Player
+	Locked     bool
 }
 
 func (cell *Cell) AppendPlayer(player Player) {

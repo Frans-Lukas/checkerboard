@@ -1,11 +1,11 @@
 package cell
 
 type Cell struct {
-	CellId  string
-	Players []Player
-	CellMaster Player
-	Locked bool
-	Lockee string
+	CellId     string
+	Players    []Player
+	CellMaster *Player
+	Locked     bool
+	Lockee     string
 }
 
 func (cell *Cell) AppendPlayer(player Player) {

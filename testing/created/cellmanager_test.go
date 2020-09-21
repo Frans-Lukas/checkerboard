@@ -35,6 +35,35 @@ func TestDeleteCell(t *testing.T) {
 	}
 }
 
+func TestUnregisterCellMaster(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	status, err := cm.UnregisterCellMaster(
+		context.Background(), &generated.CellMasterRequest{CellId: "testId1"},
+	)
+	failIfNotNull(err, "could not unregister cell")
+	if status.WasUnregistered == true && (*cm.Cells)[0].CellMaster == nil {
+		return
+	} else {
+		fatalFail(errors.New("CellMaster was not unregistered with UnregisterCellMaster"))
+	}
+}
+
+func TestUnregisterCellMasterReturnsOnFail(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	status, err := cm.UnregisterCellMaster(
+		context.Background(), &generated.CellMasterRequest{CellId: "invalidId"},
+	)
+	failIfNotNull(err, "could not unregister cell")
+	if status.WasUnregistered == false {
+		return
+	}
+	fatalFail(errors.New("unregister succeeded when it should not have"))
+}
+
 func TestCreateCellCreatesEmptyPlayerList(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	request := generated.CellRequest{CellId: "testId"}
@@ -86,22 +115,33 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestAddPlayerToCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
 	testIp := "192.168.16.1"
-	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
-
-
-	playerList, err := cm.ListPlayersInCell(
-		context.Background(), &generated.ListPlayersRequest{CellId: "testId1"},
+	status, err := cm.AddPlayerToCell(
+		context.Background(),
+		&generated.PlayerInCellRequest{CellId: "testId1", Ip: testIp, Port: 1337},
 	)
-	failIfNotNull(err, "could not list players in cell")
-	if len(playerList.Port) == 0 || len(playerList.Ip) == 0 {
-		fatalFail(errors.New("players were not returned from ListPlayersInCell"))
-	}
-	if playerList.Ip[0] == testIp && playerList.Port[0] == 1337 {
+	failIfNotNull(err, "could not add player to cell")
+	addedPlayer := (*cm.Cells)[0].Players[0]
+	if status.Status && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
 		return
 	}
-	fatalFail(errors.New("incorrect players were returned from ListPlayersInCell"))
+	fatalFail(errors.New("player was not added correctly"))
+}
+
+func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
+	testIp := "192.168.16.1"
+	status, err := cm.AddPlayerToCell(
+		context.Background(),
+		&generated.PlayerInCellRequest{CellId: "invalidTestId", Ip: testIp, Port: 1337},
+	)
+	if status.Status == false && err != nil {
+		return
+	} else {
+		fatalFail(errors.New("AddPlayerToCell did not throw on invalid cellId"))
+	}
 }
 
 func TestPlayerLeftCell(t *testing.T) {
@@ -254,7 +294,7 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 
 func TestRequestCellMaster(t *testing.T) {
 	cellMaster := cell.Player{Ip: "randomIp", Port: 1337}
-	mainCell := cell.Cell{CellId: "testId2", CellMaster: cellMaster}
+	mainCell := cell.Cell{CellId: "testId2", CellMaster: &cellMaster}
 
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})

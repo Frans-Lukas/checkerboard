@@ -27,9 +27,15 @@ func (cellManager *CellManager) CreateCell(
 func (cellManager *CellManager) AddPlayerToCell(
 	ctx context.Context, in *generated.PlayerInCellRequest,
 ) (*generated.TransactionSucceeded, error) {
-	for _, cell := range *cellManager.Cells {
+	for index, cell := range *cellManager.Cells {
 		if cell.CellId == in.CellId {
-			cell.AppendPlayer(created.Player{Ip: in.Ip, Port: in.Port, TrustLevel: 0})
+			(*cellManager.Cells)[index].AppendPlayer(
+				created.Player{
+					Ip:         in.Ip,
+					Port:       in.Port,
+					TrustLevel: 0,
+				},
+			)
 			return &generated.TransactionSucceeded{Status: true}, nil
 		}
 	}
@@ -90,11 +96,11 @@ func (cellManager *CellManager) RequestCellMaster(
 
 	for _, cell := range *cellManager.Cells {
 		if in.CellId == cell.CellId {
-			//if cell.CellMaster != nil {
+			if cell.CellMaster != nil {
 				return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
-			//} else {
-			//	return &generated.CellMasterReply{Ip: "", Port: -1}, nil
-			//}
+			} else {
+				return &generated.CellMasterReply{Ip: "", Port: -1}, nil
+			}
 		}
 	}
 
@@ -104,7 +110,14 @@ func (cellManager *CellManager) RequestCellMaster(
 func (cellManager *CellManager) UnregisterCellMaster(
 	ctx context.Context, in *generated.CellMasterRequest,
 ) (*generated.CellMasterStatusReply, error) {
-	return &generated.CellMasterStatusReply{}, nil
+	success := false
+	for index, cell := range *cellManager.Cells {
+		if cell.CellId == in.CellId {
+			(*cellManager.Cells)[index].CellMaster = nil
+			success = true
+		}
+	}
+	return &generated.CellMasterStatusReply{WasUnregistered: success}, nil
 }
 
 func (cellManager *CellManager) PlayerLeftCell(

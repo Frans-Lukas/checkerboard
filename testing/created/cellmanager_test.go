@@ -83,3 +83,28 @@ func TestListPlayersInCell(t *testing.T) {
 	}
 	fatalFail(errors.New("incorrect players were returned from ListPlayersInCell"))
 }
+
+func TestPlayerLeftCell(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	testIp := "192.168.16.1"
+	testIp2 := "192.168.16.2"
+	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
+	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp2, Port: 1337})
+	reply, err := cm.PlayerLeftCell(
+		context.Background(), &generated.PlayerLeftCellRequest{Port: 1337, Ip: testIp},
+	)
+	failIfNotNull(err, "could not list players in cell")
+	if !reply.PlayerLeft {
+		fatalFail(errors.New("PlayerLeft bool is invalid"))
+	}
+	player2Exists := false
+	for _, player := range (*cm.Cells)[0].Players {
+		if player.Ip == testIp2 {
+			player2Exists = false
+		}
+	}
+	if player2Exists {
+		fatalFail(errors.New("player was not removed from cell in playerleftcell"))
+	}
+}

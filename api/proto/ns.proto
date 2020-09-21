@@ -3,90 +3,91 @@ syntax = "proto3";
 package cellmanager;
 
 service CellManager {
-    rpc CreateCell (CellRequest) returns (CellStatusReply) {}
-    rpc DeleteCell (CellRequest) returns (CellStatusReply) {}
-    rpc ListCells (ListCellsRequest) returns (ListCellsReply) {}
-    rpc ListPlayersInCell (ListPlayersRequest) returns (PlayersReply) {}
-    rpc RequestCellMaster (CellMasterRequest) returns (CellMasterReply) {}
-    rpc UnregisterCellMaster (CellMasterRequest) returns (CellMasterStatusReply) {}
-    rpc PlayerLeftCell (PlayerLeftCellRequest) returns (PlayerStatusReply) {}
-    rpc RequestCellNeighbours (CellNeighbourRequest) returns (CellNeighboursReply) {}
-    rpc RequestCellSizeChange (CellChangeSizeRequest) returns (CellChangeStatusReply) {}
-    rpc LockCells (LockCellsRequest) returns (CellLockStatusReply) {}
-    rpc UnlockCells (LockCellsRequest) returns (CellLockStatusReply) {}
+  rpc CreateCell (CellRequest) returns (CellStatusReply) {}
+  rpc DeleteCell (CellRequest) returns (CellStatusReply) {}
+  rpc ListCells (ListCellsRequest) returns (ListCellsReply) {}
+  rpc ListPlayersInCell (ListPlayersRequest) returns (PlayersReply) {}
+  rpc RequestCellMaster (CellMasterRequest) returns (CellMasterReply) {}
+  rpc UnregisterCellMaster (CellMasterRequest) returns (CellMasterStatusReply) {}
+  rpc PlayerLeftCell (PlayerLeftCellRequest) returns (PlayerStatusReply) {}
+  rpc RequestCellNeighbours (CellNeighbourRequest) returns (CellNeighboursReply) {}
+  rpc RequestCellSizeChange (CellChangeSizeRequest) returns (CellChangeStatusReply) {}
+  rpc LockCells (LockCellsRequest) returns (CellLockStatusReply) {}
+  rpc UnlockCells (LockCellsRequest) returns (CellLockStatusReply) {}
 }
 
 message CellNeighbourRequest {
-    string cellId = 1;
+  string cellId = 1;
 }
 
 message CellChangeSizeRequest {
-    string cellId = 1;
-    float newHeight = 2;
-    float newWidth = 3;
+  string cellId = 1;
+  float newHeight = 2;
+  float newWidth = 3;
 }
 
 message LockCellsRequest {
-    repeated string cellId = 1;
+  repeated string cellId = 1;
 }
 
 message PlayerLeftCellRequest {
-    string ip = 1;
-    int32 port = 2;
+  string ip = 1;
+  int32 port = 2;
+  string cellId = 3;
 }
 
-message ListCellsRequest { /** should be empty **/ }
+message ListCellsRequest {/** should be empty **/}
 
 message ListPlayersRequest {
-    string cellId = 1;
+  string cellId = 1;
 }
 
 message CellMasterRequest {
-    string cellId = 1;
+  string cellId = 1;
 
 }
 
 message CellMasterStatusReply {
-    bool wasUnregistered = 1;
+  bool wasUnregistered = 1;
 }
 
 message PlayerStatusReply {
-    bool playerLeft = 1;
+  bool playerLeft = 1;
 
 }
 
 message CellRequest {
-    string cellId = 1;
+  string cellId = 1;
 }
 
 message CellNeighboursReply {
-    repeated string cellId = 1;
+  repeated string cellId = 1;
 
 }
 message CellChangeStatusReply {
-    bool succeeded = 1;
+  bool succeeded = 1;
 
 }
 
 message CellLockStatusReply {
-    bool locked = 1;
-    string lockee = 2;
+  bool locked = 1;
+  string lockee = 2;
 }
 
 message CellStatusReply {
-    bool wasPerformed = 1;
+  bool wasPerformed = 1;
 }
 
 message ListCellsReply {
-    repeated string cellId = 1;
+  repeated string cellId = 1;
 }
 
 message PlayersReply {
-    repeated string ip = 1;
-    repeated int32 port = 2;
+  repeated string ip = 1;
+  repeated int32 port = 2;
 }
 
 message CellMasterReply {
-    string ip = 1;
-    int32 port = 2;
+  string ip = 1;
+  int32 port = 2;
 }

@@ -84,7 +84,7 @@ func (cellManager *CellManager) UnregisterCellMaster(
 }
 
 func (cellManager *CellManager) PlayerLeftCell(
-	ctx context.Context, in *generated.PlayerLeftCellRequest,
+	ctx context.Context, in *generated.PlayerInCellRequest,
 ) (*generated.PlayerStatusReply, error) {
 	for _, cellToLeave := range *cellManager.Cells {
 		if cellToLeave.CellId == in.CellId {

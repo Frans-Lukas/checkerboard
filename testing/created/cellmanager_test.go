@@ -94,7 +94,7 @@ func TestPlayerLeftCell(t *testing.T) {
 	(*cm.Cells)[1].AppendPlayer(cell.Player{Ip: testIp2, Port: 1337})
 	reply, err := cm.PlayerLeftCell(
 		context.Background(),
-		&generated.PlayerLeftCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
+		&generated.PlayerInCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
 	)
 	failIfNotNull(err, "could not list players in cell")
 	if !reply.PlayerLeft {

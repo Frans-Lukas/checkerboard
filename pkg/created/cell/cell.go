@@ -4,6 +4,7 @@ type Cell struct {
 	CellId  string
 	Players []Player
 	Locked bool
+	Lockee string
 }
 
 func (cell *Cell) AppendPlayer(player Player) {

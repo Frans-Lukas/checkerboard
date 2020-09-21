@@ -131,6 +131,7 @@ func (cellManager *CellManager) LockCells(
 
 	for _, j := range indexes {
 		(*cellManager.Cells)[j].Locked = true
+		(*cellManager.Cells)[j].Lockee = in.SenderCellId
 	}
 
 	return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
@@ -146,7 +147,7 @@ func (cellManager *CellManager) UnlockCells(
 		cellIsUnlockable := false
 		for i, storedCell := range *cellManager.Cells {
 			if cellId == storedCell.CellId {
-				if !storedCell.Locked {
+				if !storedCell.Locked || storedCell.Lockee != in.SenderCellId {
 					break
 				}
 				indexes = append(indexes, i)
@@ -161,6 +162,7 @@ func (cellManager *CellManager) UnlockCells(
 
 	for _, j := range indexes {
 		(*cellManager.Cells)[j].Locked = false
+		(*cellManager.Cells)[j].Lockee = ""
 	}
 
 	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil

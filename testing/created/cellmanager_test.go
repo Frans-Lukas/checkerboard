@@ -118,7 +118,7 @@ func TestLockCells(t *testing.T) {
 	cm.AppendCell(cell.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
-	request := generated.LockCellsRequest{CellId: ids}
+	request := generated.LockCellsRequest{CellId: ids, SenderCellId: "tester"}
 	reply, err := cm.LockCells(context.Background(), &request)
 	failIfNotNull(err, "could not lock cells")
 	if !reply.Locked {
@@ -132,6 +132,12 @@ func TestLockCells(t *testing.T) {
 	} else if (*cm.Cells)[2].Locked {
 		fatalFail(errors.New("cell testId3 is locked"))
 	}
+
+	if (*cm.Cells)[0].Lockee != "tester" {
+		fatalFail(errors.New("cell testId1 is not locked"))
+	} else if !(*cm.Cells)[1].Locked {
+		fatalFail(errors.New("cell testId2 is not locked"))
+	}
 }
 
 func TestCannotLockWhenACellIsLocked(t *testing.T) {
@@ -141,7 +147,7 @@ func TestCannotLockWhenACellIsLocked(t *testing.T) {
 	cm.AppendCell(cell.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
-	request := generated.LockCellsRequest{CellId: ids}
+	request := generated.LockCellsRequest{CellId: ids, SenderCellId: "tester"}
 	reply, err := cm.LockCells(context.Background(), &request)
 	failIfNotNull(err, "could not lock cells")
 	if reply.Locked {
@@ -181,6 +187,29 @@ func TestUnlockCells(t *testing.T) {
 }
 
 func TestCannotUnlockWhenACellIsNotLocked(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
+	cm.AppendCell(cell.Cell{CellId: "testId2"})
+	cm.AppendCell(cell.Cell{CellId: "testId3"})
+
+	ids := []string{"testId1", "testId2"}
+	request := generated.LockCellsRequest{CellId: ids}
+	reply, err := cm.UnlockCells(context.Background(), &request)
+	failIfNotNull(err, "could not lock cells")
+	if !reply.Locked {
+		fatalFail(errors.New("locked bool is invalid"))
+	}
+
+	if !(*cm.Cells)[0].Locked {
+		fatalFail(errors.New("cell testId1 is unlocked"))
+	} else if (*cm.Cells)[1].Locked {
+		fatalFail(errors.New("cell testId2 is locked"))
+	} else if (*cm.Cells)[2].Locked {
+		fatalFail(errors.New("cell testId3 is locked"))
+	}
+}
+
+func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
 	cm.AppendCell(cell.Cell{CellId: "testId2"})

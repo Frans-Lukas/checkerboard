@@ -28,6 +28,7 @@ message CellChangeSizeRequest {
 
 message LockCellsRequest {
   repeated string cellId = 1;
+  string senderCellId = 2;
 }
 
 message PlayerLeftCellRequest {

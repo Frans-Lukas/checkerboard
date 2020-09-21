@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/generated"
+	"sort"
 )
 
 type CellManager struct {
@@ -26,7 +27,15 @@ func (cellManager *CellManager) CreateCell(
 func (cellManager *CellManager) DeleteCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	return &generated.CellStatusReply{WasPerformed: true}, nil
+	length := len(*cellManager.Cells)
+	i := sort.Search(length, func(i int) bool { return in.CellId == (*cellManager.Cells)[i].CellId })
+	if i != length {
+		(*cellManager.Cells)[i] = (*cellManager.Cells)[length - 1]
+		*cellManager.Cells = (*cellManager.Cells)[:length - 1]
+		return &generated.CellStatusReply{WasPerformed: true}, nil
+	} else {
+		return &generated.CellStatusReply{WasPerformed: false}, nil
+	}
 }
 
 func (cellManager *CellManager) ListCells(

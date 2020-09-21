@@ -19,6 +19,22 @@ func TestCreateCell(t *testing.T) {
 	}
 }
 
+func TestDeleteCell(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	request := generated.CellRequest{CellId: "testId"}
+	_, err := cm.CreateCell(context.Background(), &request)
+	failIfNotNull(err, "could not create cell")
+	if (*cm.Cells)[0].CellId != "testId" {
+		fatalFail(errors.New("cell was not inserted with CreateCell"))
+	}
+
+	_, err = cm.DeleteCell(context.Background(), &request)
+	failIfNotNull(err, "could not delete cell")
+	if len(*cm.Cells) != 0 {
+		fatalFail(errors.New("cell was not deleted with DeleteCell"))
+	}
+}
+
 func TestListCells(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})

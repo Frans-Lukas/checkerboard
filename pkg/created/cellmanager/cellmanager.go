@@ -113,16 +113,20 @@ func (cellManager *CellManager) LockCells(
 	var indexes []int
 
 	for _, cellId := range in.CellId {
+		cellIsLockable := false
 		for i, storedCell := range *cellManager.Cells {
 			if cellId == storedCell.CellId {
+				if storedCell.Locked {
+					break
+				}
 				indexes = append(indexes, i)
+				cellIsLockable = true
 				break
 			}
 		}
-	}
-
-	if len(indexes) != len(in.CellId) {
-		return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
+		if !cellIsLockable {
+			return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
+		}
 	}
 
 	for _, j := range indexes {

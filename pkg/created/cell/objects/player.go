@@ -6,3 +6,4 @@ type Player struct {
 	// 0 = lowest trust level UINT32_MAX = highest trust level
 	TrustLevel uint32
 }
+

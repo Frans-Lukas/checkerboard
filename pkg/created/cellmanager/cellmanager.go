@@ -21,7 +21,7 @@ func NewCellManager() CellManager {
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]objects.Player, 0)})
+	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
@@ -31,7 +31,7 @@ func (cellManager *CellManager) AddPlayerToCell(
 	for index, cell := range *cellManager.Cells {
 		if cell.CellId == in.CellId {
 			(*cellManager.Cells)[index].AppendPlayer(
-				objects.Player{
+				objects.Client{
 					Ip:         in.Ip,
 					Port:       in.Port,
 					TrustLevel: 0,
@@ -126,7 +126,7 @@ func (cellManager *CellManager) PlayerLeftCell(
 ) (*generated.PlayerStatusReply, error) {
 	for _, cellToLeave := range *cellManager.Cells {
 		if cellToLeave.CellId == in.CellId {
-			cellToLeave.DeletePlayer(objects.Player{Port: in.Port, Ip: in.Ip})
+			cellToLeave.DeletePlayer(objects.Client{Port: in.Port, Ip: in.Ip})
 		}
 	}
 	return &generated.PlayerStatusReply{PlayerLeft: true}, nil

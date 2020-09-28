@@ -39,7 +39,7 @@ func TestDeleteCell(t *testing.T) {
 func TestUnregisterCellMaster(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	(*cm.Cells)[0].CellMaster = &objects.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	(*cm.Cells)[0].CellMaster = &objects.Client{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "testId1"},
 	)
@@ -54,7 +54,7 @@ func TestUnregisterCellMaster(t *testing.T) {
 func TestUnregisterCellMasterReturnsOnFail(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	(*cm.Cells)[0].CellMaster = &objects.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	(*cm.Cells)[0].CellMaster = &objects.Client{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "invalidId"},
 	)
@@ -100,7 +100,7 @@ func TestListPlayersInCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
-	(*cm.Cells)[0].AppendPlayer(objects.Player{Ip: testIp, Port: 1337})
+	(*cm.Cells)[0].AppendPlayer(objects.Client{Ip: testIp, Port: 1337})
 	playerList, err := cm.ListPlayersInCell(
 		context.Background(), &generated.ListPlayersRequest{CellId: "testId1"},
 	)
@@ -116,7 +116,7 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestAddPlayerToCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Player, 0)})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
@@ -132,7 +132,7 @@ func TestAddPlayerToCell(t *testing.T) {
 
 func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Player, 0)})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
@@ -151,8 +151,8 @@ func TestPlayerLeftCell(t *testing.T) {
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
 	testIp2 := "192.168.16.2"
-	(*cm.Cells)[1].AppendPlayer(objects.Player{Ip: testIp, Port: 1337})
-	(*cm.Cells)[1].AppendPlayer(objects.Player{Ip: testIp2, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(objects.Client{Ip: testIp, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(objects.Client{Ip: testIp2, Port: 1337})
 	reply, err := cm.PlayerLeftCell(
 		context.Background(),
 		&generated.PlayerInCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
@@ -294,7 +294,7 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 }
 
 func TestRequestCellMaster(t *testing.T) {
-	cellMaster := objects.Player{Ip: "randomIp", Port: 1337}
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
 	mainCell := cell.Cell{CellId: "testId2", CellMaster: &cellMaster}
 
 	cm := cellmanager.NewCellManager()

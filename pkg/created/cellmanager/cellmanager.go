@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	created "github.com/Frans-Lukas/checkerboard/pkg/created/cell"
-	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 )
 
 type CellManager struct {
@@ -20,7 +21,7 @@ func NewCellManager() CellManager {
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]created.Player, 0)})
+	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]objects.Player, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
@@ -30,16 +31,16 @@ func (cellManager *CellManager) AddPlayerToCell(
 	for index, cell := range *cellManager.Cells {
 		if cell.CellId == in.CellId {
 			(*cellManager.Cells)[index].AppendPlayer(
-				created.Player{
+				objects.Player{
 					Ip:         in.Ip,
 					Port:       in.Port,
 					TrustLevel: 0,
 				},
 			)
-			return &generated.TransactionSucceeded{Status: true}, nil
+			return &generated.TransactionSucceeded{Succeeded: true}, nil
 		}
 	}
-	return &generated.TransactionSucceeded{Status: false}, errors.New("Invalid cellID: " + in.CellId)
+	return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid cellID: " + in.CellId)
 }
 
 func (cellManager *CellManager) DeleteCell(
@@ -125,7 +126,7 @@ func (cellManager *CellManager) PlayerLeftCell(
 ) (*generated.PlayerStatusReply, error) {
 	for _, cellToLeave := range *cellManager.Cells {
 		if cellToLeave.CellId == in.CellId {
-			cellToLeave.DeletePlayer(created.Player{Port: in.Port, Ip: in.Ip})
+			cellToLeave.DeletePlayer(objects.Player{Port: in.Port, Ip: in.Ip})
 		}
 	}
 	return &generated.PlayerStatusReply{PlayerLeft: true}, nil

@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
-	generated "github.com/Frans-Lukas/checkerboard/pkg/generated"
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	"testing"
 )
 
@@ -38,7 +39,7 @@ func TestDeleteCell(t *testing.T) {
 func TestUnregisterCellMaster(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	(*cm.Cells)[0].CellMaster = &objects.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "testId1"},
 	)
@@ -53,7 +54,7 @@ func TestUnregisterCellMaster(t *testing.T) {
 func TestUnregisterCellMasterReturnsOnFail(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	(*cm.Cells)[0].CellMaster = &cell.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
+	(*cm.Cells)[0].CellMaster = &objects.Player{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "invalidId"},
 	)
@@ -99,7 +100,7 @@ func TestListPlayersInCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
-	(*cm.Cells)[0].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
+	(*cm.Cells)[0].AppendPlayer(objects.Player{Ip: testIp, Port: 1337})
 	playerList, err := cm.ListPlayersInCell(
 		context.Background(), &generated.ListPlayersRequest{CellId: "testId1"},
 	)
@@ -115,7 +116,7 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestAddPlayerToCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Player, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
@@ -123,7 +124,7 @@ func TestAddPlayerToCell(t *testing.T) {
 	)
 	failIfNotNull(err, "could not add player to cell")
 	addedPlayer := (*cm.Cells)[0].Players[0]
-	if status.Status && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
+	if status.Succeeded && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
 		return
 	}
 	fatalFail(errors.New("player was not added correctly"))
@@ -131,13 +132,13 @@ func TestAddPlayerToCell(t *testing.T) {
 
 func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]cell.Player, 0)})
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Player, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
 		&generated.PlayerInCellRequest{CellId: "invalidTestId", Ip: testIp, Port: 1337},
 	)
-	if status.Status == false && err != nil {
+	if status.Succeeded == false && err != nil {
 		return
 	} else {
 		fatalFail(errors.New("AddPlayerToCell did not throw on invalid cellId"))
@@ -150,8 +151,8 @@ func TestPlayerLeftCell(t *testing.T) {
 	cm.AppendCell(cell.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
 	testIp2 := "192.168.16.2"
-	(*cm.Cells)[1].AppendPlayer(cell.Player{Ip: testIp, Port: 1337})
-	(*cm.Cells)[1].AppendPlayer(cell.Player{Ip: testIp2, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(objects.Player{Ip: testIp, Port: 1337})
+	(*cm.Cells)[1].AppendPlayer(objects.Player{Ip: testIp2, Port: 1337})
 	reply, err := cm.PlayerLeftCell(
 		context.Background(),
 		&generated.PlayerInCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
@@ -293,7 +294,7 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 }
 
 func TestRequestCellMaster(t *testing.T) {
-	cellMaster := cell.Player{Ip: "randomIp", Port: 1337}
+	cellMaster := objects.Player{Ip: "randomIp", Port: 1337}
 	mainCell := cell.Cell{CellId: "testId2", CellMaster: &cellMaster}
 
 	cm := cellmanager.NewCellManager()

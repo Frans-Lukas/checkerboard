@@ -1,4 +1,4 @@
-package cell
+package objects
 
 type Player struct {
 	Port int32

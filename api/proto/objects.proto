@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package objects;
+
+service Player {
+    rpc SendUpdate (MultipleObjects) returns (EmptyReply) {}
+    rpc UpdateCellMaster (NewCellMaster) returns (EmptyReply) {}
+}
+
+service CellMaster {
+    rpc SendUpdate (SingleObject) returns (EmptyReply) {}
+    rpc RequestMutatingObjects (MultipleObjects) returns (MultipleObjects) {}
+    rpc BroadcastMutatedOBjects (MultipleObjects) returns (EmptyReply) {}
+    rpc GetCellState (Cell) returns (MultipleObjects) {}
+    rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
+}
+
+message MultipleObjects {
+    repeated SingleObject objects = 1;
+}
+
+
+message SingleObject {
+    string objectId = 1;
+    repeated string updateKey = 2;
+    repeated string newValue = 3;
+}
+
+message NewCellMaster {
+    string ip = 1;
+    int32 port = 2;
+}
+
+message Cell {
+    string cellId = 1;
+}
+
+
+message EmptyReply { }
+message EmptyRequest { }

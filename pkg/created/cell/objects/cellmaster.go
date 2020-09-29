@@ -7,13 +7,14 @@ import (
 
 type CellMaster struct {
 	objects.CellMasterServer
-	ObjectsToUpdate *[]objects.SingleObject
+	ObjectsToUpdate   *[]objects.SingleObject
+	SubscribedPlayers *map[string][]objects.PlayerClient
 }
 
-
 func NewCellMaster() CellMaster {
-	emptyList := make([]objects.SingleObject, 0)
-	return CellMaster{ObjectsToUpdate: &emptyList}
+	emptyObjectList := make([]objects.SingleObject, 0)
+	emptyPlayerMap := make(map[string][]objects.PlayerClient, 0)
+	return CellMaster{ObjectsToUpdate: &emptyObjectList, SubscribedPlayers: &emptyPlayerMap}
 }
 
 func (cm *CellMaster) AppendObjectToUpdate(object objects.SingleObject) {
@@ -25,20 +26,44 @@ func (cm *CellMaster) SendUpdate(ctx context.Context, in *objects.SingleObject, 
 	return &objects.EmptyReply{}, nil
 }
 
+func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.Cell) (*objects.MultipleObjects, error) {
+	mutatingObjects := make([]*objects.SingleObject, 0)
 
+	for index, object := range *cm.ObjectsToUpdate {
+		if object.CellId == in.CellId {
+			mutatingObjects = append(mutatingObjects, &(*cm.ObjectsToUpdate)[index])
+		}
+	}
 
-func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.EmptyRequest) (*objects.MultipleObjects, error) {
-	//cm.AppendObjectToUpdate(*in)
-	return &objects.MultipleObjects{}, nil
+	return &objects.MultipleObjects{Objects: mutatingObjects}, nil
 }
 
+//TODO: Test this fucker
+func (cm *CellMaster) BroadcastMutatedObjects(ctx context.Context, in *objects.MultipleObjects) (*objects.EmptyReply, error) {
+	for objectIndex, object := range (*in).Objects {
+		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
+			for _, player := range playerList {
+				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				if err != nil {
+					return nil, err
+				}
 
 //rpc RequestMutatingObjects (MultipleObjects) returns (MultipleObjects) {}
 
+			}
+		}
+	}
+	return &objects.EmptyReply{}, nil
+}
+
+
+func (cm *CellMaster) SendObjectUpdateToPlayer(player objects.PlayerClient, ctx context.Context, object *objects.SingleObject) (error) {
+	_, err := player.SendUpdate(ctx, &objects.MultipleObjects{Objects: []*objects.SingleObject{object}})
+	return err
+}
+
 //TODO implement cell state
 /*func (cm *CellMaster) GetCellState(ctx context.Context, in *objects.Cell) (*objects.MultipleObjects, error) {
-
-
 	return &objects.MultipleObjects{}, nil
 }*/
 

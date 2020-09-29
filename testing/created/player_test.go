@@ -14,11 +14,11 @@ func TestUpdateCellMaster(t *testing.T) {
 	_, err := player1.UpdateCellMaster(context.Background(), &request)
 	failIfNotNull(err, "could not update cellmaster")
 
-	if player1.Cellmaster.Port == -1 {
+	if player1.CellMaster.Port == -1 {
 		fatalFail(errors.New("player was not updated with cellmaster"))
 	}
 
-	if player1.Cellmaster.Port != 1337 || player1.Cellmaster.Ip != "localhost" {
+	if player1.CellMaster.Port != 1337 || player1.CellMaster.Ip != "localhost" {
 		fatalFail(errors.New("players cellmaster was not updated with correct variables"))
 	}
 }

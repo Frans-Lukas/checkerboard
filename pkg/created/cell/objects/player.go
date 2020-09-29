@@ -6,7 +6,8 @@ import (
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 )
 
-type Client struct { //TODO decide what to do with player and client
+type Client struct {
+	//TODO decide what to do with player and client
 	Port int32
 	Ip   string
 	// 0 = lowest trust level UINT32_MAX = highest trust level
@@ -15,18 +16,18 @@ type Client struct { //TODO decide what to do with player and client
 
 type Player struct {
 	generated.PlayerServer
-	Cellmaster Client
+	CellMaster      Client
 	ObjectsToUpdate map[string]map[string]string
 }
 
 func NewPlayer() Player {
-	return Player{Cellmaster:Client{Port:-1, Ip:"none"}, ObjectsToUpdate: map[string]map[string]string{}}
+	return Player{CellMaster: Client{Port: -1, Ip: "none"}, ObjectsToUpdate: map[string]map[string]string{}}
 }
 
 func (player *Player) UpdateCellMaster(
 	ctx context.Context, in *generated.NewCellMaster,
 ) (*generated.EmptyReply, error) {
-	player.Cellmaster = Client{Ip:in.Ip, Port:in.Port}
+	player.CellMaster = Client{Ip: in.Ip, Port: in.Port}
 	return &generated.EmptyReply{}, nil
 }
 

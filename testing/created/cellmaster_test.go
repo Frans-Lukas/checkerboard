@@ -21,3 +21,17 @@ func TestSendUpdate(t *testing.T) {
 	}
 	fatalFail(errors.New("object to update was not added to list"))
 }
+
+func TestGetCellState(t *testing.T) {
+	cm := objects.NewCellMaster()
+
+}
+
+func TestIsAlive(t *testing.T) {
+	cm := objects.NewCellMaster()
+
+	request := generated.EmptyRequest{}
+	_, err := cm.IsAlive(context.Background(), &request)
+
+	failIfNotNull(err, "isAlive failed")
+}

@@ -37,3 +37,6 @@ func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.Em
 
 
 
+func (cm *CellMaster) IsAlive(ctx context.Context, in *objects.EmptyRequest) (*objects.EmptyReply, error) {
+	return &objects.EmptyReply{}, nil
+}

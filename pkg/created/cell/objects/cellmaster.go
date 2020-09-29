@@ -25,8 +25,6 @@ func (cm *CellMaster) SendUpdate(ctx context.Context, in *objects.SingleObject, 
 	return &objects.EmptyReply{}, nil
 }
 
-
-
 func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.EmptyRequest) (*objects.MultipleObjects, error) {
 	//cm.AppendObjectToUpdate(*in)
 	return &objects.MultipleObjects{}, nil

@@ -36,6 +36,11 @@ func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.Em
 //rpc RequestMutatingObjects (MultipleObjects) returns (MultipleObjects) {}
 
 
+func (cm *CellMaster) GetCellState(ctx context.Context, in *objects.Cell) (*objects.MultipleObjects, error) {
+
+
+	return &objects.MultipleObjects{}, nil
+}
 
 func (cm *CellMaster) IsAlive(ctx context.Context, in *objects.EmptyRequest) (*objects.EmptyReply, error) {
 	return &objects.EmptyReply{}, nil

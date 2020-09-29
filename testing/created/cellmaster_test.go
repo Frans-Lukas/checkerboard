@@ -52,6 +52,10 @@ func TestRequestMutatingObjects(t *testing.T) {
 	}
 }
 
+func TestBroadcastMutatedObjects(t *testing.T) {
+	//cm := objects.NewCellMaster()
+	//cm.SubscribedPlayers = append()
+}
 
 func TestGetCellState(t *testing.T) {
 	//cm := objects.NewCellMaster()

@@ -38,11 +38,16 @@ func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.Ce
 	return &objects.MultipleObjects{Objects: mutatingObjects}, nil
 }
 
+//TODO: Test this fucker
 func (cm *CellMaster) BroadcastMutatedObjects(ctx context.Context, in *objects.MultipleObjects) (*objects.EmptyReply, error) {
 	for objectIndex, object := range (*in).Objects {
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
 			for _, player := range playerList {
-				cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				if err != nil {
+					return nil, err
+				}
+
 			}
 		}
 	}

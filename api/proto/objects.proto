@@ -9,7 +9,7 @@ service Player {
 
 service CellMaster {
     rpc SendUpdate (SingleObject) returns (EmptyReply) {}
-    rpc RequestMutatingObjects (EmptyRequest) returns (MultipleObjects) {}
+    rpc RequestMutatingObjects (Cell) returns (MultipleObjects) {}
     rpc BroadcastMutatedOBjects (MultipleObjects) returns (EmptyReply) {}
     rpc GetCellState (Cell) returns (MultipleObjects) {}
     rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
@@ -21,9 +21,10 @@ message MultipleObjects {
 
 
 message SingleObject {
-    string objectId = 1;
-    repeated string updateKey = 2;
-    repeated string newValue = 3;
+    string cellId = 1;
+    string objectId = 2;
+    repeated string updateKey = 3;
+    repeated string newValue = 4;
 }
 
 message NewCellMaster {

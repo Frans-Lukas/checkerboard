@@ -10,7 +10,7 @@ service Player {
 service CellMaster {
     rpc SendUpdate (SingleObject) returns (EmptyReply) {}
     rpc RequestMutatingObjects (Cell) returns (MultipleObjects) {}
-    rpc BroadcastMutatedOBjects (MultipleObjects) returns (EmptyReply) {}
+    rpc BroadcastMutatedObjects (MultipleObjects) returns (EmptyReply) {}
     rpc GetCellState (Cell) returns (MultipleObjects) {}
     rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
 }

@@ -43,7 +43,7 @@ func (cm *CellMaster) BroadcastMutatedObjects(ctx context.Context, in *objects.M
 	for objectIndex, object := range (*in).Objects {
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
 			for _, player := range playerList {
-				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				err := cm.SendObjectUpdateToPlayer(&player, ctx, (*in).Objects[objectIndex])
 				if err != nil {
 					return nil, err
 				}
@@ -54,8 +54,8 @@ func (cm *CellMaster) BroadcastMutatedObjects(ctx context.Context, in *objects.M
 	return &objects.EmptyReply{}, nil
 }
 
-func (cm *CellMaster) SendObjectUpdateToPlayer(player objects.PlayerClient, ctx context.Context, object *objects.SingleObject) (error) {
-	_, err := player.SendUpdate(ctx, &objects.MultipleObjects{Objects: []*objects.SingleObject{object}})
+func (cm *CellMaster) SendObjectUpdateToPlayer(player *objects.PlayerClient, ctx context.Context, object *objects.SingleObject) (error) {
+	_, err := (*player).SendUpdate(ctx, &objects.MultipleObjects{Objects: []*objects.SingleObject{object}})
 	return err
 }
 

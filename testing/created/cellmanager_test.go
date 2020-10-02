@@ -104,7 +104,7 @@ func TestListPlayersInCell(t *testing.T) {
 	playerList, err := cm.ListPlayersInCell(
 		context.Background(), &generated.ListPlayersRequest{CellId: "testId1"},
 	)
-	failIfNotNull(err, "could not list players in cell")
+	failIfNotNull(err, "could not list players object cell")
 	if len(playerList.Port) == 0 || len(playerList.Ip) == 0 {
 		fatalFail(errors.New("players were not returned from ListPlayersInCell"))
 	}
@@ -157,7 +157,7 @@ func TestPlayerLeftCell(t *testing.T) {
 		context.Background(),
 		&generated.PlayerInCellRequest{Port: 1337, Ip: testIp, CellId: "testId1"},
 	)
-	failIfNotNull(err, "could not list players in cell")
+	failIfNotNull(err, "could not list players object cell")
 	if !reply.PlayerLeft {
 		fatalFail(errors.New("PlayerLeft bool is invalid"))
 	}
@@ -168,7 +168,7 @@ func TestPlayerLeftCell(t *testing.T) {
 		}
 	}
 	if player2Exists {
-		fatalFail(errors.New("player was not removed from cell in playerleftcell"))
+		fatalFail(errors.New("player was not removed from cell object playerleftcell"))
 	}
 }
 

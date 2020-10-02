@@ -20,6 +20,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
@@ -27,6 +28,7 @@ import (
 	OBJ "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -35,11 +37,14 @@ import (
 const (
 	address     = "localhost:50051"
 	defaultName = "world"
-	port = int32(50052)
+	port        = int32(50052)
 )
 
 func main() {
-	// Set up a connection to the server.
+	// Set up a connection to the server.\
+
+	gameLoop()
+
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -56,9 +61,8 @@ func main() {
 	}
 	log.Printf("Greeting: %t", r.WasPerformed)
 
-
 	// Setup player server
-	lis, err := net.Listen("tcp", ":" + fmt.Sprint(port))
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -75,7 +79,7 @@ func main() {
 	// connect Player to nameServer
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	response, err := c.AddPlayerToCell(ctx, &NS.PlayerInCellRequest{Ip: "localhost", Port:port, CellId:"new id"})
+	response, err := c.AddPlayerToCell(ctx, &NS.PlayerInCellRequest{Ip: "localhost", Port: port, CellId: "new id"})
 	if err != nil {
 		log.Fatalf("could not add player: %v", err)
 	} else if !response.Succeeded {
@@ -85,10 +89,53 @@ func main() {
 	// connect player and cellmaster
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	cellMasterReply, err := c.RequestCellMaster(ctx, &NS.CellMasterRequest{CellId:"new id"})
+	cellMasterReply, err := c.RequestCellMaster(ctx, &NS.CellMasterRequest{CellId: "new id"})
 	if err != nil {
 		log.Fatalf("could not request cellmaster: %v", err)
 	} else if cellMasterReply.Port == -1 {
 		log.Fatalf("did not receive a cellmaster")
+	}
+}
+
+type Player struct {
+	posX int
+	posY int
+}
+
+var player = Player{posX: 0, posY: 0}
+
+func gameLoop() {
+	reader := bufio.NewReader(os.Stdin)
+
+	printMap()
+	for {
+		input, _ := reader.ReadString('\n')
+		readInput(input)
+		printMap()
+	}
+}
+
+func readInput(input string) {
+	if input[0] == 'w' {
+		player.posY--
+	} else if input[0] == 's' {
+		player.posY++
+	} else if input[0] == 'a' {
+		player.posX--
+	} else if input[0] == 'd' {
+		player.posX++
+	}
+}
+func printMap() {
+	const MAP_SIZE = 5
+	for row := 0; row < MAP_SIZE; row++ {
+		for column := 0; column < MAP_SIZE; column++ {
+			if row == player.posY && column == player.posX {
+				print("P ")
+			} else {
+				print("* ")
+			}
+		}
+		print("\n")
 	}
 }

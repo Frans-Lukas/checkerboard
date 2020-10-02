@@ -6,17 +6,16 @@ import (
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	NS "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	OBJ "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
 const (
 	address     = "localhost:50051"
 	defaultName = "world"
-	port = int32(50053)
+	port        = int32(50053)
 )
 
 func main() {
@@ -29,7 +28,7 @@ func main() {
 	c := NS.NewCellManagerClient(conn)
 
 	// Setup cellMaster server
-	lis, err := net.Listen("tcp", ":" + fmt.Sprint(port))
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -42,4 +41,9 @@ func main() {
 			log.Fatalf("failed to serve %v", err)
 		}
 	}(*s)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	c.SetWorldSize(ctx, &NS.WorldSize{Height: 5, Width: 5})
+	c.AddPlayerToCell()
 }

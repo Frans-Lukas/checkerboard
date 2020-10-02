@@ -130,6 +130,52 @@ func TestAddPlayerToCell(t *testing.T) {
 	fatalFail(errors.New("player was not added correctly"))
 }
 
+func TestAddPlayerToCellWithPositionsBoundary(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	testIp := "192.168.16.1"
+	status, err := cm.AddPlayerToCellWithPositions(
+		context.Background(),
+		&generated.PlayerInCellRequestWithPositions{PosX: 100, PosY: 0, Ip: testIp, Port: 1337},
+	)
+	failIfNotNull(err, "could not add player to cell")
+	addedPlayer := (*cm.Cells)[0].Players[0]
+	if status.Succeeded && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
+		return
+	}
+	fatalFail(errors.New("player was not added correctly"))
+}
+
+func TestAddPlayerToCellWithPositionsCenter(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	testIp := "192.168.16.1"
+	status, err := cm.AddPlayerToCellWithPositions(
+		context.Background(),
+		&generated.PlayerInCellRequestWithPositions{PosX: 50, PosY: 50, Ip: testIp, Port: 1337},
+	)
+	failIfNotNull(err, "could not add player to cell")
+	addedPlayer := (*cm.Cells)[0].Players[0]
+	if status.Succeeded && addedPlayer.Port == 1337 && addedPlayer.Ip == testIp {
+		return
+	}
+	fatalFail(errors.New("player was not added correctly"))
+}
+
+func TestAddPlayerToCellWithPositionsShouldFailOnInvalidPositions(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	testIp := "192.168.16.1"
+	status, err := cm.AddPlayerToCellWithPositions(
+		context.Background(),
+		&generated.PlayerInCellRequestWithPositions{PosX: -50, PosY: 50, Ip: testIp, Port: 1337},
+	)
+	if !status.Succeeded && err != nil {
+		return
+	}
+	fatalFail(errors.New("player was added incorrectly"))
+}
+
 func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
 	cm := cellmanager.NewCellManager()
 	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
@@ -142,6 +188,38 @@ func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
 		return
 	} else {
 		fatalFail(errors.New("AddPlayerToCell did not throw on invalid cellId"))
+	}
+}
+
+func TestSetWorldSize(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.SetWorldSize(context.Background(), &generated.WorldSize{Width: 100, Height: 100})
+	if cm.WorldHeight == 100 && cm.WorldWidth == 100 {
+		return
+	} else {
+		fatalFail(errors.New("SetWorldSize does not set world size"))
+	}
+}
+
+func TestSetWorldSizeCreatesBigCell(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.SetWorldSize(context.Background(), &generated.WorldSize{Width: 100, Height: 100})
+	if (*cm.Cells)[0].Width == 100 && (*cm.Cells)[0].Height == 100 &&
+		(*cm.Cells)[0].PosX == 0 && (*cm.Cells)[0].PosY == 0 {
+		return
+	} else {
+		fatalFail(errors.New("SetWorldSize does not initialize world cell"))
+	}
+}
+
+func TestSetWorldSizeFailsIfACellExists(t *testing.T) {
+	cm := cellmanager.NewCellManager()
+	cm.SetWorldSize(context.Background(), &generated.WorldSize{Width: 100, Height: 100})
+	status, _ := cm.SetWorldSize(context.Background(), &generated.WorldSize{Width: 100, Height: 100})
+	if status.Succeeded == false {
+		return
+	} else {
+		fatalFail(errors.New("SetWorldSize should fail if cells exists"))
 	}
 }
 

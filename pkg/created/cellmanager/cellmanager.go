@@ -6,11 +6,14 @@ import (
 	created "github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+	"strconv"
 )
 
 type CellManager struct {
 	generated.CellManagerServer
-	Cells *[]created.Cell
+	WorldWidth  int64
+	WorldHeight int64
+	Cells       *[]created.Cell
 }
 
 func NewCellManager() CellManager {
@@ -23,6 +26,28 @@ func (cellManager *CellManager) CreateCell(
 ) (*generated.CellStatusReply, error) {
 	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
+}
+
+func (cellManager *CellManager) SetWorldSize(
+	ctx context.Context, in *generated.WorldSize,
+) (*generated.TransactionSucceeded, error) {
+	cellManager.WorldWidth = in.Width
+	cellManager.WorldHeight = in.Height
+
+	if len(*cellManager.Cells) > 0 {
+		return &generated.TransactionSucceeded{Succeeded: false}, nil
+	}
+
+	cellManager.AppendCell(created.Cell{
+		CellId:  "initialCell",
+		Players: make([]objects.Client, 0),
+		PosY:    0,
+		PosX:    0,
+		Width:   in.Width,
+		Height:  in.Height,
+	})
+
+	return &generated.TransactionSucceeded{Succeeded: true}, nil
 }
 
 func (cellManager *CellManager) AddPlayerToCell(
@@ -41,6 +66,24 @@ func (cellManager *CellManager) AddPlayerToCell(
 		}
 	}
 	return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid cellID: " + in.CellId)
+}
+func (cellManager *CellManager) AddPlayerToCellWithPositions(
+	ctx context.Context, in *generated.PlayerInCellRequestWithPositions,
+) (*generated.TransactionSucceeded, error) {
+	for index, cell := range *cellManager.Cells {
+		if cell.CollidesWith(in) {
+			(*cellManager.Cells)[index].AppendPlayer(
+				objects.Client{
+					Ip:         in.Ip,
+					Port:       in.Port,
+					TrustLevel: 0,
+				},
+			)
+			return &generated.TransactionSucceeded{Succeeded: true}, nil
+
+		}
+	}
+	return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 }
 
 func (cellManager *CellManager) DeleteCell(

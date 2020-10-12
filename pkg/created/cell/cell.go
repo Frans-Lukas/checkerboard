@@ -25,7 +25,7 @@ func NewCell(cellID string) Cell {
 func (cell *Cell) AppendPlayer(player objects.Client) {
 	cell.Players = append(cell.Players, player)
 }
-func (cell *Cell) CollidesWith(in *generated.PlayerInCellRequestWithPositions) bool {
+func (cell *Cell) CollidesWith(in *generated.Position) bool {
 	return cell.PosX <= in.PosX && cell.PosX+cell.Width >= in.PosX &&
 		cell.PosY <= in.PosY && cell.PosY+cell.Height >= in.PosY
 }

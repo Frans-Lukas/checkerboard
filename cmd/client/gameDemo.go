@@ -29,6 +29,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
@@ -43,8 +44,6 @@ const (
 func main() {
 	// Set up a connection to the server.\
 
-	gameLoop()
-
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -52,14 +51,100 @@ func main() {
 	defer conn.Close()
 	c := NS.NewCellManagerClient(conn)
 
-	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.CreateCell(ctx, &NS.CellRequest{CellId: "new id"})
+
+	port, err := strconv.Atoi(os.Args[2])
+
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("invalid port argument: ./gameDemo ip port")
 	}
-	log.Printf("Greeting: %t", r.WasPerformed)
+
+	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
+
+	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: 0, PosY: 0})
+
+	if err != nil {
+		log.Fatalf("No cell master :(")
+	}
+
+	conn2, err2 := grpc.Dial(objects.ToAddress(*cm), grpc.WithInsecure(), grpc.WithBlock())
+	defer conn2.Close()
+	if err2 != nil {
+		log.Fatalf("did not connect: %v", err2)
+	}
+
+	cmConn := OBJ.NewCellMasterClient(conn)
+	gameLoop(cmConn)
+}
+
+type Player struct {
+	posXKey  string
+	posX     int
+	posYKey  string
+	posY     int
+	objectId string
+}
+
+type PlayerServer struct {
+	OBJ.PlayerClient
+}
+
+func PlayerConstructor(posX int, posY int) Player {
+	return Player{posX: posX, posY: posY, objectId: fmt.Sprint(time.Now().UnixNano()), posXKey: "posX", posYKey: "posY"}
+}
+
+var playerList = make(map[string]*Player, 0)
+
+var player = PlayerConstructor(0, 0)
+
+const PlayerObjectType = "player"
+
+func (c *PlayerServer) SendUpdate(ctx context.Context, in *OBJ.MultipleObjects, opts ...grpc.CallOption) (*OBJ.EmptyReply, error) {
+	for _, object := range (*in).Objects {
+		if val, ok := playerList[object.ObjectId]; ok {
+			for keyIndex, key := range object.UpdateKey {
+				updatePlayer(key, val, object, keyIndex)
+			}
+
+		} else {
+			playerList[object.ObjectId] = PlayerFromObject(object)
+		}
+	}
+	printMap()
+	return &OBJ.EmptyReply{}, nil
+}
+
+func PlayerFromObject(object *OBJ.SingleObject) *Player {
+	player := PlayerConstructor(0, 0)
+	for keyIndex, key := range object.UpdateKey {
+		updatePlayer(key, &player, object, keyIndex)
+	}
+	player.objectId = object.ObjectId
+	return &player
+}
+
+func updatePlayer(key string, val *Player, object *OBJ.SingleObject, keyIndex int) {
+	switch key {
+	case val.posXKey:
+		newX, err := strconv.Atoi(object.NewValue[keyIndex])
+		if err != nil {
+			log.Fatalf("invalid posx")
+		}
+		playerList[object.ObjectId].posX = newX
+	case val.posYKey:
+		newY, err := strconv.Atoi(object.NewValue[keyIndex])
+		if err != nil {
+			log.Fatalf("invalid posy")
+		}
+		playerList[object.ObjectId].posY = newY
+	}
+}
+
+func gameLoop(cm OBJ.CellMasterClient) {
+	reader := bufio.NewReader(os.Stdin)
+
+	playerList[player.objectId] = &player
 
 	// Setup player server
 	lis, err := net.Listen("tcp", ":"+fmt.Sprint(port))
@@ -76,41 +161,16 @@ func main() {
 		}
 	}(*s)
 
-	// connect Player to nameServer
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := c.AddPlayerToCell(ctx, &NS.PlayerInCellRequest{Ip: "localhost", Port: port, CellId: "new id"})
-	if err != nil {
-		log.Fatalf("could not add player: %v", err)
-	} else if !response.Succeeded {
-		log.Fatalf("failed to add player to cellmanager")
-	}
-
-	// connect player and cellmaster
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	cellMasterReply, err := c.RequestCellMaster(ctx, &NS.CellMasterRequest{CellId: "new id"})
-	if err != nil {
-		log.Fatalf("could not request cellmaster: %v", err)
-	} else if cellMasterReply.Port == -1 {
-		log.Fatalf("did not receive a cellmaster")
-	}
-}
-
-type Player struct {
-	posX int
-	posY int
-}
-
-var player = Player{posX: 0, posY: 0}
-
-func gameLoop() {
-	reader := bufio.NewReader(os.Stdin)
-
 	printMap()
 	for {
 		input, _ := reader.ReadString('\n')
 		readInput(input)
+
+		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		//TODO check so that defer is not needed
+		//defer cancel()
+		cm.SendUpdate(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, UpdateKey: []string{player.posXKey, player.posYKey}, NewValue: []string{fmt.Sprint(player.posX), fmt.Sprint(player.posY)}})
+
 		printMap()
 	}
 }
@@ -126,16 +186,32 @@ func readInput(input string) {
 		player.posX++
 	}
 }
+
 func printMap() {
 	const MAP_SIZE = 5
 	for row := 0; row < MAP_SIZE; row++ {
 		for column := 0; column < MAP_SIZE; column++ {
-			if row == player.posY && column == player.posX {
-				print("P ")
-			} else {
-				print("* ")
-			}
+			printPosition(row, column)
 		}
 		print("\n")
+	}
+}
+
+func printPosition(row int, column int) {
+	printedPlayer := false
+	if row == player.posY && column == player.posX {
+		print("P ")
+		printedPlayer = true
+	} else {
+		for _, player := range playerList {
+			if row == player.posY && column == player.posX {
+				print("O ")
+				printedPlayer = true
+				break
+			}
+		}
+	}
+	if !printedPlayer {
+		print("* ")
 	}
 }

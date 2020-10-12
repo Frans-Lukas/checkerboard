@@ -432,3 +432,50 @@ func TestRequestCellMasterFailsOnEmptyCell(t *testing.T) {
 	}
 	fatalFail(errors.New("should have failed"))
 }
+
+func TestRequestCellMasterWithPositions(t *testing.T) {
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
+	mainCell := cell.NewCell("testId2")
+	mainCell.PosX = 0
+	mainCell.PosY = 0
+	mainCell.Width = 100
+	mainCell.Height = 100
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(mainCell)
+
+	(*cm.Cells)[0].CellMaster = &cellMaster
+
+	request := generated.Position{PosX: 50, PosY: 50}
+	newCm, err := cm.RequestCellMasterWithPositions(context.Background(), &request)
+	if err != nil {
+		fatalFail(errors.New("error on requesting CM"))
+	}
+
+	if newCm.Port == cellMaster.Port {
+		return
+	}
+
+	fatalFail(errors.New("wrong cell master returned"))
+}
+
+func TestRequestCellMasterWithPositionsFailsIfOutOfBounds(t *testing.T) {
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
+	mainCell := cell.NewCell("testId2")
+	mainCell.PosX = 0
+	mainCell.PosY = 0
+	mainCell.Width = 100
+	mainCell.Height = 100
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(mainCell)
+
+	(*cm.Cells)[0].CellMaster = &cellMaster
+
+	request := generated.Position{PosX: 150, PosY: 50}
+	_, err := cm.RequestCellMasterWithPositions(context.Background(), &request)
+	if err != nil {
+		return
+	}
+	fatalFail(errors.New("should have failed"))
+}

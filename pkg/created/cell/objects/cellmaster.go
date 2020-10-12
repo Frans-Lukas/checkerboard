@@ -2,13 +2,20 @@ package objects
 
 import (
 	"context"
+	"fmt"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	"github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 )
+
+func ToAddress(reply cellmanager.CellMasterReply) string {
+	return reply.Ip + ":" + fmt.Sprint(reply.Port)
+}
 
 type CellMaster struct {
 	objects.CellMasterServer
 	ObjectsToUpdate   *[]objects.SingleObject
 	SubscribedPlayers *map[string][]objects.PlayerClient
+	Cells             *[]objects.Cell
 }
 
 func NewCellMaster() CellMaster {
@@ -38,7 +45,6 @@ func (cm *CellMaster) RequestMutatingObjects(ctx context.Context, in *objects.Ce
 	return &objects.MultipleObjects{Objects: mutatingObjects}, nil
 }
 
-//TODO: Test this fucker
 func (cm *CellMaster) BroadcastMutatedObjects(ctx context.Context, in *objects.MultipleObjects) (*objects.EmptyReply, error) {
 	for objectIndex, object := range (*in).Objects {
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {

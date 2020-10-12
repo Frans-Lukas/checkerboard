@@ -67,11 +67,12 @@ func (cellManager *CellManager) AddPlayerToCell(
 	}
 	return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid cellID: " + in.CellId)
 }
+
 func (cellManager *CellManager) AddPlayerToCellWithPositions(
 	ctx context.Context, in *generated.PlayerInCellRequestWithPositions,
 ) (*generated.TransactionSucceeded, error) {
 	for index, cell := range *cellManager.Cells {
-		if cell.CollidesWith(in) {
+		if cell.CollidesWith(&generated.Position{PosY: in.PosY, PosX: in.PosX}) {
 			(*cellManager.Cells)[index].AppendPlayer(
 				objects.Client{
 					Ip:         in.Ip,
@@ -84,6 +85,17 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 		}
 	}
 	return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
+}
+
+func (cellManager *CellManager) RequestCellMasterWithPositions(
+	ctx context.Context, in *generated.Position,
+) (*generated.CellMasterReply, error) {
+	for _, cell := range *cellManager.Cells {
+		if cell.CollidesWith(in) {
+			return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
+		}
+	}
+	return &generated.CellMasterReply{Ip: "INVALID POSITION", Port: -1}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 }
 
 func (cellManager *CellManager) DeleteCell(

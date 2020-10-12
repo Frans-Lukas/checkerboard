@@ -25,6 +25,7 @@ message SingleObject {
     string objectId = 2;
     repeated string updateKey = 3;
     repeated string newValue = 4;
+    string objectType = 5;
 }
 
 message NewCellMaster {

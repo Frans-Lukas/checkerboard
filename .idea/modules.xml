@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/checkerboard.iml" filepath="$PROJECT_DIR$/.idea/checkerboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/checkerboard.iml" filepath="$PROJECT_DIR$/checkerboard.iml" />
     </modules>
   </component>
 </project>

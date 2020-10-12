@@ -16,19 +16,19 @@ func createSingleObject(propertyKey string, newValue string, id string, cellId s
 }
 
 func TestSendUpdate(t *testing.T) {
-	cm := objects.NewCellMaster()
+	cm := objects.NewPlayer()
 	obj := createSingleObject("key", "value", "key2", "cellId")
-	_, err := cm.SendUpdate(context.Background(), &obj)
+	_, err := cm.RequestObjectMutation(context.Background(), &obj)
 
 	failIfNotNull(err, "could not update cellmaster")
-	if (*cm.ObjectsToUpdate)[0].UpdateKey[0] == "key" {
+	if (*cm.MutatingObjects)[0].UpdateKey[0] == "key" {
 		return
 	}
 	fatalFail(errors.New("object to update was not added to list"))
 }
 
 func TestRequestMutatingObjects(t *testing.T) {
-	cm := objects.NewCellMaster()
+	cm := objects.NewPlayer()
 	cellID1Object := createSingleObject("key", "value", "key2", "cellId1")
 	cellID2Object := createSingleObject("key2", "value2", "key2", "cellId2")
 	cellID1Object2 := createSingleObject("key1", "value1", "key3", "cellId1")
@@ -61,13 +61,13 @@ type PlayerClientWrapper struct {
 var player = PlayerClientWrapper{}
 var player2 = PlayerClientWrapper{}
 
-func (p PlayerClientWrapper) SendUpdate(ctx context.Context, in *generated.MultipleObjects, opts ...grpc.CallOption) (*generated.EmptyReply, error) {
+func (p PlayerClientWrapper) ReceiveMutatedObjects(ctx context.Context, in *generated.MultipleObjects, opts ...grpc.CallOption) (*generated.EmptyReply, error) {
 	player.object = in.Objects[0]
 	return nil, nil
 }
 
 func TestBroadcastMutatedObjects(t *testing.T) {
-	cm := objects.NewCellMaster()
+	cm := objects.NewPlayer()
 	cellId1 := "cellId1"
 	cellId2 := "cellId2"
 
@@ -131,7 +131,7 @@ func TestBroadcastMutatedObjects(t *testing.T) {
 }*/
 
 func TestIsAlive(t *testing.T) {
-	cm := objects.NewCellMaster()
+	cm := objects.NewPlayer()
 
 	request := generated.EmptyRequest{}
 	_, err := cm.IsAlive(context.Background(), &request)

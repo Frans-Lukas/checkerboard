@@ -6,8 +6,11 @@ import (
 	created "github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+	"log"
 	"strconv"
 )
+
+const requestCMWithPosPrint = true
 
 type CellManager struct {
 	generated.CellManagerServer
@@ -90,9 +93,14 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 func (cellManager *CellManager) RequestCellMasterWithPositions(
 	ctx context.Context, in *generated.Position,
 ) (*generated.CellMasterReply, error) {
-	for _, cell := range *cellManager.Cells {
+	for cellIndex, cell := range *cellManager.Cells {
 		if cell.CollidesWith(in) {
-			return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
+			cm, err := cellManager.selectCellMaster(cell, cellIndex)
+			if err != nil {
+				log.Fatalf("could not select cell as there is no player")
+			}
+			//helpers.DebugPrint(requestCMWithPosPrint, fmt.Sprintf("returning cm with port: $d", cm.Port))
+			return &generated.CellMasterReply{Ip: cm.Ip, Port: cm.Port}, nil
 		}
 	}
 	return &generated.CellMasterReply{Ip: "INVALID POSITION", Port: -1}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
@@ -152,25 +160,31 @@ func (cellManager *CellManager) RequestCellMaster(
 
 	for cellIndex, cell := range *cellManager.Cells {
 		if in.CellId == cell.CellId {
-			if cell.CellMaster == nil {
-				cmIndex := cell.SelectNewCellMaster()
-
-				if cmIndex == -1 {
-					return &generated.CellMasterReply{Ip: "", Port: -1}, errors.New("empty cell requested a cell master")
-				}
-
-				newCM := cell.Players[cmIndex]
-
-				(*cellManager.Cells)[cellIndex].CellMaster = &newCM
-
-				return &generated.CellMasterReply{Ip: newCM.Ip, Port: newCM.Port}, nil
-			} else {
-				return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
-			}
+			return cellManager.selectCellMaster(cell, cellIndex)
 		}
 	}
 
 	return &generated.CellMasterReply{}, nil
+}
+
+func (cellManager *CellManager) selectCellMaster(cell created.Cell, cellIndex int) (*generated.CellMasterReply, error) {
+
+	if cell.CellMaster == nil {
+		cmIndex := cell.SelectNewCellMaster()
+
+		if cmIndex == -1 {
+			return &generated.CellMasterReply{Ip: "", Port: -1}, errors.New("empty cell requested a cell master")
+		}
+
+		newCM := cell.Players[cmIndex]
+
+		(*cellManager.Cells)[cellIndex].CellMaster = &newCM
+
+		return &generated.CellMasterReply{Ip: newCM.Ip, Port: newCM.Port}, nil
+	} else {
+		return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
+	}
+
 }
 
 func (cellManager *CellManager) UnregisterCellMaster(

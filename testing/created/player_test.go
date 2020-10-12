@@ -31,14 +31,14 @@ func TestSendUpdateSingleObject(t *testing.T) {
 
 	request := generated.MultipleObjects{Objects: objectList}
 
-	_, err := player1.SendUpdate(context.Background(), &request)
+	_, err := player1.ReceiveMutatedObjects(context.Background(), &request)
 	failIfNotNull(err, "could not fulfill sendUpdate")
 
-	if len(player1.ObjectsToUpdate) == 0 {
+	if len(player1.MutatedObjects) == 0 {
 		fatalFail(errors.New("objects not added to ObjectsToUpdate"))
 	}
 
-	if player1.ObjectsToUpdate["object1"]["objKey1"] != "value1" || player1.ObjectsToUpdate["object1"]["objKey2"] != "value2" {
+	if player1.MutatedObjects["object1"]["objKey1"] != "value1" || player1.MutatedObjects["object1"]["objKey2"] != "value2" {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
 }
@@ -51,7 +51,7 @@ func TestSendUpdateSingleObjectWrong(t *testing.T) {
 
 	request := generated.MultipleObjects{Objects: objectList}
 
-	_, err := player1.SendUpdate(context.Background(), &request)
+	_, err := player1.ReceiveMutatedObjects(context.Background(), &request)
 
 	if err == nil {
 		fatalFail(errors.New("objects are added when they should not be"))
@@ -68,18 +68,18 @@ func TestSendUpdateMultipleObjects(t *testing.T) {
 
 	request := generated.MultipleObjects{Objects: objectList}
 
-	_, err := player1.SendUpdate(context.Background(), &request)
+	_, err := player1.ReceiveMutatedObjects(context.Background(), &request)
 	failIfNotNull(err, "could not fulfill sendUpdate")
 
-	if len(player1.ObjectsToUpdate) == 0 {
+	if len(player1.MutatedObjects) == 0 {
 		fatalFail(errors.New("objects not added to ObjectsToUpdate"))
 	}
 
-	if player1.ObjectsToUpdate["object1"]["1objKey1"] != "1value1" || player1.ObjectsToUpdate["object1"]["1objKey2"] != "1value2" {
+	if player1.MutatedObjects["object1"]["1objKey1"] != "1value1" || player1.MutatedObjects["object1"]["1objKey2"] != "1value2" {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
 
-	if player1.ObjectsToUpdate["object2"]["2objKey1"] != "2value1" || player1.ObjectsToUpdate["object2"]["2objKey2"] != "2value2" {
+	if player1.MutatedObjects["object2"]["2objKey1"] != "2value1" || player1.MutatedObjects["object2"]["2objKey2"] != "2value2" {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
 }
@@ -94,8 +94,8 @@ func TestSendUpdateMultipleObjectsWrong(t *testing.T) {
 
 	request := generated.MultipleObjects{Objects: objectList}
 
-	_, err := player1.SendUpdate(context.Background(), &request)
-	if err == nil || len(player1.ObjectsToUpdate) != 0{
+	_, err := player1.ReceiveMutatedObjects(context.Background(), &request)
+	if err == nil || len(player1.MutatedObjects) != 0{
 		fatalFail(errors.New("objects are added when they should not be"))
 	}
 }
@@ -110,7 +110,7 @@ func TestSendUpdateMultipleTimes(t *testing.T) {
 
 	request := generated.MultipleObjects{Objects: objectList}
 
-	_, err := player1.SendUpdate(context.Background(), &request)
+	_, err := player1.ReceiveMutatedObjects(context.Background(), &request)
 	failIfNotNull(err, "could not fulfill sendUpdate")
 
 	object2 = generated.SingleObject{ObjectId: "object2", UpdateKey:[]string{"2objKey2", "2objKey3"}, NewValue:[]string{"2newValue2", "2value3"}}
@@ -120,14 +120,14 @@ func TestSendUpdateMultipleTimes(t *testing.T) {
 
 	request = generated.MultipleObjects{Objects: objectList}
 
-	_, err = player1.SendUpdate(context.Background(), &request)
+	_, err = player1.ReceiveMutatedObjects(context.Background(), &request)
 	failIfNotNull(err, "could not fulfill sendUpdate")
 
-	if len(player1.ObjectsToUpdate) != 3 {
+	if len(player1.MutatedObjects) != 3 {
 		fatalFail(errors.New("objects not added to ObjectsToUpdate"))
 	}
 
-	if player1.ObjectsToUpdate["object2"]["2objKey1"] != "2value1" || player1.ObjectsToUpdate["object2"]["2objKey2"] != "2newValue2" || player1.ObjectsToUpdate["object2"]["2objKey3"] != "2value3" {
+	if player1.MutatedObjects["object2"]["2objKey1"] != "2value1" || player1.MutatedObjects["object2"]["2objKey2"] != "2newValue2" || player1.MutatedObjects["object2"]["2objKey3"] != "2value3" {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
 }

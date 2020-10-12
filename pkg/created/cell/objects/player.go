@@ -16,12 +16,17 @@ type Client struct {
 
 type Player struct {
 	generated.PlayerServer
-	CellMaster      Client
-	ObjectsToUpdate map[string]map[string]string
+	CellMaster        Client
+	MutatedObjects    map[string]map[string]string
+	MutatingObjects   *[]generated.SingleObject
+	SubscribedPlayers *map[string][]generated.PlayerClient
+	Cells             *[]generated.Cell
 }
 
 func NewPlayer() Player {
-	return Player{CellMaster: Client{Port: -1, Ip: "none"}, ObjectsToUpdate: map[string]map[string]string{}}
+	emptyObjectList := make([]generated.SingleObject, 0)
+	emptyPlayerMap := make(map[string][]generated.PlayerClient, 0)
+	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList}
 }
 
 func (player *Player) UpdateCellMaster(
@@ -31,7 +36,7 @@ func (player *Player) UpdateCellMaster(
 	return &generated.EmptyReply{}, nil
 }
 
-func (player *Player) SendUpdate(
+func (player *Player) ReceiveMutatedObjects(
 	ctx context.Context, in *generated.MultipleObjects,
 ) (*generated.EmptyReply, error) {
 	for _, object := range in.Objects {
@@ -42,15 +47,65 @@ func (player *Player) SendUpdate(
 
 	for _, object := range in.Objects {
 
-		if player.ObjectsToUpdate[object.ObjectId] == nil {
-			player.ObjectsToUpdate[object.ObjectId] = map[string]string{}
+		if player.MutatedObjects[object.ObjectId] == nil {
+			player.MutatedObjects[object.ObjectId] = map[string]string{}
 		}
 
-		objectsToUpdate := player.ObjectsToUpdate[object.ObjectId]
+		objectsToUpdate := player.MutatedObjects[object.ObjectId]
 		for index, key := range object.UpdateKey {
 			objectsToUpdate[key] = object.NewValue[index]
 		}
 	}
 
+	return &generated.EmptyReply{}, nil
+}
+
+func (cm *Player) AppendObjectToUpdate(object generated.SingleObject) {
+	*cm.MutatingObjects = append(*cm.MutatingObjects, object)
+}
+
+func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject, ) (*generated.EmptyReply, error) {
+	cm.AppendObjectToUpdate(*in)
+	return &generated.EmptyReply{}, nil
+}
+
+func (cm *Player) RequestMutatingObjects(ctx context.Context, in *generated.Cell) (*generated.MultipleObjects, error) {
+	mutatingObjects := make([]*generated.SingleObject, 0)
+
+	for index, object := range *cm.MutatingObjects {
+		if object.CellId == in.CellId {
+			mutatingObjects = append(mutatingObjects, &(*cm.MutatingObjects)[index])
+		}
+	}
+
+	return &generated.MultipleObjects{Objects: mutatingObjects}, nil
+}
+
+func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.MultipleObjects) (*generated.EmptyReply, error) {
+	for objectIndex, object := range (*in).Objects {
+		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
+			for _, player := range playerList {
+				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				if err != nil {
+					return nil, err
+				}
+
+			}
+		}
+	}
+	return &generated.EmptyReply{}, nil
+}
+
+func (cm *Player) SendObjectUpdateToPlayer(player generated.PlayerClient, ctx context.Context, object *generated.SingleObject) (error) {
+	_, err := player.ReceiveMutatedObjects(ctx, &generated.MultipleObjects{Objects: []*generated.SingleObject{object}})
+	return err
+}
+
+//TODO implement cell state
+/*func (cm *CellMaster) GetCellState(ctx context.Context, in *objects.Cell) (*objects.MultipleObjects, error) {
+	return &objects.MultipleObjects{}, nil
+}*/
+
+func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*generated.EmptyReply, error) {
 	return &generated.EmptyReply{}, nil
 }

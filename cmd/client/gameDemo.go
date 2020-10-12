@@ -38,7 +38,6 @@ import (
 const (
 	address     = "localhost:50051"
 	defaultName = "world"
-	port        = int32(50052)
 )
 
 func main() {
@@ -59,6 +58,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("invalid port argument: ./gameDemo ip port")
 	}
+
+	//start cell master
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	cellMaster := objects.NewCellMaster()
+	OBJ.RegisterCellMasterServer(s, &cellMaster)
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve %v", err)
+		}
+	}()
 
 	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
 
@@ -147,7 +160,7 @@ func gameLoop(cm OBJ.CellMasterClient) {
 	playerList[player.objectId] = &player
 
 	// Setup player server
-	lis, err := net.Listen("tcp", ":"+fmt.Sprint(port))
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(os.Args[2]))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

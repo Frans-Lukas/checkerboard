@@ -1,4 +1,4 @@
-package cellMaster
+package main
 
 import (
 	"context"
@@ -36,11 +36,6 @@ func main() {
 	cellMaster := objects.NewCellMaster()
 	OBJ.RegisterCellMasterServer(s, &cellMaster)
 
-	go func(s grpc.Server) {
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve %v", err)
-		}
-	}(*s)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -48,4 +43,7 @@ func main() {
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: "localhost", Port: port, PosY: 0, PosX: 0})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve %v", err)
+	}
 }

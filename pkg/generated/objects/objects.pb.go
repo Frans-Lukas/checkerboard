@@ -358,38 +358,38 @@ var file_objects_proto_rawDesc = []byte{
 	0x22, 0x1e, 0x0a, 0x04, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x65, 0x6c, 0x6c,
 	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x63, 0x65, 0x6c, 0x6c, 0x49, 0x64,
 	0x22, 0x0c, 0x0a, 0x0a, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x0e,
-	0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x32, 0x8a,
-	0x01, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12, 0x3d, 0x0a, 0x0a, 0x53, 0x65, 0x6e,
-	0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x18, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
-	0x73, 0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74,
-	0x73, 0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74,
-	0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x10, 0x55, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x16, 0x2e, 0x6f,
-	0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x4e, 0x65, 0x77, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61,
-	0x73, 0x74, 0x65, 0x72, 0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45,
-	0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x32, 0xcd, 0x02, 0x0a, 0x0a,
-	0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x3a, 0x0a, 0x0a, 0x53, 0x65,
-	0x6e, 0x64, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x15, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63,
-	0x74, 0x73, 0x2e, 0x53, 0x69, 0x6e, 0x67, 0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x1a,
+	0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x32, 0xe1,
+	0x03, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12, 0x48, 0x0a, 0x15, 0x52, 0x65, 0x63,
+	0x65, 0x69, 0x76, 0x65, 0x4d, 0x75, 0x74, 0x61, 0x74, 0x65, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63,
+	0x74, 0x73, 0x12, 0x18, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x4d, 0x75, 0x6c,
+	0x74, 0x69, 0x70, 0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x1a, 0x13, 0x2e, 0x6f,
+	0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x10, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x65, 0x6c,
+	0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x16, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
+	0x73, 0x2e, 0x4e, 0x65, 0x77, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x1a,
 	0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52,
-	0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x43, 0x0a, 0x16, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x4d, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x12, 0x0d, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x1a,
-	0x18, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70,
-	0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x22, 0x00, 0x12, 0x4a, 0x0a, 0x17, 0x42,
-	0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x4d, 0x75, 0x74, 0x61, 0x74, 0x65, 0x64, 0x4f,
-	0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x12, 0x18, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
-	0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x43, 0x65,
-	0x6c, 0x6c, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x0d, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
+	0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x45, 0x0a, 0x15, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12,
+	0x15, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x53, 0x69, 0x6e, 0x67, 0x6c, 0x65,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x43, 0x0a,
+	0x16, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x4d, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6e, 0x67,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x12, 0x0d, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
 	0x73, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x1a, 0x18, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
 	0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x22, 0x00, 0x12, 0x37, 0x0a, 0x07, 0x49, 0x73, 0x41, 0x6c, 0x69, 0x76, 0x65, 0x12, 0x15, 0x2e,
-	0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45,
-	0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x22, 0x00, 0x12, 0x4a, 0x0a, 0x17, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x4d,
+	0x75, 0x74, 0x61, 0x74, 0x65, 0x64, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x12, 0x18, 0x2e,
+	0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x1a, 0x13, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74,
+	0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x39,
+	0x0a, 0x0c, 0x47, 0x65, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x0d,
+	0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x1a, 0x18, 0x2e,
+	0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x22, 0x00, 0x12, 0x37, 0x0a, 0x07, 0x49, 0x73, 0x41,
+	0x6c, 0x69, 0x76, 0x65, 0x12, 0x15, 0x2e, 0x6f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x6f, 0x62,
+	0x6a, 0x65, 0x63, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -415,20 +415,20 @@ var file_objects_proto_goTypes = []interface{}{
 }
 var file_objects_proto_depIdxs = []int32{
 	1, // 0: objects.MultipleObjects.objects:type_name -> objects.SingleObject
-	0, // 1: objects.Player.SendUpdate:input_type -> objects.MultipleObjects
+	0, // 1: objects.Player.ReceiveMutatedObjects:input_type -> objects.MultipleObjects
 	2, // 2: objects.Player.UpdateCellMaster:input_type -> objects.NewCellMaster
-	1, // 3: objects.CellMaster.SendUpdate:input_type -> objects.SingleObject
-	3, // 4: objects.CellMaster.RequestMutatingObjects:input_type -> objects.Cell
-	0, // 5: objects.CellMaster.BroadcastMutatedObjects:input_type -> objects.MultipleObjects
-	3, // 6: objects.CellMaster.GetCellState:input_type -> objects.Cell
-	5, // 7: objects.CellMaster.IsAlive:input_type -> objects.EmptyRequest
-	4, // 8: objects.Player.SendUpdate:output_type -> objects.EmptyReply
+	1, // 3: objects.Player.RequestObjectMutation:input_type -> objects.SingleObject
+	3, // 4: objects.Player.RequestMutatingObjects:input_type -> objects.Cell
+	0, // 5: objects.Player.BroadcastMutatedObjects:input_type -> objects.MultipleObjects
+	3, // 6: objects.Player.GetCellState:input_type -> objects.Cell
+	5, // 7: objects.Player.IsAlive:input_type -> objects.EmptyRequest
+	4, // 8: objects.Player.ReceiveMutatedObjects:output_type -> objects.EmptyReply
 	4, // 9: objects.Player.UpdateCellMaster:output_type -> objects.EmptyReply
-	4, // 10: objects.CellMaster.SendUpdate:output_type -> objects.EmptyReply
-	0, // 11: objects.CellMaster.RequestMutatingObjects:output_type -> objects.MultipleObjects
-	4, // 12: objects.CellMaster.BroadcastMutatedObjects:output_type -> objects.EmptyReply
-	0, // 13: objects.CellMaster.GetCellState:output_type -> objects.MultipleObjects
-	4, // 14: objects.CellMaster.IsAlive:output_type -> objects.EmptyReply
+	4, // 10: objects.Player.RequestObjectMutation:output_type -> objects.EmptyReply
+	0, // 11: objects.Player.RequestMutatingObjects:output_type -> objects.MultipleObjects
+	4, // 12: objects.Player.BroadcastMutatedObjects:output_type -> objects.EmptyReply
+	0, // 13: objects.Player.GetCellState:output_type -> objects.MultipleObjects
+	4, // 14: objects.Player.IsAlive:output_type -> objects.EmptyReply
 	8, // [8:15] is the sub-list for method output_type
 	1, // [1:8] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -523,7 +523,7 @@ func file_objects_proto_init() {
 			NumEnums:      0,
 			NumMessages:   6,
 			NumExtensions: 0,
-			NumServices:   2,
+			NumServices:   1,
 		},
 		GoTypes:           file_objects_proto_goTypes,
 		DependencyIndexes: file_objects_proto_depIdxs,
@@ -547,8 +547,13 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type PlayerClient interface {
-	SendUpdate(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error)
+	ReceiveMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error)
 	UpdateCellMaster(ctx context.Context, in *NewCellMaster, opts ...grpc.CallOption) (*EmptyReply, error)
+	RequestObjectMutation(ctx context.Context, in *SingleObject, opts ...grpc.CallOption) (*EmptyReply, error)
+	RequestMutatingObjects(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error)
+	BroadcastMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error)
+	GetCellState(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error)
+	IsAlive(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error)
 }
 
 type playerClient struct {
@@ -559,9 +564,9 @@ func NewPlayerClient(cc grpc.ClientConnInterface) PlayerClient {
 	return &playerClient{cc}
 }
 
-func (c *playerClient) SendUpdate(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error) {
+func (c *playerClient) ReceiveMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error) {
 	out := new(EmptyReply)
-	err := c.cc.Invoke(ctx, "/objects.Player/SendUpdate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/objects.Player/ReceiveMutatedObjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -577,41 +582,106 @@ func (c *playerClient) UpdateCellMaster(ctx context.Context, in *NewCellMaster, 
 	return out, nil
 }
 
+func (c *playerClient) RequestObjectMutation(ctx context.Context, in *SingleObject, opts ...grpc.CallOption) (*EmptyReply, error) {
+	out := new(EmptyReply)
+	err := c.cc.Invoke(ctx, "/objects.Player/RequestObjectMutation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) RequestMutatingObjects(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error) {
+	out := new(MultipleObjects)
+	err := c.cc.Invoke(ctx, "/objects.Player/RequestMutatingObjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) BroadcastMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error) {
+	out := new(EmptyReply)
+	err := c.cc.Invoke(ctx, "/objects.Player/BroadcastMutatedObjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetCellState(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error) {
+	out := new(MultipleObjects)
+	err := c.cc.Invoke(ctx, "/objects.Player/GetCellState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) IsAlive(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error) {
+	out := new(EmptyReply)
+	err := c.cc.Invoke(ctx, "/objects.Player/IsAlive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlayerServer is the server API for Player service.
 type PlayerServer interface {
-	SendUpdate(context.Context, *MultipleObjects) (*EmptyReply, error)
+	ReceiveMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error)
 	UpdateCellMaster(context.Context, *NewCellMaster) (*EmptyReply, error)
+	RequestObjectMutation(context.Context, *SingleObject) (*EmptyReply, error)
+	RequestMutatingObjects(context.Context, *Cell) (*MultipleObjects, error)
+	BroadcastMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error)
+	GetCellState(context.Context, *Cell) (*MultipleObjects, error)
+	IsAlive(context.Context, *EmptyRequest) (*EmptyReply, error)
 }
 
 // UnimplementedPlayerServer can be embedded to have forward compatible implementations.
 type UnimplementedPlayerServer struct {
 }
 
-func (*UnimplementedPlayerServer) SendUpdate(context.Context, *MultipleObjects) (*EmptyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendUpdate not implemented")
+func (*UnimplementedPlayerServer) ReceiveMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReceiveMutatedObjects not implemented")
 }
 func (*UnimplementedPlayerServer) UpdateCellMaster(context.Context, *NewCellMaster) (*EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCellMaster not implemented")
+}
+func (*UnimplementedPlayerServer) RequestObjectMutation(context.Context, *SingleObject) (*EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestObjectMutation not implemented")
+}
+func (*UnimplementedPlayerServer) RequestMutatingObjects(context.Context, *Cell) (*MultipleObjects, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestMutatingObjects not implemented")
+}
+func (*UnimplementedPlayerServer) BroadcastMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BroadcastMutatedObjects not implemented")
+}
+func (*UnimplementedPlayerServer) GetCellState(context.Context, *Cell) (*MultipleObjects, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCellState not implemented")
+}
+func (*UnimplementedPlayerServer) IsAlive(context.Context, *EmptyRequest) (*EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsAlive not implemented")
 }
 
 func RegisterPlayerServer(s *grpc.Server, srv PlayerServer) {
 	s.RegisterService(&_Player_serviceDesc, srv)
 }
 
-func _Player_SendUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_ReceiveMutatedObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MultipleObjects)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlayerServer).SendUpdate(ctx, in)
+		return srv.(PlayerServer).ReceiveMutatedObjects(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.Player/SendUpdate",
+		FullMethod: "/objects.Player/ReceiveMutatedObjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).SendUpdate(ctx, req.(*MultipleObjects))
+		return srv.(PlayerServer).ReceiveMutatedObjects(ctx, req.(*MultipleObjects))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -634,233 +704,127 @@ func _Player_UpdateCellMaster_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Player_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "objects.Player",
-	HandlerType: (*PlayerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SendUpdate",
-			Handler:    _Player_SendUpdate_Handler,
-		},
-		{
-			MethodName: "UpdateCellMaster",
-			Handler:    _Player_UpdateCellMaster_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "objects.proto",
-}
-
-// CellMasterClient is the client API for CellMaster service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type CellMasterClient interface {
-	SendUpdate(ctx context.Context, in *SingleObject, opts ...grpc.CallOption) (*EmptyReply, error)
-	RequestMutatingObjects(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error)
-	BroadcastMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error)
-	GetCellState(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error)
-	IsAlive(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error)
-}
-
-type cellMasterClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewCellMasterClient(cc grpc.ClientConnInterface) CellMasterClient {
-	return &cellMasterClient{cc}
-}
-
-func (c *cellMasterClient) SendUpdate(ctx context.Context, in *SingleObject, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
-	err := c.cc.Invoke(ctx, "/objects.CellMaster/SendUpdate", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cellMasterClient) RequestMutatingObjects(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error) {
-	out := new(MultipleObjects)
-	err := c.cc.Invoke(ctx, "/objects.CellMaster/RequestMutatingObjects", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cellMasterClient) BroadcastMutatedObjects(ctx context.Context, in *MultipleObjects, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
-	err := c.cc.Invoke(ctx, "/objects.CellMaster/BroadcastMutatedObjects", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cellMasterClient) GetCellState(ctx context.Context, in *Cell, opts ...grpc.CallOption) (*MultipleObjects, error) {
-	out := new(MultipleObjects)
-	err := c.cc.Invoke(ctx, "/objects.CellMaster/GetCellState", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *cellMasterClient) IsAlive(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
-	err := c.cc.Invoke(ctx, "/objects.CellMaster/IsAlive", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// CellMasterServer is the server API for CellMaster service.
-type CellMasterServer interface {
-	SendUpdate(context.Context, *SingleObject) (*EmptyReply, error)
-	RequestMutatingObjects(context.Context, *Cell) (*MultipleObjects, error)
-	BroadcastMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error)
-	GetCellState(context.Context, *Cell) (*MultipleObjects, error)
-	IsAlive(context.Context, *EmptyRequest) (*EmptyReply, error)
-}
-
-// UnimplementedCellMasterServer can be embedded to have forward compatible implementations.
-type UnimplementedCellMasterServer struct {
-}
-
-func (*UnimplementedCellMasterServer) SendUpdate(context.Context, *SingleObject) (*EmptyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendUpdate not implemented")
-}
-func (*UnimplementedCellMasterServer) RequestMutatingObjects(context.Context, *Cell) (*MultipleObjects, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RequestMutatingObjects not implemented")
-}
-func (*UnimplementedCellMasterServer) BroadcastMutatedObjects(context.Context, *MultipleObjects) (*EmptyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BroadcastMutatedObjects not implemented")
-}
-func (*UnimplementedCellMasterServer) GetCellState(context.Context, *Cell) (*MultipleObjects, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCellState not implemented")
-}
-func (*UnimplementedCellMasterServer) IsAlive(context.Context, *EmptyRequest) (*EmptyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IsAlive not implemented")
-}
-
-func RegisterCellMasterServer(s *grpc.Server, srv CellMasterServer) {
-	s.RegisterService(&_CellMaster_serviceDesc, srv)
-}
-
-func _CellMaster_SendUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_RequestObjectMutation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SingleObject)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CellMasterServer).SendUpdate(ctx, in)
+		return srv.(PlayerServer).RequestObjectMutation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.CellMaster/SendUpdate",
+		FullMethod: "/objects.Player/RequestObjectMutation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CellMasterServer).SendUpdate(ctx, req.(*SingleObject))
+		return srv.(PlayerServer).RequestObjectMutation(ctx, req.(*SingleObject))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellMaster_RequestMutatingObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_RequestMutatingObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Cell)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CellMasterServer).RequestMutatingObjects(ctx, in)
+		return srv.(PlayerServer).RequestMutatingObjects(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.CellMaster/RequestMutatingObjects",
+		FullMethod: "/objects.Player/RequestMutatingObjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CellMasterServer).RequestMutatingObjects(ctx, req.(*Cell))
+		return srv.(PlayerServer).RequestMutatingObjects(ctx, req.(*Cell))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellMaster_BroadcastMutatedObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_BroadcastMutatedObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MultipleObjects)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CellMasterServer).BroadcastMutatedObjects(ctx, in)
+		return srv.(PlayerServer).BroadcastMutatedObjects(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.CellMaster/BroadcastMutatedObjects",
+		FullMethod: "/objects.Player/BroadcastMutatedObjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CellMasterServer).BroadcastMutatedObjects(ctx, req.(*MultipleObjects))
+		return srv.(PlayerServer).BroadcastMutatedObjects(ctx, req.(*MultipleObjects))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellMaster_GetCellState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_GetCellState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Cell)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CellMasterServer).GetCellState(ctx, in)
+		return srv.(PlayerServer).GetCellState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.CellMaster/GetCellState",
+		FullMethod: "/objects.Player/GetCellState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CellMasterServer).GetCellState(ctx, req.(*Cell))
+		return srv.(PlayerServer).GetCellState(ctx, req.(*Cell))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CellMaster_IsAlive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Player_IsAlive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CellMasterServer).IsAlive(ctx, in)
+		return srv.(PlayerServer).IsAlive(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/objects.CellMaster/IsAlive",
+		FullMethod: "/objects.Player/IsAlive",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CellMasterServer).IsAlive(ctx, req.(*EmptyRequest))
+		return srv.(PlayerServer).IsAlive(ctx, req.(*EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _CellMaster_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "objects.CellMaster",
-	HandlerType: (*CellMasterServer)(nil),
+var _Player_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "objects.Player",
+	HandlerType: (*PlayerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendUpdate",
-			Handler:    _CellMaster_SendUpdate_Handler,
+			MethodName: "ReceiveMutatedObjects",
+			Handler:    _Player_ReceiveMutatedObjects_Handler,
+		},
+		{
+			MethodName: "UpdateCellMaster",
+			Handler:    _Player_UpdateCellMaster_Handler,
+		},
+		{
+			MethodName: "RequestObjectMutation",
+			Handler:    _Player_RequestObjectMutation_Handler,
 		},
 		{
 			MethodName: "RequestMutatingObjects",
-			Handler:    _CellMaster_RequestMutatingObjects_Handler,
+			Handler:    _Player_RequestMutatingObjects_Handler,
 		},
 		{
 			MethodName: "BroadcastMutatedObjects",
-			Handler:    _CellMaster_BroadcastMutatedObjects_Handler,
+			Handler:    _Player_BroadcastMutatedObjects_Handler,
 		},
 		{
 			MethodName: "GetCellState",
-			Handler:    _CellMaster_GetCellState_Handler,
+			Handler:    _Player_GetCellState_Handler,
 		},
 		{
 			MethodName: "IsAlive",
-			Handler:    _CellMaster_IsAlive_Handler,
+			Handler:    _Player_IsAlive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -3,12 +3,9 @@ syntax = "proto3";
 package objects;
 
 service Player {
-    rpc SendUpdate (MultipleObjects) returns (EmptyReply) {}
+    rpc ReceiveMutatedObjects (MultipleObjects) returns (EmptyReply) {}
     rpc UpdateCellMaster (NewCellMaster) returns (EmptyReply) {}
-}
-
-service CellMaster {
-    rpc SendUpdate (SingleObject) returns (EmptyReply) {}
+    rpc RequestObjectMutation (SingleObject) returns (EmptyReply) {}
     rpc RequestMutatingObjects (Cell) returns (MultipleObjects) {}
     rpc BroadcastMutatedObjects (MultipleObjects) returns (EmptyReply) {}
     rpc GetCellState (Cell) returns (MultipleObjects) {}

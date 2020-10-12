@@ -20,6 +20,7 @@
 package main
 
 import (
+	"github.com/Frans-Lukas/checkerboard/cmd/constants"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	"google.golang.org/grpc"
@@ -27,12 +28,8 @@ import (
 	"net"
 )
 
-const (
-	port = ":50051"
-)
-
 func main() {
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", constants.CellManagerPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -43,4 +40,8 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func AFunFunctionForA() {
+
 }

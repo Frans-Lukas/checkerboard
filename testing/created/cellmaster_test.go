@@ -32,9 +32,9 @@ func TestRequestMutatingObjects(t *testing.T) {
 	cellID1Object := createSingleObject("key", "value", "key2", "cellId1")
 	cellID2Object := createSingleObject("key2", "value2", "key2", "cellId2")
 	cellID1Object2 := createSingleObject("key1", "value1", "key3", "cellId1")
-	cm.AppendObjectToUpdate(cellID1Object)
-	cm.AppendObjectToUpdate(cellID1Object2)
-	cm.AppendObjectToUpdate(cellID2Object)
+	cm.AppendMutatingObject(cellID1Object)
+	cm.AppendMutatingObject(cellID1Object2)
+	cm.AppendMutatingObject(cellID2Object)
 
 	cellId := generated.Cell{CellId: "cellId1"}
 	mutatingObjects, err := cm.RequestMutatingObjects(context.Background(), &cellId)

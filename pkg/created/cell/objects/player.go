@@ -60,12 +60,13 @@ func (player *Player) ReceiveMutatedObjects(
 	return &generated.EmptyReply{}, nil
 }
 
-func (cm *Player) AppendObjectToUpdate(object generated.SingleObject) {
+func (cm *Player) AppendMutatingObject(object generated.SingleObject) {
 	*cm.MutatingObjects = append(*cm.MutatingObjects, object)
 }
 
-func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject, ) (*generated.EmptyReply, error) {
-	cm.AppendObjectToUpdate(*in)
+func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject) (*generated.EmptyReply, error) {
+	println("Received object mutation request for type: ", in.ObjectType)
+	cm.AppendMutatingObject(*in)
 	return &generated.EmptyReply{}, nil
 }
 

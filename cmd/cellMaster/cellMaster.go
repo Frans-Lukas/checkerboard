@@ -45,5 +45,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	c.SetWorldSize(ctx, &NS.WorldSize{Height: 5, Width: 5})
-	c.AddPlayerToCell()
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: "localhost", Port: port, PosY: 0, PosX: 0})
 }

@@ -392,3 +392,43 @@ func TestRequestCellMaster(t *testing.T) {
 		fatalFail(errors.New("returned wrong Port"))
 	}
 }
+
+func TestRequestCellMasterSelectsNewCellMaster(t *testing.T) {
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
+	mainCell := cell.NewCell("testId2")
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.NewCell("testId1"))
+	cm.AppendCell(mainCell)
+	(*cm.Cells)[1].Players = append((*cm.Cells)[1].Players, cellMaster)
+
+	request := generated.CellMasterRequest{CellId: "testId2"}
+	reply, err := cm.RequestCellMaster(context.Background(), &request)
+	failIfNotNull(err, "Error")
+	if reply.Ip == "" {
+		fatalFail(errors.New("returned empty cellMaster"))
+	}
+	if reply.Ip != "randomIp" {
+		fatalFail(errors.New("returned wrong Ip"))
+	}
+	if reply.Port != 1337 {
+		fatalFail(errors.New("returned wrong Port"))
+	}
+}
+
+func TestRequestCellMasterFailsOnEmptyCell(t *testing.T) {
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
+	mainCell := cell.NewCell("testId2")
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(cell.NewCell("testId1"))
+	cm.AppendCell(mainCell)
+	(*cm.Cells)[0].Players = append((*cm.Cells)[0].Players, cellMaster)
+
+	request := generated.CellMasterRequest{CellId: "testId2"}
+	_, err := cm.RequestCellMaster(context.Background(), &request)
+	if err != nil {
+		return
+	}
+	fatalFail(errors.New("should have failed"))
+}

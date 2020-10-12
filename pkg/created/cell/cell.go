@@ -15,12 +15,31 @@ type Cell struct {
 	Lockee     string
 }
 
+func NewCell(cellID string) Cell {
+	return Cell{
+		CellId:  cellID,
+		Players: make([]objects.Client, 0),
+	}
+}
+
 func (cell *Cell) AppendPlayer(player objects.Client) {
 	cell.Players = append(cell.Players, player)
 }
 func (cell *Cell) CollidesWith(in *generated.PlayerInCellRequestWithPositions) bool {
 	return cell.PosX <= in.PosX && cell.PosX+cell.Width >= in.PosX &&
 		cell.PosY <= in.PosY && cell.PosY+cell.Height >= in.PosY
+}
+
+func (cell *Cell) SelectNewCellMaster() int {
+	bestTrustLevel := uint32(0)
+	cmIndex := -1
+	for index, player := range cell.Players {
+		if player.TrustLevel >= bestTrustLevel {
+			bestTrustLevel = player.TrustLevel
+			cmIndex = index
+		}
+	}
+	return cmIndex
 }
 
 func (cell *Cell) DeletePlayer(playerToRemove objects.Client) {

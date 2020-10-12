@@ -138,12 +138,22 @@ func (cellManager *CellManager) RequestCellMaster(
 	ctx context.Context, in *generated.CellMasterRequest,
 ) (*generated.CellMasterReply, error) {
 
-	for _, cell := range *cellManager.Cells {
+	for cellIndex, cell := range *cellManager.Cells {
 		if in.CellId == cell.CellId {
-			if cell.CellMaster != nil {
-				return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
+			if cell.CellMaster == nil {
+				cmIndex := cell.SelectNewCellMaster()
+
+				if cmIndex == -1 {
+					return &generated.CellMasterReply{Ip: "", Port: -1}, errors.New("empty cell requested a cell master")
+				}
+
+				newCM := cell.Players[cmIndex]
+
+				(*cellManager.Cells)[cellIndex].CellMaster = &newCM
+
+				return &generated.CellMasterReply{Ip: newCM.Ip, Port: newCM.Port}, nil
 			} else {
-				return &generated.CellMasterReply{Ip: "", Port: -1}, nil
+				return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
 			}
 		}
 	}

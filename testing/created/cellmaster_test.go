@@ -6,6 +6,7 @@ import (
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"google.golang.org/grpc"
+	"log"
 	"testing"
 )
 
@@ -25,6 +26,16 @@ func TestSendUpdate(t *testing.T) {
 		return
 	}
 	fatalFail(errors.New("object to update was not added to list"))
+}
+
+func TestReceiveCellMasterShip(t *testing.T) {
+	cm := objects.NewPlayer()
+	cl := generated.CellList{Cells: []*generated.Cell{{CellId: "cellid", PosY: 1, PosX: 1, Width: 1, Height: 1}}}
+	cm.ReceiveCellMastership(context.Background(), &cl)
+	if _, ok := (*cm.Cells)["cellid"]; ok {
+		return
+	}
+	log.Fatalf("receive cell mastership does not work. ")
 }
 
 func TestRequestMutatingObjects(t *testing.T) {

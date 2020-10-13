@@ -109,7 +109,7 @@ func main() {
 		log.Fatalf("No cell master :(")
 	}
 
-	conn2, err2 := grpc.Dial(objects.ToAddress(*cm), grpc.WithInsecure(), grpc.WithBlock())
+	conn2, err2 := grpc.Dial(objects.CMToAddress(*cm), grpc.WithInsecure(), grpc.WithBlock())
 	defer conn2.Close()
 	if err2 != nil {
 		log.Fatalf("did not connect: %v", err2)

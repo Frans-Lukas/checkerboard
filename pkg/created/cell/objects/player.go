@@ -21,12 +21,12 @@ type Player struct {
 	MutatedObjects    map[string]map[string]string
 	MutatingObjects   *[]generated.SingleObject
 	SubscribedPlayers *map[string][]generated.PlayerClient
-	Cells             *[]Cell
+	Cells             *map[string]Cell
 }
 
 func NewPlayer() Player {
 	emptyObjectList := make([]generated.SingleObject, 0)
-	cells := make([]Cell, 0)
+	cells := make(map[string]Cell, 0)
 	emptyPlayerMap := make(map[string][]generated.PlayerClient, 0)
 	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList, Cells: &cells}
 }
@@ -64,6 +64,17 @@ func (player *Player) ReceiveMutatedObjects(
 
 func (cm *Player) AppendMutatingObject(object generated.SingleObject) {
 	*cm.MutatingObjects = append(*cm.MutatingObjects, object)
+}
+
+func (cm *Player) ReceiveCellMastership(ctx context.Context, in *generated.CellList) (*generated.EmptyReply, error) {
+	for _, cell := range in.Cells {
+		if _, ok := (*cm.Cells)[cell.CellId]; ok {
+			// cm is already aware of mastership over cell
+		} else {
+			(*cm.Cells)[cell.CellId] = Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
+		}
+	}
+	return &generated.EmptyReply{}, nil
 }
 
 func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject) (*generated.EmptyReply, error) {

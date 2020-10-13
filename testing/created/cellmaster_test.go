@@ -149,3 +149,36 @@ func TestIsAlive(t *testing.T) {
 
 	failIfNotNull(err, "isAlive failed")
 }
+
+func TestRequestObjectMutationSetToCorrectCellId(t *testing.T) {
+	cm := objects.NewPlayer()
+	cell := objects.NewCell("testCell")
+	cell.PosX = 0
+	cell.PosY = 0
+	cell.Height = 100
+	cell.Width = 100
+	*cm.Cells = append(*cm.Cells, cell)
+
+	_, err := cm.RequestObjectMutation(context.Background(), &generated.SingleObject{ObjectId: "test", PosX: 50, PosY: 50})
+	failIfNotNull(err, "Failed RequestObjectMutation")
+
+	if (*cm.MutatingObjects)[0].CellId != "testCell" {
+		fatalFail(errors.New("mutating object set to wrong id"))
+	}
+}
+
+//TODO figure out what to do with mutations outside of cellmaster cell
+/*func TestRequestObjectMutationOutsideOfCell(t *testing.T) {
+	cm := objects.NewPlayer()
+	cell := objects.NewCell("testCell")
+	cell.PosX = 0
+	cell.PosY = 0
+	cell.Height = 100
+	cell.Width = 100
+	*cm.Cells = append(*cm.Cells, cell)
+
+	_, err := cm.RequestObjectMutation(context.Background(), &generated.SingleObject{ObjectId: "test", PosX: 150, PosY: 50})
+	failIfNotNull(err, "Failed RequestObjectMutation")
+
+	//TODO figure out what it should return
+}*/

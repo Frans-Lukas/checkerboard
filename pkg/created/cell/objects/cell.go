@@ -1,12 +1,13 @@
-package cell
+package objects
 
-import "github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
-import generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+import (
+	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+)
 
 type Cell struct {
 	CellId     string
-	Players    []objects.Client
-	CellMaster *objects.Client
+	Players    []Client
+	CellMaster *Client
 	PosX       int64
 	PosY       int64
 	Width      int64
@@ -18,11 +19,11 @@ type Cell struct {
 func NewCell(cellID string) Cell {
 	return Cell{
 		CellId:  cellID,
-		Players: make([]objects.Client, 0),
+		Players: make([]Client, 0),
 	}
 }
 
-func (cell *Cell) AppendPlayer(player objects.Client) {
+func (cell *Cell) AppendPlayer(player Client) {
 	cell.Players = append(cell.Players, player)
 }
 func (cell *Cell) CollidesWith(in *generated.Position) bool {
@@ -42,7 +43,7 @@ func (cell *Cell) SelectNewCellMaster() int {
 	return cmIndex
 }
 
-func (cell *Cell) DeletePlayer(playerToRemove objects.Client) {
+func (cell *Cell) DeletePlayer(playerToRemove Client) {
 	for index, player := range cell.Players {
 		if player.Ip == playerToRemove.Ip && player.Port == playerToRemove.Port {
 			cell.Players[index] = cell.Players[len(cell.Players)-1]

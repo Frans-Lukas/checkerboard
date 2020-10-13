@@ -12,12 +12,12 @@ import (
 func createSingleObject(propertyKey string, newValue string, id string, cellId string) generated.SingleObject {
 	objIds := []string{propertyKey}
 	newValues := []string{newValue}
-	return generated.SingleObject{ObjectId: id, UpdateKey: objIds, NewValue: newValues, CellId: cellId}
+	return generated.SingleObject{ObjectId: id, UpdateKey: objIds, NewValue: newValues, CellId: cellId, PosY: 0, PosX: 0}
 }
 
 func TestSendUpdate(t *testing.T) {
 	cm := objects.NewPlayer()
-	obj := createSingleObject("key", "value", "key2", "cellId")
+	obj := createSingleObject("key", "value", "key2", "cellId", )
 	_, err := cm.RequestObjectMutation(context.Background(), &obj)
 
 	failIfNotNull(err, "could not update cellmaster")

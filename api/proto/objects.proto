@@ -8,12 +8,18 @@ service Player {
     rpc RequestObjectMutation (SingleObject) returns (EmptyReply) {}
     rpc RequestMutatingObjects (Cell) returns (MultipleObjects) {}
     rpc BroadcastMutatedObjects (MultipleObjects) returns (EmptyReply) {}
+
+    rpc ReceiveCellMastership (CellList) returns (EmptyReply) {}
+
     rpc GetCellState (Cell) returns (MultipleObjects) {}
     rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
 }
 
 message MultipleObjects {
     repeated SingleObject objects = 1;
+}
+message CellList {
+    repeated Cell cells = 1;
 }
 
 
@@ -22,7 +28,9 @@ message SingleObject {
     string objectId = 2;
     repeated string updateKey = 3;
     repeated string newValue = 4;
-    string objectType = 5;
+    int64 posX = 5;
+    int64 posY = 6;
+    string objectType = 7;
 }
 
 message NewCellMaster {
@@ -32,6 +40,11 @@ message NewCellMaster {
 
 message Cell {
     string cellId = 1;
+    int64 posX = 2;
+    int64 posY = 3;
+    int64 width = 4;
+    int64 height = 5;
+
 }
 
 

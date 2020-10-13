@@ -3,7 +3,6 @@ package created
 import (
 	"context"
 	"errors"
-	"github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
@@ -38,7 +37,7 @@ func TestDeleteCell(t *testing.T) {
 
 func TestUnregisterCellMaster(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
 	(*cm.Cells)[0].CellMaster = &objects.Client{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "testId1"},
@@ -53,7 +52,7 @@ func TestUnregisterCellMaster(t *testing.T) {
 
 func TestUnregisterCellMasterReturnsOnFail(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
 	(*cm.Cells)[0].CellMaster = &objects.Client{Ip: "testIp", Port: 1337, TrustLevel: 0}
 	status, err := cm.UnregisterCellMaster(
 		context.Background(), &generated.CellMasterRequest{CellId: "invalidId"},
@@ -77,8 +76,8 @@ func TestCreateCellCreatesEmptyPlayerList(t *testing.T) {
 
 func TestListCells(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	cm.AppendCell(cell.Cell{CellId: "testId2"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId2"})
 	cellList, err := cm.ListCells(context.Background(), &generated.ListCellsRequest{})
 	failIfNotNull(err, "could not list cells")
 	testId1Exists := false
@@ -98,7 +97,7 @@ func TestListCells(t *testing.T) {
 
 func TestListPlayersInCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
 	(*cm.Cells)[0].AppendPlayer(objects.Client{Ip: testIp, Port: 1337})
 	playerList, err := cm.ListPlayersInCell(
@@ -116,7 +115,7 @@ func TestListPlayersInCell(t *testing.T) {
 
 func TestAddPlayerToCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
@@ -132,7 +131,7 @@ func TestAddPlayerToCell(t *testing.T) {
 
 func TestAddPlayerToCellWithPositionsBoundary(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCellWithPositions(
 		context.Background(),
@@ -148,7 +147,7 @@ func TestAddPlayerToCellWithPositionsBoundary(t *testing.T) {
 
 func TestAddPlayerToCellWithPositionsCenter(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCellWithPositions(
 		context.Background(),
@@ -164,7 +163,7 @@ func TestAddPlayerToCellWithPositionsCenter(t *testing.T) {
 
 func TestAddPlayerToCellWithPositionsShouldFailOnInvalidPositions(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Players: make([]objects.Client, 0), PosY: 0, PosX: 0, Width: 100, Height: 100})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCellWithPositions(
 		context.Background(),
@@ -178,7 +177,7 @@ func TestAddPlayerToCellWithPositionsShouldFailOnInvalidPositions(t *testing.T) 
 
 func TestAddPlayerToCellThrowsIfInvalidCellId(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Players: make([]objects.Client, 0)})
 	testIp := "192.168.16.1"
 	status, err := cm.AddPlayerToCell(
 		context.Background(),
@@ -225,8 +224,8 @@ func TestSetWorldSizeFailsIfACellExists(t *testing.T) {
 
 func TestPlayerLeftCell(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId2"})
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId2"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
 	testIp := "192.168.16.1"
 	testIp2 := "192.168.16.2"
 	(*cm.Cells)[1].AppendPlayer(objects.Client{Ip: testIp, Port: 1337})
@@ -252,9 +251,9 @@ func TestPlayerLeftCell(t *testing.T) {
 
 func TestLockCells(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	cm.AppendCell(cell.Cell{CellId: "testId2"})
-	cm.AppendCell(cell.Cell{CellId: "testId3"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId2"})
+	cm.AppendCell(objects.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
 	request := generated.LockCellsRequest{CellId: ids, SenderCellId: "tester"}
@@ -281,9 +280,9 @@ func TestLockCells(t *testing.T) {
 
 func TestCannotLockWhenACellIsLocked(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
-	cm.AppendCell(cell.Cell{CellId: "testId2", Locked: true})
-	cm.AppendCell(cell.Cell{CellId: "testId3"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId2", Locked: true})
+	cm.AppendCell(objects.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
 	request := generated.LockCellsRequest{CellId: ids, SenderCellId: "tester"}
@@ -304,9 +303,9 @@ func TestCannotLockWhenACellIsLocked(t *testing.T) {
 
 func TestUnlockCells(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
-	cm.AppendCell(cell.Cell{CellId: "testId2", Locked: true})
-	cm.AppendCell(cell.Cell{CellId: "testId3"})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Locked: true})
+	cm.AppendCell(objects.Cell{CellId: "testId2", Locked: true})
+	cm.AppendCell(objects.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
 	request := generated.LockCellsRequest{CellId: ids}
@@ -327,9 +326,9 @@ func TestUnlockCells(t *testing.T) {
 
 func TestCannotUnlockWhenACellIsNotLocked(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true})
-	cm.AppendCell(cell.Cell{CellId: "testId2"})
-	cm.AppendCell(cell.Cell{CellId: "testId3"})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Locked: true})
+	cm.AppendCell(objects.Cell{CellId: "testId2"})
+	cm.AppendCell(objects.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
 	request := generated.LockCellsRequest{CellId: ids}
@@ -350,9 +349,9 @@ func TestCannotUnlockWhenACellIsNotLocked(t *testing.T) {
 
 func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1", Locked: true, Lockee: "tester"})
-	cm.AppendCell(cell.Cell{CellId: "testId2", Locked: true, Lockee: "hacker"})
-	cm.AppendCell(cell.Cell{CellId: "testId3"})
+	cm.AppendCell(objects.Cell{CellId: "testId1", Locked: true, Lockee: "tester"})
+	cm.AppendCell(objects.Cell{CellId: "testId2", Locked: true, Lockee: "hacker"})
+	cm.AppendCell(objects.Cell{CellId: "testId3"})
 
 	ids := []string{"testId1", "testId2"}
 	request := generated.LockCellsRequest{CellId: ids}
@@ -373,10 +372,10 @@ func TestCannotUnlockWhenACellIsLockedBySomeoneElse(t *testing.T) {
 
 func TestRequestCellMaster(t *testing.T) {
 	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
-	mainCell := cell.Cell{CellId: "testId2", CellMaster: &cellMaster}
+	mainCell := objects.Cell{CellId: "testId2", CellMaster: &cellMaster}
 
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.Cell{CellId: "testId1"})
+	cm.AppendCell(objects.Cell{CellId: "testId1"})
 	cm.AppendCell(mainCell)
 
 	request := generated.CellMasterRequest{CellId: "testId2"}
@@ -395,10 +394,10 @@ func TestRequestCellMaster(t *testing.T) {
 
 func TestRequestCellMasterSelectsNewCellMaster(t *testing.T) {
 	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
-	mainCell := cell.NewCell("testId2")
+	mainCell := objects.NewCell("testId2")
 
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.NewCell("testId1"))
+	cm.AppendCell(objects.NewCell("testId1"))
 	cm.AppendCell(mainCell)
 	(*cm.Cells)[1].Players = append((*cm.Cells)[1].Players, cellMaster)
 
@@ -418,10 +417,10 @@ func TestRequestCellMasterSelectsNewCellMaster(t *testing.T) {
 
 func TestRequestCellMasterFailsOnEmptyCell(t *testing.T) {
 	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
-	mainCell := cell.NewCell("testId2")
+	mainCell := objects.NewCell("testId2")
 
 	cm := cellmanager.NewCellManager()
-	cm.AppendCell(cell.NewCell("testId1"))
+	cm.AppendCell(objects.NewCell("testId1"))
 	cm.AppendCell(mainCell)
 	(*cm.Cells)[0].Players = append((*cm.Cells)[0].Players, cellMaster)
 
@@ -435,7 +434,7 @@ func TestRequestCellMasterFailsOnEmptyCell(t *testing.T) {
 
 func TestRequestCellMasterWithPositions(t *testing.T) {
 	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
-	mainCell := cell.NewCell("testId2")
+	mainCell := objects.NewCell("testId2")
 	mainCell.PosX = 0
 	mainCell.PosY = 0
 	mainCell.Width = 100
@@ -461,7 +460,7 @@ func TestRequestCellMasterWithPositions(t *testing.T) {
 
 func TestRequestCellMasterWithPositionsFailsIfOutOfBounds(t *testing.T) {
 	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
-	mainCell := cell.NewCell("testId2")
+	mainCell := objects.NewCell("testId2")
 	mainCell.PosX = 0
 	mainCell.PosY = 0
 	mainCell.Width = 100

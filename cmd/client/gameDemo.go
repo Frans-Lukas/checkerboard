@@ -43,8 +43,8 @@ const posXKey = "posX"
 const posYKey = "posY"
 
 type Player struct {
-	posX     int
-	posY     int
+	posX     int64
+	posY     int64
 	objectId string
 }
 
@@ -58,22 +58,12 @@ var player = PlayerConstructor(0, 0)
 
 const PlayerObjectType = "player"
 
-func PlayerConstructor(posX int, posY int) Player {
+func PlayerConstructor(posX int64, posY int64) Player {
 	return Player{posX: posX, posY: posY, objectId: fmt.Sprint(time.Now().UnixNano())}
 }
 
 func main() {
 	// Set up a connection to the server.\
-
-	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := NS.NewCellManagerClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
 
 	port, err := strconv.Atoi(os.Args[2])
 
@@ -99,6 +89,16 @@ func main() {
 		updateWorld(&cellMaster)
 	}()
 
+	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := NS.NewCellManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
 	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
 
 	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: 0, PosY: 0})
@@ -115,7 +115,7 @@ func main() {
 		log.Fatalf("did not connect: %v", err2)
 	}
 
-	cmConn := OBJ.NewPlayerClient(conn)
+	cmConn := OBJ.NewPlayerClient(conn2)
 	gameLoop(cmConn)
 }
 
@@ -133,7 +133,17 @@ func gameLoop(cm OBJ.PlayerClient) {
 		//TODO check so that defer is not needed
 		//defer cancel()
 		println("sending object mutation request")
-		cm.RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, UpdateKey: []string{posXKey, posYKey}, NewValue: []string{fmt.Sprint(player.posX), fmt.Sprint(player.posY)}})
+
+		_, err2 := cm.IsAlive(ctx, &OBJ.EmptyRequest{})
+		if err2 != nil {
+			log.Fatalf("isAlive: " + err2.Error())
+		}
+
+		val, err := cm.RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, PosX: int64(player.posX), PosY: int64(player.posY)})
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+		println(val)
 
 		printMap()
 	}
@@ -155,13 +165,13 @@ func printMap() {
 	const MAP_SIZE = 5
 	for row := 0; row < MAP_SIZE; row++ {
 		for column := 0; column < MAP_SIZE; column++ {
-			printPosition(row, column)
+			printPosition(int64(row), int64(column))
 		}
 		print("\n")
 	}
 }
 
-func printPosition(row int, column int) {
+func printPosition(row int64, column int64) {
 	printedPlayer := false
 	if row == player.posY && column == player.posX {
 		print("P ")
@@ -182,11 +192,8 @@ func printPosition(row int, column int) {
 
 func (c *PlayerServer) SendUpdate(ctx context.Context, in *OBJ.MultipleObjects, opts ...grpc.CallOption) (*OBJ.EmptyReply, error) {
 	for _, object := range (*in).Objects {
-		if val, ok := playerList[object.ObjectId]; ok {
-			for keyIndex, key := range object.UpdateKey {
-				updatePlayer(key, val, object, keyIndex)
-			}
-
+		if _, ok := playerList[object.ObjectId]; ok {
+			updatePlayer(object)
 		} else {
 			playerList[object.ObjectId] = PlayerFromObject(object)
 		}
@@ -197,41 +204,25 @@ func (c *PlayerServer) SendUpdate(ctx context.Context, in *OBJ.MultipleObjects, 
 
 func PlayerFromObject(object *OBJ.SingleObject) *Player {
 	player := PlayerConstructor(0, 0)
-	for keyIndex, key := range object.UpdateKey {
-		updatePlayer(key, &player, object, keyIndex)
-	}
+	updatePlayer(object)
 	player.objectId = object.ObjectId
 	return &player
 }
 
-func updatePlayer(key string, player *Player, object *OBJ.SingleObject, keyIndex int) {
-	switch key {
-	case posXKey:
-		newX, err := strconv.Atoi(object.NewValue[keyIndex])
-		if err != nil {
-			log.Fatalf("invalid posx")
-		}
-		playerList[object.ObjectId].posX = newX
-	case posYKey:
-		newY, err := strconv.Atoi(object.NewValue[keyIndex])
-		if err != nil {
-			log.Fatalf("invalid posy")
-		}
-		playerList[object.ObjectId].posY = newY
-	}
+func updatePlayer(object *OBJ.SingleObject) {
+	playerList[object.ObjectId].posX = object.PosX
+	playerList[object.ObjectId].posY = object.PosY
 }
 
 func updateWorld(player *objects.Player) {
 	// poll mutatingobjects
 	for {
+
 		objectsToCellMap := make(map[string][]*OBJ.SingleObject, 0)
 
-		objectsToMutate := make([]OBJ.SingleObject, 0)
-		copy(objectsToMutate, *player.MutatingObjects)
+		objectsToMutate := make([]OBJ.SingleObject, len(*player.MutatingObjects))
 		player.MutatingObjects = new([]OBJ.SingleObject)
-
 		for _, mutatingObject := range objectsToMutate {
-			print("Updating object of type %s", mutatingObject.ObjectType)
 			mutatedObject := performGameLogic(mutatingObject)
 
 			if objectList, ok := objectsToCellMap[mutatingObject.CellId]; ok {
@@ -277,22 +268,7 @@ func performPlayerUpdate(object OBJ.SingleObject) OBJ.SingleObject {
 
 func singleObjectToPlayer(object OBJ.SingleObject) Player {
 	playerToUpdate := PlayerConstructor(0, 0)
-
-	for keyIndex, key := range object.UpdateKey {
-		switch key {
-		case posXKey:
-			newX, err := strconv.Atoi(object.NewValue[keyIndex])
-			if err != nil {
-				log.Fatalf("invalid posx")
-			}
-			playerToUpdate.posX = newX
-		case posYKey:
-			newY, err := strconv.Atoi(object.NewValue[keyIndex])
-			if err != nil {
-				log.Fatalf("invalid posy")
-			}
-			playerToUpdate.posY = newY
-		}
-	}
+	playerToUpdate.posY = object.PosY
+	playerToUpdate.posX = object.PosX
 	return playerToUpdate
 }

@@ -3,6 +3,7 @@ package objects
 import (
 	"context"
 	"errors"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 )
 
@@ -20,13 +21,14 @@ type Player struct {
 	MutatedObjects    map[string]map[string]string
 	MutatingObjects   *[]generated.SingleObject
 	SubscribedPlayers *map[string][]generated.PlayerClient
-	Cells             *[]generated.Cell
+	Cells             *[]Cell
 }
 
 func NewPlayer() Player {
 	emptyObjectList := make([]generated.SingleObject, 0)
+	cells := make([]Cell, 0)
 	emptyPlayerMap := make(map[string][]generated.PlayerClient, 0)
-	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList}
+	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList, Cells: &cells}
 }
 
 func (player *Player) UpdateCellMaster(
@@ -66,6 +68,15 @@ func (cm *Player) AppendMutatingObject(object generated.SingleObject) {
 
 func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject) (*generated.EmptyReply, error) {
 	println("Received object mutation request for type: ", in.ObjectType)
+	// TODO: make sure overlapping objects
+	for _, cell := range *cm.Cells {
+		println("iterating cell with id ", cell.CellId)
+		if cell.CollidesWith(&cellmanager.Position{PosY: in.PosY, PosX: in.PosX}) {
+			println("object collides with cell with id ", cell.CellId)
+			in.CellId = cell.CellId
+			break
+		}
+	}
 	cm.AppendMutatingObject(*in)
 	return &generated.EmptyReply{}, nil
 }
@@ -84,8 +95,11 @@ func (cm *Player) RequestMutatingObjects(ctx context.Context, in *generated.Cell
 
 func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.MultipleObjects) (*generated.EmptyReply, error) {
 	for objectIndex, object := range (*in).Objects {
+		println("checking cell with id ", object.CellId)
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
+			println("broadcasting to cell with id ", object.CellId)
 			for _, player := range playerList {
+				println("sending updated objects to player: ", player)
 				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
 				if err != nil {
 					return nil, err

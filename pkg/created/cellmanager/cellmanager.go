@@ -3,7 +3,6 @@ package cellmanager
 import (
 	"context"
 	"errors"
-	created "github.com/Frans-Lukas/checkerboard/pkg/created/cell"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	"log"
@@ -16,18 +15,18 @@ type CellManager struct {
 	generated.CellManagerServer
 	WorldWidth  int64
 	WorldHeight int64
-	Cells       *[]created.Cell
+	Cells       *[]objects.Cell
 }
 
 func NewCellManager() CellManager {
-	cells := make([]created.Cell, 0)
+	cells := make([]objects.Cell, 0)
 	return CellManager{Cells: &cells}
 }
 
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(created.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)})
+	cellManager.AppendCell(objects.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)})
 	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
@@ -41,7 +40,7 @@ func (cellManager *CellManager) SetWorldSize(
 		return &generated.TransactionSucceeded{Succeeded: false}, nil
 	}
 
-	cellManager.AppendCell(created.Cell{
+	cellManager.AppendCell(objects.Cell{
 		CellId:  "initialCell",
 		Players: make([]objects.Client, 0),
 		PosY:    0,
@@ -167,7 +166,7 @@ func (cellManager *CellManager) RequestCellMaster(
 	return &generated.CellMasterReply{}, nil
 }
 
-func (cellManager *CellManager) selectCellMaster(cell created.Cell, cellIndex int) (*generated.CellMasterReply, error) {
+func (cellManager *CellManager) selectCellMaster(cell objects.Cell, cellIndex int) (*generated.CellMasterReply, error) {
 
 	if cell.CellMaster == nil {
 		cmIndex := cell.SelectNewCellMaster()
@@ -285,6 +284,6 @@ func (cellManager *CellManager) UnlockCells(
 	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
 }
 
-func (cellManager *CellManager) AppendCell(cell created.Cell) {
+func (cellManager *CellManager) AppendCell(cell objects.Cell) {
 	*cellManager.Cells = append(*cellManager.Cells, cell)
 }

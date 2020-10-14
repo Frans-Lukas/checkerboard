@@ -146,20 +146,24 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 	subscribedToCell := false
 	for _, cell := range *cm.Cells{
 		if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
-			if subscribers, ok := (*cm.SubscribedPlayers)[cell.CellId]; ok {
-				if _, exists := (subscribers)[in.Ip + ":" + strconv.Itoa(int(in.Port))]; !exists {
+			if _, exists := (*cm.SubscribedPlayers)[cell.CellId]; !exists {
+				(*cm.SubscribedPlayers)[cell.CellId] = map[string]*generated.PlayerClient{}
+			}
+
+			subscribers := (*cm.SubscribedPlayers)[cell.CellId]
+
+			if _, exists := (subscribers)[in.Ip + ":" + strconv.Itoa(int(in.Port))]; !exists {
 
 
-					conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
-					if err2 != nil {
-						println("did not connect to subscriber: %v", err2)
-						return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
-					}
-
-					subscriberConn := generated.NewPlayerClient(conn)
-					subscribers[in.Ip + ":" + strconv.Itoa(int(in.Port))] = &subscriberConn
-					subscribedToCell = true
+				conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
+				if err2 != nil {
+					println("did not connect to subscriber: %v", err2)
+					return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
 				}
+
+				subscriberConn := generated.NewPlayerClient(conn)
+				subscribers[in.Ip + ":" + strconv.Itoa(int(in.Port))] = &subscriberConn
+				subscribedToCell = true
 			}
 		}
 	}

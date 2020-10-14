@@ -144,7 +144,7 @@ func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*gen
 
 func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {
 	subscribedToCell := false
-	for _, cell := range *cm.Cells{
+	for _, cell := range *cm.Cells {
 		if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
 			if _, exists := (*cm.SubscribedPlayers)[cell.CellId]; !exists {
 				(*cm.SubscribedPlayers)[cell.CellId] = map[string]*generated.PlayerClient{}
@@ -153,7 +153,6 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 			subscribers := (*cm.SubscribedPlayers)[cell.CellId]
 
 			if _, exists := (subscribers)[in.Ip + ":" + strconv.Itoa(int(in.Port))]; !exists {
-
 
 				conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
 				if err2 != nil {

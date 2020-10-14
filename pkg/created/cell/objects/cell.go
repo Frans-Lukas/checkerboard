@@ -2,6 +2,7 @@ package objects
 
 import (
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 )
 
 type Cell struct {
@@ -21,6 +22,10 @@ func NewCell(cellID string) Cell {
 		CellId:  cellID,
 		Players: make([]Client, 0),
 	}
+}
+
+func (cell *Cell) ToGeneratedCell() objects.Cell{
+	return objects.Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
 }
 
 func (cell *Cell) AppendPlayer(player Client) {

@@ -2,9 +2,8 @@ package objects
 
 import (
 	"fmt"
-	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 )
 
-func CMToAddress(reply cellmanager.CellMasterReply) string {
-	return reply.Ip + ":" + fmt.Sprint(reply.Port)
+func ToAddress(ip string, port int32) string {
+	return ip + ":" + fmt.Sprint(port)
 }

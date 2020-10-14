@@ -43,13 +43,10 @@ const posXKey = "posX"
 const posYKey = "posY"
 
 type Player struct {
+	OBJ.PlayerServer
 	posX     int64
 	posY     int64
 	objectId string
-}
-
-type PlayerServer struct {
-	OBJ.PlayerClient
 }
 
 var playerList = make(map[string]*Player, 0)
@@ -102,6 +99,10 @@ func main() {
 	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
 
 	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: 0, PosY: 0})
+
+	if err != nil {
+		log.Fatalf("RequestCellMaster err: " + err.Error())
+	}
 
 	println("my cm has port: ", cm.Port)
 
@@ -190,7 +191,7 @@ func printPosition(row int64, column int64) {
 	}
 }
 
-func (c *PlayerServer) SendUpdate(ctx context.Context, in *OBJ.MultipleObjects, opts ...grpc.CallOption) (*OBJ.EmptyReply, error) {
+func (c *Player) ReceiveMutatedObjects(ctx context.Context, in *OBJ.MultipleObjects, opts ...grpc.CallOption) (*OBJ.EmptyReply, error) {
 	for _, object := range (*in).Objects {
 		if _, ok := playerList[object.ObjectId]; ok {
 			updatePlayer(object)
@@ -221,10 +222,12 @@ func updateWorld(player *objects.Player) {
 		objectsToCellMap := make(map[string][]*OBJ.SingleObject, 0)
 
 		objectsToMutate := make([]OBJ.SingleObject, len(*player.MutatingObjects))
+		copy(objectsToMutate, *player.MutatingObjects)
 		player.MutatingObjects = new([]OBJ.SingleObject)
 		for _, mutatingObject := range objectsToMutate {
+			println("mutatingObject cellId: ", mutatingObject.CellId)
 			mutatedObject := performGameLogic(mutatingObject)
-
+			println("mutated object cellId: ", mutatedObject.CellId)
 			if objectList, ok := objectsToCellMap[mutatingObject.CellId]; ok {
 				objectsToCellMap[mutatingObject.CellId] = append(objectList, &mutatedObject)
 			} else {
@@ -237,7 +240,7 @@ func updateWorld(player *objects.Player) {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			//TODO check if defer is needed
 			//defer cancel()
-			print("broadcasting objectlist")
+			println("broadcasting objectlist")
 			player.BroadcastMutatedObjects(ctx, &OBJ.MultipleObjects{Objects: objectList})
 		}
 		player.MutatingObjects = new([]OBJ.SingleObject)

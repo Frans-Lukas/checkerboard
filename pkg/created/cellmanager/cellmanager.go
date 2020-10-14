@@ -3,10 +3,14 @@ package cellmanager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+	objects2 "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
 	"log"
 	"strconv"
+	"time"
 )
 
 const requestCMWithPosPrint = true
@@ -98,11 +102,30 @@ func (cellManager *CellManager) RequestCellMasterWithPositions(
 			if err != nil {
 				log.Fatalf("could not select cell as there is no player")
 			}
+			go func() {
+				NotifyOfCellMastership(*cm, cell)
+			}()
 			//helpers.DebugPrint(requestCMWithPosPrint, fmt.Sprintf("returning cm with port: $d", cm.Port))
 			return &generated.CellMasterReply{Ip: cm.Ip, Port: cm.Port}, nil
 		}
 	}
 	return &generated.CellMasterReply{Ip: "INVALID POSITION", Port: -1}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
+}
+
+func NotifyOfCellMastership(reply generated.CellMasterReply, cell objects.Cell) {
+	address := fmt.Sprintf(reply.Ip + ":" + strconv.Itoa(int(reply.Port)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := objects2.NewPlayerClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	newCell := cell.ToGeneratedCell()
+	c.ReceiveCellMastership(ctx, &objects2.CellList{Cells: []*objects2.Cell{&newCell}})
 }
 
 func (cellManager *CellManager) DeleteCell(

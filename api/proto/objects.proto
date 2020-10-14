@@ -8,11 +8,11 @@ service Player {
     rpc RequestObjectMutation (SingleObject) returns (EmptyReply) {}
     rpc RequestMutatingObjects (Cell) returns (MultipleObjects) {}
     rpc BroadcastMutatedObjects (MultipleObjects) returns (EmptyReply) {}
-
     rpc ReceiveCellMastership (CellList) returns (EmptyReply) {}
-
     rpc GetCellState (Cell) returns (MultipleObjects) {}
     rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
+
+    rpc SubscribePlayer (PlayerInfo) returns (SubscriptionReply) {}
 }
 
 message MultipleObjects {
@@ -38,6 +38,13 @@ message NewCellMaster {
     int32 port = 2;
 }
 
+message PlayerInfo {
+    string ip = 1;
+    int32 port = 2;
+    int64 posX = 3;
+    int64 posY = 4;
+}
+
 message Cell {
     string cellId = 1;
     int64 posX = 2;
@@ -47,6 +54,9 @@ message Cell {
 
 }
 
+message SubscriptionReply {
+    bool succeeded = 1;
+}
 
 message EmptyReply { }
 message EmptyRequest { }

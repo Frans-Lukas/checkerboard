@@ -110,7 +110,7 @@ func TestBroadcastMutatedObjects(t *testing.T) {
 
 //TODO put back when cell state is implemented
 /*func TestGetCellState(t *testing.T) {
-	cm := objects.NewCellMaster()
+	cm := objects.PlayerInfo()
 
 	object1 := generated.SingleObject{CellId: "testCell", ObjectId: "object1", UpdateKey:[]string{"1objKey1", "1objKey2"}, NewValue:[]string{"1value1", "1value2"}}
 	object2 := generated.SingleObject{CellId: "testCell", ObjectId: "object2", UpdateKey:[]string{"2objKey1", "2objKey2"}, NewValue:[]string{"2value1", "2value2"}}
@@ -157,7 +157,7 @@ func TestRequestObjectMutationSetToCorrectCellId(t *testing.T) {
 	cell.PosY = 0
 	cell.Height = 100
 	cell.Width = 100
-	*cm.Cells = append(*cm.Cells, cell)
+	(*cm.Cells)["testcell"] = cell
 
 	_, err := cm.RequestObjectMutation(context.Background(), &generated.SingleObject{ObjectId: "test", PosX: 50, PosY: 50})
 	failIfNotNull(err, "Failed RequestObjectMutation")

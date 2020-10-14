@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
+	"strconv"
 )
 
 type Client struct {
@@ -20,19 +22,19 @@ type Player struct {
 	CellMaster        Client
 	MutatedObjects    map[string]map[string]string
 	MutatingObjects   *[]generated.SingleObject
-	SubscribedPlayers *map[string][]generated.PlayerClient
+	SubscribedPlayers *map[string]map[string]*generated.PlayerClient
 	Cells             *map[string]Cell
 }
 
 func NewPlayer() Player {
 	emptyObjectList := make([]generated.SingleObject, 0)
 	cells := make(map[string]Cell, 0)
-	emptyPlayerMap := make(map[string][]generated.PlayerClient, 0)
+	emptyPlayerMap := make(map[string]map[string]*generated.PlayerClient, 0)
 	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList, Cells: &cells}
 }
 
 func (player *Player) UpdateCellMaster(
-	ctx context.Context, in *generated.NewCellMaster,
+	ctx context.Context, in *generated.PlayerInfo,
 ) (*generated.EmptyReply, error) {
 	player.CellMaster = Client{Ip: in.Ip, Port: in.Port}
 	return &generated.EmptyReply{}, nil
@@ -41,6 +43,7 @@ func (player *Player) UpdateCellMaster(
 func (player *Player) ReceiveMutatedObjects(
 	ctx context.Context, in *generated.MultipleObjects,
 ) (*generated.EmptyReply, error) {
+	println("Received mutated object")
 	for _, object := range in.Objects {
 		if len(object.NewValue) != len(object.UpdateKey) {
 			return &generated.EmptyReply{}, errors.New("not as many values as keys")
@@ -63,10 +66,12 @@ func (player *Player) ReceiveMutatedObjects(
 }
 
 func (cm *Player) AppendMutatingObject(object generated.SingleObject) {
+	println("Appending object with cellid ", object.CellId)
 	*cm.MutatingObjects = append(*cm.MutatingObjects, object)
 }
 
 func (cm *Player) ReceiveCellMastership(ctx context.Context, in *generated.CellList) (*generated.EmptyReply, error) {
+	println("Received cell mastership")
 	for _, cell := range in.Cells {
 		if _, ok := (*cm.Cells)[cell.CellId]; ok {
 			// cm is already aware of mastership over cell
@@ -111,7 +116,7 @@ func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.Mul
 			println("broadcasting to cell with id ", object.CellId)
 			for _, player := range playerList {
 				println("sending updated objects to player: ", player)
-				err := cm.SendObjectUpdateToPlayer(player, ctx, (*in).Objects[objectIndex])
+				err := cm.SendObjectUpdateToPlayer(*player, ctx, (*in).Objects[objectIndex])
 				if err != nil {
 					return nil, err
 				}
@@ -123,6 +128,7 @@ func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.Mul
 }
 
 func (cm *Player) SendObjectUpdateToPlayer(player generated.PlayerClient, ctx context.Context, object *generated.SingleObject) (error) {
+	println("Sending object update to player ")
 	_, err := player.ReceiveMutatedObjects(ctx, &generated.MultipleObjects{Objects: []*generated.SingleObject{object}})
 	return err
 }
@@ -134,4 +140,32 @@ func (cm *Player) SendObjectUpdateToPlayer(player generated.PlayerClient, ctx co
 
 func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*generated.EmptyReply, error) {
 	return &generated.EmptyReply{}, nil
+}
+
+func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {
+	subscribedToCell := false
+	for _, cell := range *cm.Cells{
+		if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
+			if subscribers, ok := (*cm.SubscribedPlayers)[cell.CellId]; ok {
+				if _, exists := (subscribers)[in.Ip + ":" + strconv.Itoa(int(in.Port))]; !exists {
+
+
+					conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
+					if err2 != nil {
+						println("did not connect to subscriber: %v", err2)
+						return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
+					}
+
+					subscriberConn := generated.NewPlayerClient(conn)
+					subscribers[in.Ip + ":" + strconv.Itoa(int(in.Port))] = &subscriberConn
+					subscribedToCell = true
+				}
+			}
+		}
+	}
+	if !subscribedToCell {
+		return &generated.SubscriptionReply{Succeeded: false}, errors.New("no colliding cell")
+	} else {
+		return &generated.SubscriptionReply{Succeeded: true}, nil
+	}
 }

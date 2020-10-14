@@ -3,10 +3,12 @@ package created
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"google.golang.org/grpc"
 	"log"
+	"net"
 	"testing"
 )
 
@@ -182,3 +184,48 @@ func TestRequestObjectMutationSetToCorrectCellId(t *testing.T) {
 
 	//TODO figure out what it should return
 }*/
+
+func TestSubscribePlayerToSingleCell(t *testing.T) {
+	cm := objects.NewPlayer()
+	cell1 := objects.NewCell("cell1")
+	cell1.PosX = 0
+	cell1.PosY = 0
+	cell1.Height = 100
+	cell1.Width = 100
+	(*cm.Cells)[cell1.CellId] = cell1
+	cell2 := objects.NewCell("cell2")
+	cell2.PosX = 50
+	cell2.PosY = 0
+	cell2.Height = 100
+	cell2.Width = 100
+	(*cm.Cells)[cell2.CellId] = cell2
+
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(8888))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	playerServer := grpc.NewServer()
+	subscriber := objects.NewPlayer()
+	generated.RegisterPlayerServer(playerServer, &subscriber)
+	go func() {
+		if err := playerServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve %v", err)
+		}
+	}()
+
+	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip:"http://localhost", Port: 8888, PosX:40, PosY:40})
+	failIfNotNull(err, "Received error on subscription: " + err.Error())
+
+	if !res.Succeeded {
+		fatalFail(errors.New("succeeded == false but no error"))
+	}
+
+	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["http://localhost:8888"] ; !subscribed {
+		fatalFail(errors.New("not subscribed to cell1"))
+	}
+
+	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["http://localhost:8888"] ; subscribed {
+		fatalFail(errors.New("subscribed to cell2"))
+	}
+}

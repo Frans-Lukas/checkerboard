@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 	"testing"

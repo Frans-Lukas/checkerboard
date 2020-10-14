@@ -34,7 +34,7 @@ func NewPlayer() Player {
 }
 
 func (player *Player) UpdateCellMaster(
-	ctx context.Context, in *generated.PlayerInfo,
+	ctx context.Context, in *generated.NewCellMaster,
 ) (*generated.EmptyReply, error) {
 	player.CellMaster = Client{Ip: in.Ip, Port: in.Port}
 	return &generated.EmptyReply{}, nil

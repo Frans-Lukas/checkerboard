@@ -10,7 +10,7 @@ import (
 
 func TestUpdateCellMaster(t *testing.T) {
 	player1 := objects.NewPlayer()
-	request := generated.PlayerInfo{Ip: "localhost", Port: 1337}
+	request := generated.NewCellMaster{Ip: "localhost", Port: 1337}
 	_, err := player1.UpdateCellMaster(context.Background(), &request)
 	failIfNotNull(err, "could not update cellmaster")
 

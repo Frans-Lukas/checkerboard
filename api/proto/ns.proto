@@ -13,6 +13,8 @@ service CellManager {
 
   rpc RequestCellMasterWithPositions (Position) returns (CellMasterReply) {}
 
+  rpc DivideCell (CellRequest) returns (CellListReply) {}
+
   rpc ListPlayersInCell (ListPlayersRequest) returns (PlayersReply) {}
   rpc RequestCellMaster (CellMasterRequest) returns (CellMasterReply) {}
   rpc UnregisterCellMaster (CellMasterRequest) returns (CellMasterStatusReply) {}
@@ -21,6 +23,19 @@ service CellManager {
   rpc RequestCellSizeChange (CellChangeSizeRequest) returns (CellChangeStatusReply) {}
   rpc LockCells (LockCellsRequest) returns (CellLockStatusReply) {}
   rpc UnlockCells (LockCellsRequest) returns (CellLockStatusReply) {}
+}
+
+
+message Cell {
+    string cellId = 1;
+    int64 posX = 2;
+    int64 posY = 3;
+    int64 width = 4;
+    int64 height = 5;
+}
+
+message CellListReply {
+    repeated Cell cells = 1;
 }
 
 message TransactionSucceeded {

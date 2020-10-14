@@ -29,6 +29,132 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type Cell struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	CellId string `protobuf:"bytes,1,opt,name=cellId,proto3" json:"cellId,omitempty"`
+	PosX   int64  `protobuf:"varint,2,opt,name=posX,proto3" json:"posX,omitempty"`
+	PosY   int64  `protobuf:"varint,3,opt,name=posY,proto3" json:"posY,omitempty"`
+	Width  int64  `protobuf:"varint,4,opt,name=width,proto3" json:"width,omitempty"`
+	Height int64  `protobuf:"varint,5,opt,name=height,proto3" json:"height,omitempty"`
+}
+
+func (x *Cell) Reset() {
+	*x = Cell{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ns_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Cell) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Cell) ProtoMessage() {}
+
+func (x *Cell) ProtoReflect() protoreflect.Message {
+	mi := &file_ns_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Cell.ProtoReflect.Descriptor instead.
+func (*Cell) Descriptor() ([]byte, []int) {
+	return file_ns_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Cell) GetCellId() string {
+	if x != nil {
+		return x.CellId
+	}
+	return ""
+}
+
+func (x *Cell) GetPosX() int64 {
+	if x != nil {
+		return x.PosX
+	}
+	return 0
+}
+
+func (x *Cell) GetPosY() int64 {
+	if x != nil {
+		return x.PosY
+	}
+	return 0
+}
+
+func (x *Cell) GetWidth() int64 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *Cell) GetHeight() int64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+type CellListReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Cells []*Cell `protobuf:"bytes,1,rep,name=cells,proto3" json:"cells,omitempty"`
+}
+
+func (x *CellListReply) Reset() {
+	*x = CellListReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ns_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CellListReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CellListReply) ProtoMessage() {}
+
+func (x *CellListReply) ProtoReflect() protoreflect.Message {
+	mi := &file_ns_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CellListReply.ProtoReflect.Descriptor instead.
+func (*CellListReply) Descriptor() ([]byte, []int) {
+	return file_ns_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CellListReply) GetCells() []*Cell {
+	if x != nil {
+		return x.Cells
+	}
+	return nil
+}
+
 type TransactionSucceeded struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -40,7 +166,7 @@ type TransactionSucceeded struct {
 func (x *TransactionSucceeded) Reset() {
 	*x = TransactionSucceeded{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[0]
+		mi := &file_ns_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -53,7 +179,7 @@ func (x *TransactionSucceeded) String() string {
 func (*TransactionSucceeded) ProtoMessage() {}
 
 func (x *TransactionSucceeded) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[0]
+	mi := &file_ns_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,7 +192,7 @@ func (x *TransactionSucceeded) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransactionSucceeded.ProtoReflect.Descriptor instead.
 func (*TransactionSucceeded) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{0}
+	return file_ns_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TransactionSucceeded) GetSucceeded() bool {
@@ -87,7 +213,7 @@ type CellNeighbourRequest struct {
 func (x *CellNeighbourRequest) Reset() {
 	*x = CellNeighbourRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[1]
+		mi := &file_ns_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -100,7 +226,7 @@ func (x *CellNeighbourRequest) String() string {
 func (*CellNeighbourRequest) ProtoMessage() {}
 
 func (x *CellNeighbourRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[1]
+	mi := &file_ns_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +239,7 @@ func (x *CellNeighbourRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellNeighbourRequest.ProtoReflect.Descriptor instead.
 func (*CellNeighbourRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{1}
+	return file_ns_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CellNeighbourRequest) GetCellId() string {
@@ -136,7 +262,7 @@ type CellChangeSizeRequest struct {
 func (x *CellChangeSizeRequest) Reset() {
 	*x = CellChangeSizeRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[2]
+		mi := &file_ns_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -149,7 +275,7 @@ func (x *CellChangeSizeRequest) String() string {
 func (*CellChangeSizeRequest) ProtoMessage() {}
 
 func (x *CellChangeSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[2]
+	mi := &file_ns_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,7 +288,7 @@ func (x *CellChangeSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellChangeSizeRequest.ProtoReflect.Descriptor instead.
 func (*CellChangeSizeRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{2}
+	return file_ns_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CellChangeSizeRequest) GetCellId() string {
@@ -198,7 +324,7 @@ type WorldSize struct {
 func (x *WorldSize) Reset() {
 	*x = WorldSize{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[3]
+		mi := &file_ns_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -211,7 +337,7 @@ func (x *WorldSize) String() string {
 func (*WorldSize) ProtoMessage() {}
 
 func (x *WorldSize) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[3]
+	mi := &file_ns_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -224,7 +350,7 @@ func (x *WorldSize) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorldSize.ProtoReflect.Descriptor instead.
 func (*WorldSize) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{3}
+	return file_ns_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *WorldSize) GetHeight() int64 {
@@ -253,7 +379,7 @@ type LockCellsRequest struct {
 func (x *LockCellsRequest) Reset() {
 	*x = LockCellsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[4]
+		mi := &file_ns_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -266,7 +392,7 @@ func (x *LockCellsRequest) String() string {
 func (*LockCellsRequest) ProtoMessage() {}
 
 func (x *LockCellsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[4]
+	mi := &file_ns_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +405,7 @@ func (x *LockCellsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LockCellsRequest.ProtoReflect.Descriptor instead.
 func (*LockCellsRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{4}
+	return file_ns_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *LockCellsRequest) GetCellId() []string {
@@ -309,7 +435,7 @@ type PlayerInCellRequest struct {
 func (x *PlayerInCellRequest) Reset() {
 	*x = PlayerInCellRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[5]
+		mi := &file_ns_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -322,7 +448,7 @@ func (x *PlayerInCellRequest) String() string {
 func (*PlayerInCellRequest) ProtoMessage() {}
 
 func (x *PlayerInCellRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[5]
+	mi := &file_ns_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,7 +461,7 @@ func (x *PlayerInCellRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerInCellRequest.ProtoReflect.Descriptor instead.
 func (*PlayerInCellRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{5}
+	return file_ns_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PlayerInCellRequest) GetIp() string {
@@ -371,7 +497,7 @@ type Position struct {
 func (x *Position) Reset() {
 	*x = Position{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[6]
+		mi := &file_ns_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -384,7 +510,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[6]
+	mi := &file_ns_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -397,7 +523,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{6}
+	return file_ns_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Position) GetPosX() int64 {
@@ -428,7 +554,7 @@ type PlayerInCellRequestWithPositions struct {
 func (x *PlayerInCellRequestWithPositions) Reset() {
 	*x = PlayerInCellRequestWithPositions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[7]
+		mi := &file_ns_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -441,7 +567,7 @@ func (x *PlayerInCellRequestWithPositions) String() string {
 func (*PlayerInCellRequestWithPositions) ProtoMessage() {}
 
 func (x *PlayerInCellRequestWithPositions) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[7]
+	mi := &file_ns_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -454,7 +580,7 @@ func (x *PlayerInCellRequestWithPositions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerInCellRequestWithPositions.ProtoReflect.Descriptor instead.
 func (*PlayerInCellRequestWithPositions) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{7}
+	return file_ns_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PlayerInCellRequestWithPositions) GetIp() string {
@@ -494,7 +620,7 @@ type ListCellsRequest struct {
 func (x *ListCellsRequest) Reset() {
 	*x = ListCellsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[8]
+		mi := &file_ns_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -507,7 +633,7 @@ func (x *ListCellsRequest) String() string {
 func (*ListCellsRequest) ProtoMessage() {}
 
 func (x *ListCellsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[8]
+	mi := &file_ns_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -520,7 +646,7 @@ func (x *ListCellsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCellsRequest.ProtoReflect.Descriptor instead.
 func (*ListCellsRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{8}
+	return file_ns_proto_rawDescGZIP(), []int{10}
 }
 
 type ListPlayersRequest struct {
@@ -534,7 +660,7 @@ type ListPlayersRequest struct {
 func (x *ListPlayersRequest) Reset() {
 	*x = ListPlayersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[9]
+		mi := &file_ns_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -547,7 +673,7 @@ func (x *ListPlayersRequest) String() string {
 func (*ListPlayersRequest) ProtoMessage() {}
 
 func (x *ListPlayersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[9]
+	mi := &file_ns_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -560,7 +686,7 @@ func (x *ListPlayersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPlayersRequest.ProtoReflect.Descriptor instead.
 func (*ListPlayersRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{9}
+	return file_ns_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListPlayersRequest) GetCellId() string {
@@ -581,7 +707,7 @@ type CellMasterRequest struct {
 func (x *CellMasterRequest) Reset() {
 	*x = CellMasterRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[10]
+		mi := &file_ns_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -594,7 +720,7 @@ func (x *CellMasterRequest) String() string {
 func (*CellMasterRequest) ProtoMessage() {}
 
 func (x *CellMasterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[10]
+	mi := &file_ns_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -607,7 +733,7 @@ func (x *CellMasterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellMasterRequest.ProtoReflect.Descriptor instead.
 func (*CellMasterRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{10}
+	return file_ns_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CellMasterRequest) GetCellId() string {
@@ -628,7 +754,7 @@ type CellMasterStatusReply struct {
 func (x *CellMasterStatusReply) Reset() {
 	*x = CellMasterStatusReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[11]
+		mi := &file_ns_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -641,7 +767,7 @@ func (x *CellMasterStatusReply) String() string {
 func (*CellMasterStatusReply) ProtoMessage() {}
 
 func (x *CellMasterStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[11]
+	mi := &file_ns_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -654,7 +780,7 @@ func (x *CellMasterStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellMasterStatusReply.ProtoReflect.Descriptor instead.
 func (*CellMasterStatusReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{11}
+	return file_ns_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CellMasterStatusReply) GetWasUnregistered() bool {
@@ -675,7 +801,7 @@ type PlayerStatusReply struct {
 func (x *PlayerStatusReply) Reset() {
 	*x = PlayerStatusReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[12]
+		mi := &file_ns_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -688,7 +814,7 @@ func (x *PlayerStatusReply) String() string {
 func (*PlayerStatusReply) ProtoMessage() {}
 
 func (x *PlayerStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[12]
+	mi := &file_ns_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -701,7 +827,7 @@ func (x *PlayerStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerStatusReply.ProtoReflect.Descriptor instead.
 func (*PlayerStatusReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{12}
+	return file_ns_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *PlayerStatusReply) GetPlayerLeft() bool {
@@ -722,7 +848,7 @@ type CellRequest struct {
 func (x *CellRequest) Reset() {
 	*x = CellRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[13]
+		mi := &file_ns_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -735,7 +861,7 @@ func (x *CellRequest) String() string {
 func (*CellRequest) ProtoMessage() {}
 
 func (x *CellRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[13]
+	mi := &file_ns_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -748,7 +874,7 @@ func (x *CellRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellRequest.ProtoReflect.Descriptor instead.
 func (*CellRequest) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{13}
+	return file_ns_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CellRequest) GetCellId() string {
@@ -769,7 +895,7 @@ type CellNeighboursReply struct {
 func (x *CellNeighboursReply) Reset() {
 	*x = CellNeighboursReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[14]
+		mi := &file_ns_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -782,7 +908,7 @@ func (x *CellNeighboursReply) String() string {
 func (*CellNeighboursReply) ProtoMessage() {}
 
 func (x *CellNeighboursReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[14]
+	mi := &file_ns_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -795,7 +921,7 @@ func (x *CellNeighboursReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellNeighboursReply.ProtoReflect.Descriptor instead.
 func (*CellNeighboursReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{14}
+	return file_ns_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CellNeighboursReply) GetCellId() []string {
@@ -816,7 +942,7 @@ type CellChangeStatusReply struct {
 func (x *CellChangeStatusReply) Reset() {
 	*x = CellChangeStatusReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[15]
+		mi := &file_ns_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -829,7 +955,7 @@ func (x *CellChangeStatusReply) String() string {
 func (*CellChangeStatusReply) ProtoMessage() {}
 
 func (x *CellChangeStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[15]
+	mi := &file_ns_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -842,7 +968,7 @@ func (x *CellChangeStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellChangeStatusReply.ProtoReflect.Descriptor instead.
 func (*CellChangeStatusReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{15}
+	return file_ns_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *CellChangeStatusReply) GetSucceeded() bool {
@@ -864,7 +990,7 @@ type CellLockStatusReply struct {
 func (x *CellLockStatusReply) Reset() {
 	*x = CellLockStatusReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[16]
+		mi := &file_ns_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -877,7 +1003,7 @@ func (x *CellLockStatusReply) String() string {
 func (*CellLockStatusReply) ProtoMessage() {}
 
 func (x *CellLockStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[16]
+	mi := &file_ns_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -890,7 +1016,7 @@ func (x *CellLockStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellLockStatusReply.ProtoReflect.Descriptor instead.
 func (*CellLockStatusReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{16}
+	return file_ns_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CellLockStatusReply) GetLocked() bool {
@@ -918,7 +1044,7 @@ type CellStatusReply struct {
 func (x *CellStatusReply) Reset() {
 	*x = CellStatusReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[17]
+		mi := &file_ns_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -931,7 +1057,7 @@ func (x *CellStatusReply) String() string {
 func (*CellStatusReply) ProtoMessage() {}
 
 func (x *CellStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[17]
+	mi := &file_ns_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -944,7 +1070,7 @@ func (x *CellStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellStatusReply.ProtoReflect.Descriptor instead.
 func (*CellStatusReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{17}
+	return file_ns_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CellStatusReply) GetWasPerformed() bool {
@@ -965,7 +1091,7 @@ type ListCellsReply struct {
 func (x *ListCellsReply) Reset() {
 	*x = ListCellsReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[18]
+		mi := &file_ns_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -978,7 +1104,7 @@ func (x *ListCellsReply) String() string {
 func (*ListCellsReply) ProtoMessage() {}
 
 func (x *ListCellsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[18]
+	mi := &file_ns_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -991,7 +1117,7 @@ func (x *ListCellsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCellsReply.ProtoReflect.Descriptor instead.
 func (*ListCellsReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{18}
+	return file_ns_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListCellsReply) GetCellId() []string {
@@ -1013,7 +1139,7 @@ type PlayersReply struct {
 func (x *PlayersReply) Reset() {
 	*x = PlayersReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[19]
+		mi := &file_ns_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1026,7 +1152,7 @@ func (x *PlayersReply) String() string {
 func (*PlayersReply) ProtoMessage() {}
 
 func (x *PlayersReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[19]
+	mi := &file_ns_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1039,7 +1165,7 @@ func (x *PlayersReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayersReply.ProtoReflect.Descriptor instead.
 func (*PlayersReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{19}
+	return file_ns_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *PlayersReply) GetIp() []string {
@@ -1068,7 +1194,7 @@ type CellMasterReply struct {
 func (x *CellMasterReply) Reset() {
 	*x = CellMasterReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ns_proto_msgTypes[20]
+		mi := &file_ns_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1081,7 +1207,7 @@ func (x *CellMasterReply) String() string {
 func (*CellMasterReply) ProtoMessage() {}
 
 func (x *CellMasterReply) ProtoReflect() protoreflect.Message {
-	mi := &file_ns_proto_msgTypes[20]
+	mi := &file_ns_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1094,7 +1220,7 @@ func (x *CellMasterReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CellMasterReply.ProtoReflect.Descriptor instead.
 func (*CellMasterReply) Descriptor() ([]byte, []int) {
-	return file_ns_proto_rawDescGZIP(), []int{20}
+	return file_ns_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CellMasterReply) GetIp() string {
@@ -1115,7 +1241,18 @@ var File_ns_proto protoreflect.FileDescriptor
 
 var file_ns_proto_rawDesc = []byte{
 	0x0a, 0x08, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0b, 0x63, 0x65, 0x6c, 0x6c,
-	0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x22, 0x34, 0x0a, 0x14, 0x54, 0x72, 0x61, 0x6e, 0x73,
+	0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x22, 0x74, 0x0a, 0x04, 0x43, 0x65, 0x6c, 0x6c, 0x12,
+	0x16, 0x0a, 0x06, 0x63, 0x65, 0x6c, 0x6c, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x63, 0x65, 0x6c, 0x6c, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x73, 0x58, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x70, 0x6f, 0x73, 0x58, 0x12, 0x12, 0x0a, 0x04, 0x70,
+	0x6f, 0x73, 0x59, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x70, 0x6f, 0x73, 0x59, 0x12,
+	0x14, 0x0a, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05,
+	0x77, 0x69, 0x64, 0x74, 0x68, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x22, 0x38, 0x0a,
+	0x0d, 0x43, 0x65, 0x6c, 0x6c, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x27,
+	0x0a, 0x05, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e,
+	0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c,
+	0x52, 0x05, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x22, 0x34, 0x0a, 0x14, 0x54, 0x72, 0x61, 0x6e, 0x73,
 	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x65, 0x64, 0x65, 0x64, 0x12,
 	0x1c, 0x0a, 0x09, 0x73, 0x75, 0x63, 0x63, 0x65, 0x65, 0x64, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x08, 0x52, 0x09, 0x73, 0x75, 0x63, 0x63, 0x65, 0x65, 0x64, 0x65, 0x64, 0x22, 0x2e, 0x0a,
@@ -1193,7 +1330,7 @@ var file_ns_proto_rawDesc = []byte{
 	0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x0e, 0x0a,
 	0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x12, 0x0a,
 	0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x70, 0x6f, 0x72,
-	0x74, 0x32, 0x9d, 0x0a, 0x0a, 0x0b, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65,
+	0x74, 0x32, 0xe3, 0x0a, 0x0a, 0x0b, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65,
 	0x72, 0x12, 0x46, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x65, 0x6c, 0x6c, 0x12,
 	0x18, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65,
 	0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x63, 0x65, 0x6c, 0x6c,
@@ -1231,51 +1368,55 @@ var file_ns_proto_rawDesc = []byte{
 	0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e,
 	0x1a, 0x1c, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43,
 	0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00,
-	0x12, 0x51, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x73, 0x49,
-	0x6e, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x1f, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x72, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x73, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e,
-	0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x73, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x22, 0x00, 0x12, 0x53, 0x0a, 0x11, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x43, 0x65,
-	0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x1e, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d,
-	0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65,
-	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d,
-	0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65,
-	0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x5c, 0x0a, 0x14, 0x55, 0x6e, 0x72, 0x65,
-	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72,
-	0x12, 0x1e, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43,
-	0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x22, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43,
-	0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52,
-	0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x54, 0x0a, 0x0e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
-	0x4c, 0x65, 0x66, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x20, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d,
-	0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x43,
-	0x65, 0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x63, 0x65, 0x6c,
-	0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x53,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x5e, 0x0a, 0x15,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x4e, 0x65, 0x69, 0x67, 0x68,
-	0x62, 0x6f, 0x75, 0x72, 0x73, 0x12, 0x21, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4e, 0x65, 0x69, 0x67, 0x68, 0x62, 0x6f, 0x75,
-	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d,
-	0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4e, 0x65, 0x69, 0x67, 0x68,
-	0x62, 0x6f, 0x75, 0x72, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x61, 0x0a, 0x15,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x43,
-	0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x22, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x53, 0x69,
-	0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x63, 0x65, 0x6c, 0x6c,
-	0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e,
-	0x67, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12,
-	0x4e, 0x0a, 0x09, 0x4c, 0x6f, 0x63, 0x6b, 0x43, 0x65, 0x6c, 0x6c, 0x73, 0x12, 0x1d, 0x2e, 0x63,
-	0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x4c, 0x6f, 0x63, 0x6b, 0x43,
-	0x65, 0x6c, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x63, 0x65,
-	0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4c, 0x6f,
-	0x63, 0x6b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12,
-	0x50, 0x0a, 0x0b, 0x55, 0x6e, 0x6c, 0x6f, 0x63, 0x6b, 0x43, 0x65, 0x6c, 0x6c, 0x73, 0x12, 0x1d,
-	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x4c, 0x6f, 0x63,
-	0x6b, 0x43, 0x65, 0x6c, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e,
-	0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c,
-	0x4c, 0x6f, 0x63, 0x6b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22,
-	0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x12, 0x44, 0x0a, 0x0a, 0x44, 0x69, 0x76, 0x69, 0x64, 0x65, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x18,
+	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c,
+	0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d,
+	0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4c, 0x69, 0x73, 0x74, 0x52,
+	0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x51, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c,
+	0x61, 0x79, 0x65, 0x72, 0x73, 0x49, 0x6e, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x1f, 0x2e, 0x63, 0x65,
+	0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c,
+	0x61, 0x79, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x63,
+	0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65,
+	0x72, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x53, 0x0a, 0x11, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x1e,
+	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c,
+	0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c,
+	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c,
+	0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x5c,
+	0x0a, 0x14, 0x55, 0x6e, 0x72, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x65, 0x6c, 0x6c,
+	0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x1e, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e,
+	0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e,
+	0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x53,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x54, 0x0a, 0x0e,
+	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x4c, 0x65, 0x66, 0x74, 0x43, 0x65, 0x6c, 0x6c, 0x12, 0x20,
+	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x49, 0x6e, 0x43, 0x65, 0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1e, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x50,
+	0x6c, 0x61, 0x79, 0x65, 0x72, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x22, 0x00, 0x12, 0x5e, 0x0a, 0x15, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x43, 0x65, 0x6c,
+	0x6c, 0x4e, 0x65, 0x69, 0x67, 0x68, 0x62, 0x6f, 0x75, 0x72, 0x73, 0x12, 0x21, 0x2e, 0x63, 0x65,
+	0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4e, 0x65,
+	0x69, 0x67, 0x68, 0x62, 0x6f, 0x75, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20,
+	0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c,
+	0x6c, 0x4e, 0x65, 0x69, 0x67, 0x68, 0x62, 0x6f, 0x75, 0x72, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x22, 0x00, 0x12, 0x61, 0x0a, 0x15, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x43, 0x65, 0x6c,
+	0x6c, 0x53, 0x69, 0x7a, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x22, 0x2e, 0x63, 0x65,
+	0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x43, 0x68,
+	0x61, 0x6e, 0x67, 0x65, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x22, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x43, 0x65,
+	0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65,
+	0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x4e, 0x0a, 0x09, 0x4c, 0x6f, 0x63, 0x6b, 0x43, 0x65, 0x6c,
+	0x6c, 0x73, 0x12, 0x1d, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72,
+	0x2e, 0x4c, 0x6f, 0x63, 0x6b, 0x43, 0x65, 0x6c, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x20, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e,
+	0x43, 0x65, 0x6c, 0x6c, 0x4c, 0x6f, 0x63, 0x6b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65,
+	0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x50, 0x0a, 0x0b, 0x55, 0x6e, 0x6c, 0x6f, 0x63, 0x6b, 0x43,
+	0x65, 0x6c, 0x6c, 0x73, 0x12, 0x1d, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67,
+	0x65, 0x72, 0x2e, 0x4c, 0x6f, 0x63, 0x6b, 0x43, 0x65, 0x6c, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x63, 0x65, 0x6c, 0x6c, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65,
+	0x72, 0x2e, 0x43, 0x65, 0x6c, 0x6c, 0x4c, 0x6f, 0x63, 0x6b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1290,66 +1431,71 @@ func file_ns_proto_rawDescGZIP() []byte {
 	return file_ns_proto_rawDescData
 }
 
-var file_ns_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_ns_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_ns_proto_goTypes = []interface{}{
-	(*TransactionSucceeded)(nil),             // 0: cellmanager.TransactionSucceeded
-	(*CellNeighbourRequest)(nil),             // 1: cellmanager.CellNeighbourRequest
-	(*CellChangeSizeRequest)(nil),            // 2: cellmanager.CellChangeSizeRequest
-	(*WorldSize)(nil),                        // 3: cellmanager.WorldSize
-	(*LockCellsRequest)(nil),                 // 4: cellmanager.LockCellsRequest
-	(*PlayerInCellRequest)(nil),              // 5: cellmanager.PlayerInCellRequest
-	(*Position)(nil),                         // 6: cellmanager.Position
-	(*PlayerInCellRequestWithPositions)(nil), // 7: cellmanager.PlayerInCellRequestWithPositions
-	(*ListCellsRequest)(nil),                 // 8: cellmanager.ListCellsRequest
-	(*ListPlayersRequest)(nil),               // 9: cellmanager.ListPlayersRequest
-	(*CellMasterRequest)(nil),                // 10: cellmanager.CellMasterRequest
-	(*CellMasterStatusReply)(nil),            // 11: cellmanager.CellMasterStatusReply
-	(*PlayerStatusReply)(nil),                // 12: cellmanager.PlayerStatusReply
-	(*CellRequest)(nil),                      // 13: cellmanager.CellRequest
-	(*CellNeighboursReply)(nil),              // 14: cellmanager.CellNeighboursReply
-	(*CellChangeStatusReply)(nil),            // 15: cellmanager.CellChangeStatusReply
-	(*CellLockStatusReply)(nil),              // 16: cellmanager.CellLockStatusReply
-	(*CellStatusReply)(nil),                  // 17: cellmanager.CellStatusReply
-	(*ListCellsReply)(nil),                   // 18: cellmanager.ListCellsReply
-	(*PlayersReply)(nil),                     // 19: cellmanager.PlayersReply
-	(*CellMasterReply)(nil),                  // 20: cellmanager.CellMasterReply
+	(*Cell)(nil),                             // 0: cellmanager.Cell
+	(*CellListReply)(nil),                    // 1: cellmanager.CellListReply
+	(*TransactionSucceeded)(nil),             // 2: cellmanager.TransactionSucceeded
+	(*CellNeighbourRequest)(nil),             // 3: cellmanager.CellNeighbourRequest
+	(*CellChangeSizeRequest)(nil),            // 4: cellmanager.CellChangeSizeRequest
+	(*WorldSize)(nil),                        // 5: cellmanager.WorldSize
+	(*LockCellsRequest)(nil),                 // 6: cellmanager.LockCellsRequest
+	(*PlayerInCellRequest)(nil),              // 7: cellmanager.PlayerInCellRequest
+	(*Position)(nil),                         // 8: cellmanager.Position
+	(*PlayerInCellRequestWithPositions)(nil), // 9: cellmanager.PlayerInCellRequestWithPositions
+	(*ListCellsRequest)(nil),                 // 10: cellmanager.ListCellsRequest
+	(*ListPlayersRequest)(nil),               // 11: cellmanager.ListPlayersRequest
+	(*CellMasterRequest)(nil),                // 12: cellmanager.CellMasterRequest
+	(*CellMasterStatusReply)(nil),            // 13: cellmanager.CellMasterStatusReply
+	(*PlayerStatusReply)(nil),                // 14: cellmanager.PlayerStatusReply
+	(*CellRequest)(nil),                      // 15: cellmanager.CellRequest
+	(*CellNeighboursReply)(nil),              // 16: cellmanager.CellNeighboursReply
+	(*CellChangeStatusReply)(nil),            // 17: cellmanager.CellChangeStatusReply
+	(*CellLockStatusReply)(nil),              // 18: cellmanager.CellLockStatusReply
+	(*CellStatusReply)(nil),                  // 19: cellmanager.CellStatusReply
+	(*ListCellsReply)(nil),                   // 20: cellmanager.ListCellsReply
+	(*PlayersReply)(nil),                     // 21: cellmanager.PlayersReply
+	(*CellMasterReply)(nil),                  // 22: cellmanager.CellMasterReply
 }
 var file_ns_proto_depIdxs = []int32{
-	13, // 0: cellmanager.CellManager.CreateCell:input_type -> cellmanager.CellRequest
-	3,  // 1: cellmanager.CellManager.SetWorldSize:input_type -> cellmanager.WorldSize
-	13, // 2: cellmanager.CellManager.DeleteCell:input_type -> cellmanager.CellRequest
-	8,  // 3: cellmanager.CellManager.ListCells:input_type -> cellmanager.ListCellsRequest
-	5,  // 4: cellmanager.CellManager.AddPlayerToCell:input_type -> cellmanager.PlayerInCellRequest
-	7,  // 5: cellmanager.CellManager.AddPlayerToCellWithPositions:input_type -> cellmanager.PlayerInCellRequestWithPositions
-	6,  // 6: cellmanager.CellManager.RequestCellMasterWithPositions:input_type -> cellmanager.Position
-	9,  // 7: cellmanager.CellManager.ListPlayersInCell:input_type -> cellmanager.ListPlayersRequest
-	10, // 8: cellmanager.CellManager.RequestCellMaster:input_type -> cellmanager.CellMasterRequest
-	10, // 9: cellmanager.CellManager.UnregisterCellMaster:input_type -> cellmanager.CellMasterRequest
-	5,  // 10: cellmanager.CellManager.PlayerLeftCell:input_type -> cellmanager.PlayerInCellRequest
-	1,  // 11: cellmanager.CellManager.RequestCellNeighbours:input_type -> cellmanager.CellNeighbourRequest
-	2,  // 12: cellmanager.CellManager.RequestCellSizeChange:input_type -> cellmanager.CellChangeSizeRequest
-	4,  // 13: cellmanager.CellManager.LockCells:input_type -> cellmanager.LockCellsRequest
-	4,  // 14: cellmanager.CellManager.UnlockCells:input_type -> cellmanager.LockCellsRequest
-	17, // 15: cellmanager.CellManager.CreateCell:output_type -> cellmanager.CellStatusReply
-	0,  // 16: cellmanager.CellManager.SetWorldSize:output_type -> cellmanager.TransactionSucceeded
-	17, // 17: cellmanager.CellManager.DeleteCell:output_type -> cellmanager.CellStatusReply
-	18, // 18: cellmanager.CellManager.ListCells:output_type -> cellmanager.ListCellsReply
-	0,  // 19: cellmanager.CellManager.AddPlayerToCell:output_type -> cellmanager.TransactionSucceeded
-	0,  // 20: cellmanager.CellManager.AddPlayerToCellWithPositions:output_type -> cellmanager.TransactionSucceeded
-	20, // 21: cellmanager.CellManager.RequestCellMasterWithPositions:output_type -> cellmanager.CellMasterReply
-	19, // 22: cellmanager.CellManager.ListPlayersInCell:output_type -> cellmanager.PlayersReply
-	20, // 23: cellmanager.CellManager.RequestCellMaster:output_type -> cellmanager.CellMasterReply
-	11, // 24: cellmanager.CellManager.UnregisterCellMaster:output_type -> cellmanager.CellMasterStatusReply
-	12, // 25: cellmanager.CellManager.PlayerLeftCell:output_type -> cellmanager.PlayerStatusReply
-	14, // 26: cellmanager.CellManager.RequestCellNeighbours:output_type -> cellmanager.CellNeighboursReply
-	15, // 27: cellmanager.CellManager.RequestCellSizeChange:output_type -> cellmanager.CellChangeStatusReply
-	16, // 28: cellmanager.CellManager.LockCells:output_type -> cellmanager.CellLockStatusReply
-	16, // 29: cellmanager.CellManager.UnlockCells:output_type -> cellmanager.CellLockStatusReply
-	15, // [15:30] is the sub-list for method output_type
-	0,  // [0:15] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	0,  // 0: cellmanager.CellListReply.cells:type_name -> cellmanager.Cell
+	15, // 1: cellmanager.CellManager.CreateCell:input_type -> cellmanager.CellRequest
+	5,  // 2: cellmanager.CellManager.SetWorldSize:input_type -> cellmanager.WorldSize
+	15, // 3: cellmanager.CellManager.DeleteCell:input_type -> cellmanager.CellRequest
+	10, // 4: cellmanager.CellManager.ListCells:input_type -> cellmanager.ListCellsRequest
+	7,  // 5: cellmanager.CellManager.AddPlayerToCell:input_type -> cellmanager.PlayerInCellRequest
+	9,  // 6: cellmanager.CellManager.AddPlayerToCellWithPositions:input_type -> cellmanager.PlayerInCellRequestWithPositions
+	8,  // 7: cellmanager.CellManager.RequestCellMasterWithPositions:input_type -> cellmanager.Position
+	15, // 8: cellmanager.CellManager.DivideCell:input_type -> cellmanager.CellRequest
+	11, // 9: cellmanager.CellManager.ListPlayersInCell:input_type -> cellmanager.ListPlayersRequest
+	12, // 10: cellmanager.CellManager.RequestCellMaster:input_type -> cellmanager.CellMasterRequest
+	12, // 11: cellmanager.CellManager.UnregisterCellMaster:input_type -> cellmanager.CellMasterRequest
+	7,  // 12: cellmanager.CellManager.PlayerLeftCell:input_type -> cellmanager.PlayerInCellRequest
+	3,  // 13: cellmanager.CellManager.RequestCellNeighbours:input_type -> cellmanager.CellNeighbourRequest
+	4,  // 14: cellmanager.CellManager.RequestCellSizeChange:input_type -> cellmanager.CellChangeSizeRequest
+	6,  // 15: cellmanager.CellManager.LockCells:input_type -> cellmanager.LockCellsRequest
+	6,  // 16: cellmanager.CellManager.UnlockCells:input_type -> cellmanager.LockCellsRequest
+	19, // 17: cellmanager.CellManager.CreateCell:output_type -> cellmanager.CellStatusReply
+	2,  // 18: cellmanager.CellManager.SetWorldSize:output_type -> cellmanager.TransactionSucceeded
+	19, // 19: cellmanager.CellManager.DeleteCell:output_type -> cellmanager.CellStatusReply
+	20, // 20: cellmanager.CellManager.ListCells:output_type -> cellmanager.ListCellsReply
+	2,  // 21: cellmanager.CellManager.AddPlayerToCell:output_type -> cellmanager.TransactionSucceeded
+	2,  // 22: cellmanager.CellManager.AddPlayerToCellWithPositions:output_type -> cellmanager.TransactionSucceeded
+	22, // 23: cellmanager.CellManager.RequestCellMasterWithPositions:output_type -> cellmanager.CellMasterReply
+	1,  // 24: cellmanager.CellManager.DivideCell:output_type -> cellmanager.CellListReply
+	21, // 25: cellmanager.CellManager.ListPlayersInCell:output_type -> cellmanager.PlayersReply
+	22, // 26: cellmanager.CellManager.RequestCellMaster:output_type -> cellmanager.CellMasterReply
+	13, // 27: cellmanager.CellManager.UnregisterCellMaster:output_type -> cellmanager.CellMasterStatusReply
+	14, // 28: cellmanager.CellManager.PlayerLeftCell:output_type -> cellmanager.PlayerStatusReply
+	16, // 29: cellmanager.CellManager.RequestCellNeighbours:output_type -> cellmanager.CellNeighboursReply
+	17, // 30: cellmanager.CellManager.RequestCellSizeChange:output_type -> cellmanager.CellChangeStatusReply
+	18, // 31: cellmanager.CellManager.LockCells:output_type -> cellmanager.CellLockStatusReply
+	18, // 32: cellmanager.CellManager.UnlockCells:output_type -> cellmanager.CellLockStatusReply
+	17, // [17:33] is the sub-list for method output_type
+	1,  // [1:17] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_ns_proto_init() }
@@ -1359,7 +1505,7 @@ func file_ns_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_ns_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TransactionSucceeded); i {
+			switch v := v.(*Cell); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1371,7 +1517,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellNeighbourRequest); i {
+			switch v := v.(*CellListReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1383,7 +1529,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellChangeSizeRequest); i {
+			switch v := v.(*TransactionSucceeded); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1395,7 +1541,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WorldSize); i {
+			switch v := v.(*CellNeighbourRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1407,7 +1553,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LockCellsRequest); i {
+			switch v := v.(*CellChangeSizeRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1419,7 +1565,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerInCellRequest); i {
+			switch v := v.(*WorldSize); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1431,7 +1577,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Position); i {
+			switch v := v.(*LockCellsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1443,7 +1589,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerInCellRequestWithPositions); i {
+			switch v := v.(*PlayerInCellRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1455,7 +1601,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListCellsRequest); i {
+			switch v := v.(*Position); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1467,7 +1613,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListPlayersRequest); i {
+			switch v := v.(*PlayerInCellRequestWithPositions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1479,7 +1625,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellMasterRequest); i {
+			switch v := v.(*ListCellsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1491,7 +1637,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellMasterStatusReply); i {
+			switch v := v.(*ListPlayersRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1503,7 +1649,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerStatusReply); i {
+			switch v := v.(*CellMasterRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1515,7 +1661,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellRequest); i {
+			switch v := v.(*CellMasterStatusReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1527,7 +1673,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellNeighboursReply); i {
+			switch v := v.(*PlayerStatusReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1539,7 +1685,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellChangeStatusReply); i {
+			switch v := v.(*CellRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1551,7 +1697,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellLockStatusReply); i {
+			switch v := v.(*CellNeighboursReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1563,7 +1709,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CellStatusReply); i {
+			switch v := v.(*CellChangeStatusReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1575,7 +1721,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListCellsReply); i {
+			switch v := v.(*CellLockStatusReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1587,7 +1733,7 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayersReply); i {
+			switch v := v.(*CellStatusReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1599,6 +1745,30 @@ func file_ns_proto_init() {
 			}
 		}
 		file_ns_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListCellsReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ns_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PlayersReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ns_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CellMasterReply); i {
 			case 0:
 				return &v.state
@@ -1617,7 +1787,7 @@ func file_ns_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ns_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1650,6 +1820,7 @@ type CellManagerClient interface {
 	AddPlayerToCell(ctx context.Context, in *PlayerInCellRequest, opts ...grpc.CallOption) (*TransactionSucceeded, error)
 	AddPlayerToCellWithPositions(ctx context.Context, in *PlayerInCellRequestWithPositions, opts ...grpc.CallOption) (*TransactionSucceeded, error)
 	RequestCellMasterWithPositions(ctx context.Context, in *Position, opts ...grpc.CallOption) (*CellMasterReply, error)
+	DivideCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellListReply, error)
 	ListPlayersInCell(ctx context.Context, in *ListPlayersRequest, opts ...grpc.CallOption) (*PlayersReply, error)
 	RequestCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterReply, error)
 	UnregisterCellMaster(ctx context.Context, in *CellMasterRequest, opts ...grpc.CallOption) (*CellMasterStatusReply, error)
@@ -1725,6 +1896,15 @@ func (c *cellManagerClient) AddPlayerToCellWithPositions(ctx context.Context, in
 func (c *cellManagerClient) RequestCellMasterWithPositions(ctx context.Context, in *Position, opts ...grpc.CallOption) (*CellMasterReply, error) {
 	out := new(CellMasterReply)
 	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/RequestCellMasterWithPositions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cellManagerClient) DivideCell(ctx context.Context, in *CellRequest, opts ...grpc.CallOption) (*CellListReply, error) {
+	out := new(CellListReply)
+	err := c.cc.Invoke(ctx, "/cellmanager.CellManager/DivideCell", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1812,6 +1992,7 @@ type CellManagerServer interface {
 	AddPlayerToCell(context.Context, *PlayerInCellRequest) (*TransactionSucceeded, error)
 	AddPlayerToCellWithPositions(context.Context, *PlayerInCellRequestWithPositions) (*TransactionSucceeded, error)
 	RequestCellMasterWithPositions(context.Context, *Position) (*CellMasterReply, error)
+	DivideCell(context.Context, *CellRequest) (*CellListReply, error)
 	ListPlayersInCell(context.Context, *ListPlayersRequest) (*PlayersReply, error)
 	RequestCellMaster(context.Context, *CellMasterRequest) (*CellMasterReply, error)
 	UnregisterCellMaster(context.Context, *CellMasterRequest) (*CellMasterStatusReply, error)
@@ -1846,6 +2027,9 @@ func (*UnimplementedCellManagerServer) AddPlayerToCellWithPositions(context.Cont
 }
 func (*UnimplementedCellManagerServer) RequestCellMasterWithPositions(context.Context, *Position) (*CellMasterReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestCellMasterWithPositions not implemented")
+}
+func (*UnimplementedCellManagerServer) DivideCell(context.Context, *CellRequest) (*CellListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DivideCell not implemented")
 }
 func (*UnimplementedCellManagerServer) ListPlayersInCell(context.Context, *ListPlayersRequest) (*PlayersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPlayersInCell not implemented")
@@ -1998,6 +2182,24 @@ func _CellManager_RequestCellMasterWithPositions_Handler(srv interface{}, ctx co
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CellManagerServer).RequestCellMasterWithPositions(ctx, req.(*Position))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CellManager_DivideCell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CellRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CellManagerServer).DivideCell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cellmanager.CellManager/DivideCell",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CellManagerServer).DivideCell(ctx, req.(*CellRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2177,6 +2379,10 @@ var _CellManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RequestCellMasterWithPositions",
 			Handler:    _CellManager_RequestCellMasterWithPositions_Handler,
+		},
+		{
+			MethodName: "DivideCell",
+			Handler:    _CellManager_DivideCell_Handler,
 		},
 		{
 			MethodName: "ListPlayersInCell",

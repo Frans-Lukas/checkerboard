@@ -13,6 +13,14 @@ service Player {
     rpc IsAlive (EmptyRequest) returns (EmptyReply) {}
 
     rpc SubscribePlayer (PlayerInfo) returns (SubscriptionReply) {}
+
+    rpc ChangedCellMaster (ChangedCellMasterRequest) returns (ChangedCellMasterReply) {}
+}
+
+message ChangedCellMasterRequest {
+}
+
+message ChangedCellMasterReply {
 }
 
 message MultipleObjects {
@@ -51,7 +59,6 @@ message Cell {
     int64 posY = 3;
     int64 width = 4;
     int64 height = 5;
-
 }
 
 message SubscriptionReply {

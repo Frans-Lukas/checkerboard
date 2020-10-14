@@ -7,6 +7,7 @@ import (
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"google.golang.org/grpc"
 	"strconv"
+	"time"
 )
 
 type Client struct {
@@ -19,11 +20,15 @@ type Client struct {
 
 type Player struct {
 	generated.PlayerServer
-	CellMaster        Client
-	MutatedObjects    *[]generated.SingleObject
-	MutatingObjects   *[]generated.SingleObject
-	SubscribedPlayers *map[string]map[string]*generated.PlayerClient
-	Cells             *map[string]Cell
+	CellMaster      Client
+	MutatedObjects  *[]generated.SingleObject
+	MutatingObjects *[]generated.SingleObject
+
+	//map of cellid map of playerid
+	SubscribedPlayers    *map[string]map[string]*generated.PlayerClient
+	Cells                *map[string]Cell
+	splitCellRequirement int
+	splitCheckInterval   int
 }
 
 func NewPlayer() Player {
@@ -167,5 +172,49 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 		return &generated.SubscriptionReply{Succeeded: false}, errors.New("no colliding cell")
 	} else {
 		return &generated.SubscriptionReply{Succeeded: true}, nil
+	}
+}
+
+func (cm *Player) ShouldSplitCell() (bool, string) {
+	for cellId, playerList := range *cm.SubscribedPlayers {
+		return len(playerList) > cm.splitCellRequirement, cellId
+	}
+
+	return false, ""
+}
+
+func (cm *Player) SplitCellLoop(client *cellmanager.CellManagerClient) {
+	for {
+		shouldSplit, cellId := cm.ShouldSplitCell()
+
+		if shouldSplit {
+			cm.SplitCell(client, cellId)
+		}
+
+		time.Sleep(time.Second * time.Duration(cm.splitCheckInterval))
+	}
+}
+
+func (cm *Player) SplitCell(client *cellmanager.CellManagerClient, cellID string) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_, err := (*client).DivideCell(ctx, &cellmanager.CellRequest{CellId: cellID})
+	if err != nil {
+		println("Failed to split cell")
+		return
+	}
+
+	cm.DesubscribePlayers(ctx)
+	// reset subscribed players map
+	cm.SubscribedPlayers = new(map[string]map[string]*generated.PlayerClient)
+
+}
+
+func (cm *Player) DesubscribePlayers(ctx context.Context) {
+	for _, playerMap := range *cm.SubscribedPlayers {
+		for _, player := range playerMap {
+			(*player).ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+		}
 	}
 }

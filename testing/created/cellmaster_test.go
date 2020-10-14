@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"testing"
@@ -64,50 +63,6 @@ func TestRequestMutatingObjects(t *testing.T) {
 	if containsCorrectObject != 2 {
 		fatalFail(errors.New("RequestMutatingObjects did not return correct object"))
 	}
-}
-
-type PlayerClientWrapper struct {
-	generated.PlayerClient
-	object *generated.SingleObject
-}
-
-var player = PlayerClientWrapper{}
-var player2 = PlayerClientWrapper{}
-
-func (p PlayerClientWrapper) ReceiveMutatedObjects(ctx context.Context, in *generated.MultipleObjects, opts ...grpc.CallOption) (*generated.EmptyReply, error) {
-	player.object = in.Objects[0]
-	return nil, nil
-}
-
-func TestBroadcastMutatedObjects(t *testing.T) {
-	cm := objects.NewPlayer()
-	cellId1 := "cellId1"
-	cellId2 := "cellId2"
-
-	(*cm.SubscribedPlayers)[cellId1] = make([]generated.PlayerClient, 0)
-	(*cm.SubscribedPlayers)[cellId2] = make([]generated.PlayerClient, 0)
-	(*cm.SubscribedPlayers)[cellId1] = append((*cm.SubscribedPlayers)["id"], player)
-	(*cm.SubscribedPlayers)[cellId2] = append((*cm.SubscribedPlayers)["id"], player2)
-
-	objects := make([]*generated.SingleObject, 0)
-	obj := createSingleObject("propertyKey", "newValeue", "objId", cellId1)
-	objects = append(objects, &obj)
-
-	multObjects := generated.MultipleObjects{Objects: objects}
-
-	cm.BroadcastMutatedObjects(context.Background(), &multObjects)
-
-	if player2.object != nil {
-		fatalFail(errors.New("brodcast was sent to wrong cellID"))
-
-	}
-
-	if player.object.CellId == cellId1 {
-		return
-	}
-	fatalFail(errors.New("broadcast updated objects failed"))
-
-	//cm.SubscribedPlayers = append()
 }
 
 //TODO put back when cell state is implemented

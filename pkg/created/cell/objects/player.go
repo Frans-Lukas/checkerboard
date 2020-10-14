@@ -20,7 +20,7 @@ type Client struct {
 type Player struct {
 	generated.PlayerServer
 	CellMaster        Client
-	MutatedObjects    map[string]map[string]string
+	MutatedObjects    *[]generated.SingleObject
 	MutatingObjects   *[]generated.SingleObject
 	SubscribedPlayers *map[string]map[string]*generated.PlayerClient
 	Cells             *map[string]Cell
@@ -30,7 +30,8 @@ func NewPlayer() Player {
 	emptyObjectList := make([]generated.SingleObject, 0)
 	cells := make(map[string]Cell, 0)
 	emptyPlayerMap := make(map[string]map[string]*generated.PlayerClient, 0)
-	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: map[string]map[string]string{}, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList, Cells: &cells}
+	mutatedObjects := make([]generated.SingleObject, 0)
+	return Player{CellMaster: Client{Port: -1, Ip: "none"}, MutatedObjects: &mutatedObjects, SubscribedPlayers: &emptyPlayerMap, MutatingObjects: &emptyObjectList, Cells: &cells}
 }
 
 func (player *Player) UpdateCellMaster(
@@ -51,15 +52,7 @@ func (player *Player) ReceiveMutatedObjects(
 	}
 
 	for _, object := range in.Objects {
-
-		if player.MutatedObjects[object.ObjectId] == nil {
-			player.MutatedObjects[object.ObjectId] = map[string]string{}
-		}
-
-		objectsToUpdate := player.MutatedObjects[object.ObjectId]
-		for index, key := range object.UpdateKey {
-			objectsToUpdate[key] = object.NewValue[index]
-		}
+		*player.MutatedObjects = append(*player.MutatedObjects, *object)
 	}
 
 	return &generated.EmptyReply{}, nil
@@ -113,6 +106,7 @@ func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.Mul
 	for objectIndex, object := range (*in).Objects {
 		println("checking cell with id ", object.CellId)
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
+			println("checking playerlist of size ", len(playerList))
 			println("broadcasting to cell with id ", object.CellId)
 			for _, player := range playerList {
 				println("sending updated objects to player: ", player)
@@ -144,6 +138,7 @@ func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*gen
 
 func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {
 	subscribedToCell := false
+	println("Subscribing player: ", in.Port)
 	for _, cell := range *cm.Cells {
 		if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
 			if _, exists := (*cm.SubscribedPlayers)[cell.CellId]; !exists {
@@ -152,7 +147,7 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 
 			subscribers := (*cm.SubscribedPlayers)[cell.CellId]
 
-			if _, exists := (subscribers)[in.Ip + ":" + strconv.Itoa(int(in.Port))]; !exists {
+			if _, exists := (subscribers)[in.Ip+":"+strconv.Itoa(int(in.Port))]; !exists {
 
 				conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
 				if err2 != nil {
@@ -160,8 +155,10 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 					return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
 				}
 
+				println("Actually subscribing player: ", in.Port)
+
 				subscriberConn := generated.NewPlayerClient(conn)
-				subscribers[in.Ip + ":" + strconv.Itoa(int(in.Port))] = &subscriberConn
+				subscribers[in.Ip+":"+strconv.Itoa(int(in.Port))] = &subscriberConn
 				subscribedToCell = true
 			}
 		}

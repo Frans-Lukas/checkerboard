@@ -118,12 +118,17 @@ func main() {
 
 	cmConn := OBJ.NewPlayerClient(conn2)
 
-	cmConn.SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: "localhost", Port: int32(port)})
+	for {
+		_, err = cmConn.SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: "localhost", Port: int32(port)})
+		if err == nil {
+			break
+		}
+	}
 
-	gameLoop(cmConn)
+	gameLoop(cmConn, cellMaster)
 }
 
-func gameLoop(cm OBJ.PlayerClient) {
+func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 	reader := bufio.NewReader(os.Stdin)
 
 	playerList[player.objectId] = &player
@@ -149,19 +154,36 @@ func gameLoop(cm OBJ.PlayerClient) {
 		}
 		println(val)
 
+		checkForPlayerUpdates(cellMaster)
+
 		printMap()
 	}
 }
 
+func checkForPlayerUpdates(cellMaster objects.Player) {
+	for _, object := range *cellMaster.MutatedObjects {
+		if _, ok := playerList[object.ObjectId]; ok {
+			if object.ObjectId != player.objectId {
+				updatePlayer(&object)
+			}
+		} else {
+			playerList[object.ObjectId] = PlayerFromObject(&object)
+		}
+	}
+	cellMaster.MutatedObjects = new([]OBJ.SingleObject)
+}
+
 func readInput(input string) {
-	if input[0] == 'w' {
-		player.posY--
-	} else if input[0] == 's' {
-		player.posY++
-	} else if input[0] == 'a' {
-		player.posX--
-	} else if input[0] == 'd' {
-		player.posX++
+	if len(input) > 0 {
+		if input[0] == 'w' {
+			player.posY--
+		} else if input[0] == 's' {
+			player.posY++
+		} else if input[0] == 'a' {
+			player.posX--
+		} else if input[0] == 'd' {
+			player.posX++
+		}
 	}
 }
 
@@ -194,21 +216,8 @@ func printPosition(row int64, column int64) {
 	}
 }
 
-func (c *Player) ReceiveMutatedObjects(ctx context.Context, in *OBJ.MultipleObjects, opts ...grpc.CallOption) (*OBJ.EmptyReply, error) {
-	for _, object := range (*in).Objects {
-		if _, ok := playerList[object.ObjectId]; ok {
-			updatePlayer(object)
-		} else {
-			playerList[object.ObjectId] = PlayerFromObject(object)
-		}
-	}
-	printMap()
-	return &OBJ.EmptyReply{}, nil
-}
-
 func PlayerFromObject(object *OBJ.SingleObject) *Player {
-	player := PlayerConstructor(0, 0)
-	updatePlayer(object)
+	player := PlayerConstructor(object.PosX, object.PosY)
 	player.objectId = object.ObjectId
 	return &player
 }

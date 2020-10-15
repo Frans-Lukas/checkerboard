@@ -19,7 +19,7 @@ func createSingleObject(propertyKey string, newValue string, id string, cellId s
 }
 
 func TestSendUpdate(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	obj := createSingleObject("key", "value", "key2", "cellId", )
 	_, err := cm.RequestObjectMutation(context.Background(), &obj)
 
@@ -31,7 +31,7 @@ func TestSendUpdate(t *testing.T) {
 }
 
 func TestReceiveCellMasterShip(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cl := generated.CellList{Cells: []*generated.Cell{{CellId: "cellid", PosY: 1, PosX: 1, Width: 1, Height: 1}}}
 	cm.ReceiveCellMastership(context.Background(), &cl)
 	if _, ok := (*cm.Cells)["cellid"]; ok {
@@ -41,7 +41,7 @@ func TestReceiveCellMasterShip(t *testing.T) {
 }
 
 func TestRequestMutatingObjects(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cellID1Object := createSingleObject("key", "value", "key2", "cellId1")
 	cellID2Object := createSingleObject("key2", "value2", "key2", "cellId2")
 	cellID1Object2 := createSingleObject("key1", "value1", "key3", "cellId1")
@@ -100,7 +100,7 @@ func TestRequestMutatingObjects(t *testing.T) {
 }*/
 
 func TestIsAlive(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 
 	request := generated.EmptyRequest{}
 	_, err := cm.IsAlive(context.Background(), &request)
@@ -109,7 +109,7 @@ func TestIsAlive(t *testing.T) {
 }
 
 func TestRequestObjectMutationSetToCorrectCellId(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cell := objects.NewCell("testCell")
 	cell.PosX = 0
 	cell.PosY = 0
@@ -142,7 +142,7 @@ func TestRequestObjectMutationSetToCorrectCellId(t *testing.T) {
 }*/
 
 func TestSubscribePlayerToSingleCell(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cell1 := objects.NewCell("cell1")
 	cell1.PosX = 0
 	cell1.PosY = 0
@@ -162,7 +162,7 @@ func TestSubscribePlayerToSingleCell(t *testing.T) {
 	}
 
 	playerServer := grpc.NewServer()
-	subscriber := objects.NewPlayer()
+	subscriber := objects.NewPlayer(1, 1)
 	generated.RegisterPlayerServer(playerServer, &subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
@@ -170,18 +170,18 @@ func TestSubscribePlayerToSingleCell(t *testing.T) {
 		}
 	}()
 
-	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip:"localhost", Port: 8888, PosX:40, PosY:40})
+	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip: "localhost", Port: 8888, PosX: 40, PosY: 40})
 	failIfNotNull(err, "Received error on subscription: ")
 
 	if !res.Succeeded {
 		fatalFail(errors.New("succeeded == false but no error"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"] ; !subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"]; !subscribed {
 		fatalFail(errors.New("not subscribed to cell1"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"] ; subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell2"))
 	}
 
@@ -189,7 +189,7 @@ func TestSubscribePlayerToSingleCell(t *testing.T) {
 }
 
 func TestSubscribePlayerToMultipleCells(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cell1 := objects.NewCell("cell1")
 	cell1.PosX = 0
 	cell1.PosY = 0
@@ -209,7 +209,7 @@ func TestSubscribePlayerToMultipleCells(t *testing.T) {
 	}
 
 	playerServer := grpc.NewServer()
-	subscriber := objects.NewPlayer()
+	subscriber := objects.NewPlayer(1, 1)
 	generated.RegisterPlayerServer(playerServer, &subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
@@ -217,17 +217,17 @@ func TestSubscribePlayerToMultipleCells(t *testing.T) {
 		}
 	}()
 
-	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip:"localhost", Port: 8888, PosX:60, PosY:60})
+	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip: "localhost", Port: 8888, PosX: 60, PosY: 60})
 
 	if !res.Succeeded {
 		fatalFail(errors.New("succeeded == false but no error"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"] ; !subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"]; !subscribed {
 		fatalFail(errors.New("not subscribed to cell1"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"] ; !subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"]; !subscribed {
 		fatalFail(errors.New("not subscribed to cell2"))
 	}
 
@@ -235,7 +235,7 @@ func TestSubscribePlayerToMultipleCells(t *testing.T) {
 }
 
 func TestSubscribePlayerOutsideCells(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cell1 := objects.NewCell("cell1")
 	cell1.PosX = 0
 	cell1.PosY = 0
@@ -255,7 +255,7 @@ func TestSubscribePlayerOutsideCells(t *testing.T) {
 	}
 
 	playerServer := grpc.NewServer()
-	subscriber := objects.NewPlayer()
+	subscriber := objects.NewPlayer(1, 1)
 	generated.RegisterPlayerServer(playerServer, &subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
@@ -263,7 +263,7 @@ func TestSubscribePlayerOutsideCells(t *testing.T) {
 		}
 	}()
 
-	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip:"localhost", Port: 8888, PosX:200, PosY:200})
+	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip: "localhost", Port: 8888, PosX: 200, PosY: 200})
 	if err == nil {
 		fatalFail(errors.New("did not receive error on failed subscription"))
 	}
@@ -272,11 +272,11 @@ func TestSubscribePlayerOutsideCells(t *testing.T) {
 		fatalFail(errors.New("succeeded == true but there is an error"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"] ; subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell1"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"] ; subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell2"))
 	}
 
@@ -284,7 +284,7 @@ func TestSubscribePlayerOutsideCells(t *testing.T) {
 }
 
 func TestSubscribeUnConnectablePlayerCells(t *testing.T) {
-	cm := objects.NewPlayer()
+	cm := objects.NewPlayer(1, 1)
 	cell1 := objects.NewCell("cell1")
 	cell1.PosX = 0
 	cell1.PosY = 0
@@ -298,7 +298,7 @@ func TestSubscribeUnConnectablePlayerCells(t *testing.T) {
 	cell2.Width = 100
 	(*cm.Cells)[cell2.CellId] = cell2
 
-	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip:"localhost", Port: 8888, PosX:200, PosY:200})
+	res, err := cm.SubscribePlayer(context.Background(), &generated.PlayerInfo{Ip: "localhost", Port: 8888, PosX: 200, PosY: 200})
 	if err == nil {
 		fatalFail(errors.New("did not receive error on failed subscription"))
 	}
@@ -307,11 +307,11 @@ func TestSubscribeUnConnectablePlayerCells(t *testing.T) {
 		fatalFail(errors.New("succeeded == true but there is an error"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"] ; subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell1.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell1"))
 	}
 
-	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"] ; subscribed {
+	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell2"))
 	}
 }

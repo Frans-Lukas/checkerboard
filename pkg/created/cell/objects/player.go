@@ -170,6 +170,10 @@ func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*gen
 	return &generated.EmptyReply{}, nil
 }
 
+func (cm *Player) ChangedCellMaster(ctx context.Context, in *generated.ChangedCellMasterRequest) (*generated.ChangedCellMasterReply, error) {
+	return nil, nil
+}
+
 func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {
 	subscribedToCell := false
 	if constants.DebugMode {
@@ -209,7 +213,7 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 	}
 }
 
-func (cm *Player) ShouldSplitCell() (bool, string) {
+func (cm *Player) ShouldSplitCell() (shouldSplit bool, cellId string) {
 	for cellId, playerList := range *cm.SubscribedPlayers {
 		// only split one cell at a time
 		return len(playerList) > cm.splitCellRequirement, cellId

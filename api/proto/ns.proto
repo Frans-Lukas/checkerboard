@@ -13,7 +13,7 @@ service CellManager {
 
   rpc RequestCellMasterWithPositions (Position) returns (CellMasterReply) {}
 
-  rpc DivideCell (CellRequest) returns (CellListReply) {}
+  rpc DivideCell (CellRequest) returns (CellChangeStatusReply) {}
 
   rpc ListPlayersInCell (ListPlayersRequest) returns (PlayersReply) {}
   rpc RequestCellMaster (CellMasterRequest) returns (CellMasterReply) {}

@@ -478,3 +478,54 @@ func TestRequestCellMasterWithPositionsFailsIfOutOfBounds(t *testing.T) {
 	}
 	fatalFail(errors.New("should have failed"))
 }
+
+func TestDivideCell(t *testing.T) {
+	cellMaster := objects.Client{Ip: "randomIp", Port: 1337}
+	mainCell := objects.NewCell("testCell")
+	mainCell.PosX = 0
+	mainCell.PosY = 0
+	mainCell.Width = 100
+	mainCell.Height = 100
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(mainCell)
+
+	(*cm.Cells)[0].CellMaster = &cellMaster
+
+	request := generated.CellRequest{CellId:"testCell"}
+
+	res, err := cm.DivideCell(context.Background(), &request)
+	failIfNotNull(err, "request for DivideCell failed")
+
+	if !res.Succeeded {
+		fatalFail(errors.New("divide failed"))
+	}
+
+	if len(*cm.Cells) != 4 {
+		fatalFail(errors.New("did not create 4 cells"))
+	}
+
+	first := false
+	second := false
+	third := false
+	fourth := false
+	for _, cell := range *cm.Cells {
+		if cell.Width != mainCell.Width/2 || cell.Height != mainCell.Height/2 {
+			fatalFail(errors.New("height or width set incorrectly"))
+		}
+
+		if cell.PosX == mainCell.PosX && cell.PosY == mainCell.PosY {
+			first = true
+		} else if cell.PosX == mainCell.PosX && cell.PosY == mainCell.PosY + mainCell.Height/2 {
+			second = true
+		} else if cell.PosX == mainCell.PosX + mainCell.Width/2 && cell.PosY == mainCell.PosY {
+			third = true
+		} else if cell.PosX == mainCell.PosX + mainCell.Width/2 && cell.PosY == mainCell.PosY + mainCell.Height/2 {
+			fourth = true
+		}
+	}
+
+	if !first || !second || !third || !fourth {
+		fatalFail(errors.New("at least one cell created incorrectly"))
+	}
+}

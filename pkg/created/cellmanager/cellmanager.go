@@ -20,11 +20,12 @@ type CellManager struct {
 	WorldWidth  int64
 	WorldHeight int64
 	Cells       *[]objects.Cell
+	CellNumber  int64
 }
 
 func NewCellManager() CellManager {
 	cells := make([]objects.Cell, 0)
-	return CellManager{Cells: &cells}
+	return CellManager{Cells: &cells, CellNumber:0}
 }
 
 func (cellManager *CellManager) CreateCell(
@@ -307,6 +308,47 @@ func (cellManager *CellManager) UnlockCells(
 	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
 }
 
+func (cellManager *CellManager) DivideCell(
+	ctx context.Context, in *generated.CellRequest,
+) (*generated.CellChangeStatusReply, error) {
+	cellIndex := FindCell(*cellManager.Cells, in.CellId)
+	if cellIndex != len(*cellManager.Cells) {
+		cell := (*cellManager.Cells)[cellIndex]
+
+		if cell.Locked {
+			return &generated.CellChangeStatusReply{Succeeded:false}, errors.New("cell is locked")
+		}
+
+		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX, PosY:cell.PosY, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
+		cellManager.CellNumber++
+		cell2:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX, PosY:cell.PosY + cell.Height/2, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
+		cellManager.CellNumber++
+		cell3:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX + cell.Width/2, PosY:cell.PosY, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
+		cellManager.CellNumber++
+		cell4:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX + cell.Width/2, PosY:cell.PosY + cell.Height/2, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
+		cellManager.CellNumber++
+
+		cellIndex := FindCell(*cellManager.Cells, in.CellId)
+		(*cellManager.Cells)[cellIndex] = cell1
+		cellManager.AppendCell(cell2)
+		cellManager.AppendCell(cell3)
+		cellManager.AppendCell(cell4)
+
+		return &generated.CellChangeStatusReply{Succeeded:true}, nil
+	} else {
+		return &generated.CellChangeStatusReply{Succeeded:false}, errors.New("cellId does not match an existing cell")
+	}
+}
+
 func (cellManager *CellManager) AppendCell(cell objects.Cell) {
 	*cellManager.Cells = append(*cellManager.Cells, cell)
+}
+
+func FindCell(cells []objects.Cell, cellId string) int {
+	for i, n := range cells {
+		if cellId == n.CellId {
+			return i
+		}
+	}
+	return len(cells)
 }

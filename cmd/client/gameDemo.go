@@ -28,6 +28,7 @@ import (
 	NS "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	OBJ "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
@@ -53,6 +54,8 @@ var playerList = make(map[string]*Player, 0)
 
 var player = PlayerConstructor(0, 0)
 
+var isBot = true
+
 const PlayerObjectType = "player"
 
 func PlayerConstructor(posX int64, posY int64) Player {
@@ -61,6 +64,10 @@ func PlayerConstructor(posX int64, posY int64) Player {
 
 func main() {
 	// Set up a connection to the server.\
+
+	rand.Seed(time.Now().UnixNano())
+	player.posX = int64(rand.Int() % constants.MAP_SIZE)
+	player.posY = int64(rand.Int() % constants.MAP_SIZE)
 
 	port, err := strconv.Atoi(os.Args[2])
 	splitCellRequirement := 5
@@ -100,7 +107,7 @@ func main() {
 
 	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
 
-	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: 0, PosY: 0})
+	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: player.posX, PosY: player.posY})
 
 	if err != nil {
 		log.Fatalf("RequestCellMaster err: " + err.Error())
@@ -134,10 +141,18 @@ func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 	reader := bufio.NewReader(os.Stdin)
 
 	playerList[player.objectId] = &player
-	printMap()
+	printMap(&cellMaster)
+	println()
+	println()
+	println()
 	for {
-		input, _ := reader.ReadString('\n')
-		readInput(input)
+		if isBot {
+			botMove()
+			time.Sleep(time.Second * 3)
+		} else {
+			input, _ := reader.ReadString('\n')
+			readInput(input)
+		}
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		//TODO check so that defer is not needed
@@ -153,8 +168,33 @@ func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 			log.Fatalf(err.Error())
 		}
 		checkForPlayerUpdates(cellMaster)
-		printMap()
+		printMap(&cellMaster)
+		println()
+		println()
+		println()
 	}
+}
+
+func botMove() {
+	switch rand.Int() % 4 {
+	case 0:
+		if player.posX+1 < constants.MAP_SIZE {
+			player.posX = player.posX + 1
+		}
+	case 1:
+		if player.posX-1 >= 0 {
+			player.posX = player.posX - 1
+		}
+	case 2:
+		if player.posY-1 >= 0 {
+			player.posY = player.posY - 1
+		}
+	case 3:
+		if player.posY+1 < constants.MAP_SIZE {
+			player.posY = player.posY + 1
+		}
+	}
+
 }
 
 func checkForPlayerUpdates(cellMaster objects.Player) {
@@ -184,17 +224,18 @@ func readInput(input string) {
 	}
 }
 
-func printMap() {
+func printMap(cellMaster *objects.Player) {
 	for row := 0; row < constants.MAP_SIZE; row++ {
 		for column := 0; column < constants.MAP_SIZE; column++ {
-			printPosition(int64(row), int64(column))
+			printPosition(int64(row), int64(column), cellMaster)
 		}
 		print("\n")
 	}
 }
 
-func printPosition(row int64, column int64) {
+func printPosition(row int64, column int64, cellMaster *objects.Player) {
 	printedPlayer := false
+	printedMap := false
 	if row == player.posY && column == player.posX {
 		print("P ")
 		printedPlayer = true
@@ -207,8 +248,22 @@ func printPosition(row int64, column int64) {
 			}
 		}
 	}
+
 	if !printedPlayer {
-		print("* ")
+		for _, c := range *cellMaster.Cells {
+			if row == c.PosY || row == c.PosY+c.Height-1 {
+				print("--")
+				printedMap = true
+				break
+			} else if column == c.PosX || column == c.PosX+c.Width-1 {
+				print("| ")
+				printedMap = true
+				break
+			}
+		}
+		if !printedMap {
+			print("* ")
+		}
 	}
 }
 

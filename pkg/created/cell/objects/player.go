@@ -104,8 +104,6 @@ func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.Singl
 		if constants.DebugMode {
 			println("iterating cell with id ", cell.CellId)
 		}
-		println(in.PosY)
-		println(in.PosX)
 		if cell.CollidesWith(&cellmanager.Position{PosY: in.PosY, PosX: in.PosX}) {
 			if constants.DebugMode {
 				println("object collides with cell with id ", cell.CellId)

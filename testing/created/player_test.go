@@ -143,8 +143,7 @@ func TestSendUpdateMultipleObjectsWrong(t *testing.T) {
 	}
 }
 
-//TODO figure out how to change this test
-/*func TestSendUpdateMultipleTimes(t *testing.T) {
+func TestSendUpdateMultipleTimes(t *testing.T) {
 	player1 := objects.NewPlayer()
 
 	object1 := generated.SingleObject{ObjectId: "object1", UpdateKey:[]string{"1objKey1", "1objKey2"}, NewValue:[]string{"1value1", "1value2"}}
@@ -172,23 +171,40 @@ func TestSendUpdateMultipleObjectsWrong(t *testing.T) {
 	}
 
 	object2Updated := generated.SingleObject{}
+	firstFound := generated.SingleObject{}
 
 	if (*player1.MutatedObjects)[0].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[0]
-	} else if (*player1.MutatedObjects)[1].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[1]
-	} else if (*player1.MutatedObjects)[2].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[2]
+		firstFound = (*player1.MutatedObjects)[0]
+	}
+	if (*player1.MutatedObjects)[1].ObjectId == "object2" {
+		if firstFound.CellId != "object2" {
+			firstFound = (*player1.MutatedObjects)[1]
+		} else {
+			object2Updated = (*player1.MutatedObjects)[1]
+		}
+	}
+	if (*player1.MutatedObjects)[2].ObjectId == "object2" {
+		if firstFound.CellId != "object2" {
+			firstFound = (*player1.MutatedObjects)[2]
+		} else if object2Updated.CellId != "object2" {
+			object2Updated = (*player1.MutatedObjects)[2]
+		} else {
+			fatalFail(errors.New("three instances of object2 found"))
+		}
+	}
+	if (*player1.MutatedObjects)[3].ObjectId == "object2" {
+		if firstFound.CellId != "object2" {
+			firstFound = (*player1.MutatedObjects)[3]
+		} else if object2Updated.CellId != "object2" {
+			object2Updated = (*player1.MutatedObjects)[3]
+		} else {
+			fatalFail(errors.New("three instances of object2 found"))
+		}
 	}
 
-
-	if (object2Updated.UpdateKey[0] == "2objKey1" && object2Updated.NewValue[0] == "2value1") || (object2Updated.UpdateKey[1] == "2objKey1" && object2Updated.NewValue[1] == "2value1") {
+	if (object2Updated.UpdateKey[0] == "2objKey2" && object2Updated.NewValue[0] != "2newValue2") || (object2Updated.UpdateKey[1] == "2objKey2" && object2Updated.NewValue[1] == "2newValue2") {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
-
-	if (object2Updated.UpdateKey[0] == "2objKey2" && object2Updated.NewValue[0] == "2value2") || (object2Updated.UpdateKey[1] == "2objKey2" && object2Updated.NewValue[1] == "2value2") {
-		fatalFail(errors.New("objects updated with incorrect values"))
-	}
-}*/
+}
 
 

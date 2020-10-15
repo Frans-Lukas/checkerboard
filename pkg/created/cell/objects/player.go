@@ -19,9 +19,14 @@ type Client struct {
 	TrustLevel uint32
 }
 
+type CellMasterConnection struct {
+	CellMaster *generated.PlayerClient
+	Connection *grpc.ClientConn
+}
+
 type Player struct {
 	generated.PlayerServer
-	CellMaster      Client
+	CellMasterConnection
 	MutatedObjects  *[]generated.SingleObject
 	MutatingObjects *[]generated.SingleObject
 
@@ -38,7 +43,6 @@ func NewPlayer(splitCellRequirement int, splitCheckInterval int) Player {
 	emptyPlayerMap := make(map[string]map[string]*generated.PlayerClient, 0)
 	mutatedObjects := make([]generated.SingleObject, 0)
 	return Player{
-		CellMaster:           Client{Port: -1, Ip: "none"},
 		MutatedObjects:       &mutatedObjects,
 		SubscribedPlayers:    &emptyPlayerMap,
 		MutatingObjects:      &emptyObjectList,
@@ -46,13 +50,6 @@ func NewPlayer(splitCellRequirement int, splitCheckInterval int) Player {
 		splitCellRequirement: splitCellRequirement,
 		splitCheckInterval:   splitCheckInterval,
 	}
-}
-
-func (player *Player) UpdateCellMaster(
-	ctx context.Context, in *generated.NewCellMaster,
-) (*generated.EmptyReply, error) {
-	player.CellMaster = Client{Ip: in.Ip, Port: in.Port}
-	return &generated.EmptyReply{}, nil
 }
 
 func (player *Player) ReceiveMutatedObjects(
@@ -171,7 +168,9 @@ func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*gen
 }
 
 func (cm *Player) ChangedCellMaster(ctx context.Context, in *generated.ChangedCellMasterRequest) (*generated.ChangedCellMasterReply, error) {
-	return nil, nil
+	cm.CellMaster = nil
+	cm.Connection.Close()
+	return &generated.ChangedCellMasterReply{}, nil
 }
 
 func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {

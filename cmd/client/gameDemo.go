@@ -63,6 +63,8 @@ func main() {
 	// Set up a connection to the server.\
 
 	port, err := strconv.Atoi(os.Args[2])
+	splitCellRequirement := 5
+	splitCellInterval := 5
 
 	if err != nil {
 		log.Fatalf("invalid port argument: ./gameDemo ip port")
@@ -74,7 +76,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	playerServer := grpc.NewServer()
-	cellMaster := objects.NewPlayer()
+	cellMaster := objects.NewPlayer(splitCellRequirement, splitCellInterval)
 	OBJ.RegisterPlayerServer(playerServer, &cellMaster)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil {
@@ -132,7 +134,6 @@ func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 	reader := bufio.NewReader(os.Stdin)
 
 	playerList[player.objectId] = &player
-
 	printMap()
 	for {
 		input, _ := reader.ReadString('\n')
@@ -141,21 +142,17 @@ func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		//TODO check so that defer is not needed
 		//defer cancel()
-		println("sending object mutation request")
 
 		_, err2 := cm.IsAlive(ctx, &OBJ.EmptyRequest{})
 		if err2 != nil {
 			log.Fatalf("isAlive: " + err2.Error())
 		}
 
-		val, err := cm.RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, PosX: int64(player.posX), PosY: int64(player.posY)})
+		_, err := cm.RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, PosX: int64(player.posX), PosY: int64(player.posY)})
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-		println(val)
-
 		checkForPlayerUpdates(cellMaster)
-
 		printMap()
 	}
 }
@@ -188,9 +185,8 @@ func readInput(input string) {
 }
 
 func printMap() {
-	const MAP_SIZE = 5
-	for row := 0; row < MAP_SIZE; row++ {
-		for column := 0; column < MAP_SIZE; column++ {
+	for row := 0; row < constants.MAP_SIZE; row++ {
+		for column := 0; column < constants.MAP_SIZE; column++ {
 			printPosition(int64(row), int64(column))
 		}
 		print("\n")
@@ -237,9 +233,10 @@ func updateWorld(player *objects.Player) {
 		copy(objectsToMutate, *player.MutatingObjects)
 		player.MutatingObjects = new([]OBJ.SingleObject)
 		for _, mutatingObject := range objectsToMutate {
-			println("mutatingObject cellId: ", mutatingObject.CellId)
 			mutatedObject := performGameLogic(mutatingObject)
-			println("mutated object cellId: ", mutatedObject.CellId)
+			if constants.DebugMode {
+				println("mutated object cellId: ", mutatedObject.CellId)
+			}
 			if objectList, ok := objectsToCellMap[mutatingObject.CellId]; ok {
 				objectsToCellMap[mutatingObject.CellId] = append(objectList, &mutatedObject)
 			} else {
@@ -252,7 +249,6 @@ func updateWorld(player *objects.Player) {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			//TODO check if defer is needed
 			//defer cancel()
-			println("broadcasting objectlist")
 			player.BroadcastMutatedObjects(ctx, &OBJ.MultipleObjects{Objects: objectList})
 		}
 		player.MutatingObjects = new([]OBJ.SingleObject)

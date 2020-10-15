@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/Frans-Lukas/checkerboard/cmd/constants"
 	NS "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	"google.golang.org/grpc"
 	"log"
@@ -25,5 +26,5 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	c.SetWorldSize(ctx, &NS.WorldSize{Height: 5, Width: 5})
+	c.SetWorldSize(ctx, &NS.WorldSize{Height: constants.MAP_SIZE, Width: constants.MAP_SIZE})
 }

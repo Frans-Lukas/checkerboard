@@ -128,9 +128,8 @@ func TestSendUpdateMultipleObjectsWrong(t *testing.T) {
 	}
 }
 
-//TODO figure out how to change this test
-/*func TestSendUpdateMultipleTimes(t *testing.T) {
-	player1 := objects.NewPlayer()
+func TestSendUpdateMultipleTimes(t *testing.T) {
+	player1 := objects.NewPlayer(1, 1)
 
 	object1 := generated.SingleObject{ObjectId: "object1", UpdateKey: []string{"1objKey1", "1objKey2"}, NewValue: []string{"1value1", "1value2"}}
 	object2 := generated.SingleObject{ObjectId: "object2", UpdateKey: []string{"2objKey1", "2objKey2"}, NewValue: []string{"2value1", "2value2"}}
@@ -152,23 +151,43 @@ func TestSendUpdateMultipleObjectsWrong(t *testing.T) {
 	_, err = player1.ReceiveMutatedObjects(context.Background(), &request)
 	failIfNotNull(err, "could not fulfill sendUpdate")
 
-	if len(*player1.MutatedObjects) != 3 {
+	if len(*player1.MutatedObjects) != 4 {
 		fatalFail(errors.New("objects not added to ObjectsToUpdate"))
 	}
 
 	object2Updated := generated.SingleObject{}
+	firstFound := generated.SingleObject{}
 
 	if (*player1.MutatedObjects)[0].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[0]
-	} else if (*player1.MutatedObjects)[1].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[1]
-	} else if (*player1.MutatedObjects)[2].ObjectId == "object2" {
-		object2Updated = (*player1.MutatedObjects)[2]
+		firstFound = (*player1.MutatedObjects)[0]
+	}
+	if (*player1.MutatedObjects)[1].ObjectId == "object2" {
+		if firstFound.ObjectId != "object2" {
+			firstFound = (*player1.MutatedObjects)[1]
+		} else {
+			object2Updated = (*player1.MutatedObjects)[1]
+		}
+	}
+	if (*player1.MutatedObjects)[2].ObjectId == "object2" {
+		if firstFound.ObjectId != "object2" {
+			firstFound = (*player1.MutatedObjects)[2]
+		} else if object2Updated.ObjectId != "object2" {
+			object2Updated = (*player1.MutatedObjects)[2]
+		} else {
+			fatalFail(errors.New("three instances of object2 found"))
+		}
+	}
+	if (*player1.MutatedObjects)[3].ObjectId == "object2" {
+		if firstFound.ObjectId != "object2" {
+			firstFound = (*player1.MutatedObjects)[3]
+		} else if object2Updated.ObjectId != "object2" {
+			object2Updated = (*player1.MutatedObjects)[3]
+		} else {
+			fatalFail(errors.New("three instances of object2 found"))
+		}
 	}
 
-
-	if (object2Updated.UpdateKey[0] == "2objKey1" && object2Updated.NewValue[0] == "2value1") || (object2Updated.UpdateKey[1] == "2objKey1" && object2Updated.NewValue[1] == "2value1") {
+	if (object2Updated.UpdateKey[0] == "2objKey2" && object2Updated.NewValue[0] != "2newValue2") || (object2Updated.UpdateKey[1] == "2objKey2" && object2Updated.NewValue[1] == "2newValue2") {
 		fatalFail(errors.New("objects updated with incorrect values"))
 	}
 }
-*/

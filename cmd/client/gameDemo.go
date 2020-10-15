@@ -83,8 +83,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	playerServer := grpc.NewServer()
-	cellMaster := objects.NewPlayer(splitCellRequirement, splitCellInterval)
-	OBJ.RegisterPlayerServer(playerServer, &cellMaster)
+	thisPlayer := objects.NewPlayer(splitCellRequirement, splitCellInterval)
+	OBJ.RegisterPlayerServer(playerServer, &thisPlayer)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve %v", err)
@@ -92,7 +92,7 @@ func main() {
 	}()
 
 	go func() {
-		updateWorld(&cellMaster)
+		updateWorld(&thisPlayer)
 	}()
 
 	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
@@ -100,48 +100,29 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := NS.NewCellManagerClient(conn)
+	cellManager := NS.NewCellManagerClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	c.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
+	cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
 
-	cm, err := c.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: player.posX, PosY: player.posY})
-
-	if err != nil {
-		log.Fatalf("RequestCellMaster err: " + err.Error())
-	}
-
-	println("my cm has port: ", cm.Port)
-
-	if err != nil {
-		log.Fatalf("No cell master :(")
-	}
-
-	conn2, err2 := grpc.Dial(objects.ToAddress(cm.Ip, cm.Port), grpc.WithInsecure(), grpc.WithBlock())
-	defer conn2.Close()
-	if err2 != nil {
-		log.Fatalf("did not connect: %v", err2)
-	}
-
-	cmConn := OBJ.NewPlayerClient(conn2)
+	RequestNewCellMaster(cellManager, ctx, thisPlayer)
 
 	for {
-		_, err = cmConn.SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: "localhost", Port: int32(port)})
+		_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: "localhost", Port: int32(port)})
 		if err == nil {
 			break
 		}
 	}
-
-	gameLoop(cmConn, cellMaster)
+	gameLoop(thisPlayer, cellManager)
 }
 
-func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
+func gameLoop(thisPlayer objects.Player, cellManager NS.CellManagerClient) {
 	reader := bufio.NewReader(os.Stdin)
 
 	playerList[player.objectId] = &player
-	printMap(&cellMaster)
+	printMap(&thisPlayer)
 	println()
 	println()
 	println()
@@ -158,21 +139,34 @@ func gameLoop(cm OBJ.PlayerClient, cellMaster objects.Player) {
 		//TODO check so that defer is not needed
 		//defer cancel()
 
-		_, err2 := cm.IsAlive(ctx, &OBJ.EmptyRequest{})
-		if err2 != nil {
-			log.Fatalf("isAlive: " + err2.Error())
-		}
+		if thisPlayer.CellMaster == nil {
 
-		_, err := cm.RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, PosX: int64(player.posX), PosY: int64(player.posY)})
+			RequestNewCellMaster(cellManager, ctx, thisPlayer)
+		}
+		_, err := (*thisPlayer.CellMaster).RequestObjectMutation(ctx, &OBJ.SingleObject{ObjectType: PlayerObjectType, ObjectId: player.objectId, PosX: int64(player.posX), PosY: int64(player.posY)})
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-		checkForPlayerUpdates(cellMaster)
-		printMap(&cellMaster)
+		checkForPlayerUpdates(thisPlayer)
+		printMap(&thisPlayer)
 		println()
 		println()
 		println()
 	}
+}
+
+func RequestNewCellMaster(cellManager NS.CellManagerClient, ctx context.Context, thisPlayer objects.Player) {
+	cm, err := cellManager.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: player.posX, PosY: player.posY})
+	if err != nil {
+		log.Fatalf("did not find new cell master: %v", err)
+	}
+	conn, err2 := grpc.Dial(objects.ToAddress(cm.Ip, cm.Port), grpc.WithInsecure(), grpc.WithBlock())
+	if err2 != nil {
+		log.Fatalf("did not connect to new cell master: %v", err2)
+	}
+	cmConn := OBJ.NewPlayerClient(conn)
+	thisPlayer.CellMaster = &cmConn
+	thisPlayer.Connection = conn
 }
 
 func botMove() {

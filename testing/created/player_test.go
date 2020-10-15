@@ -8,21 +8,6 @@ import (
 	"testing"
 )
 
-func TestUpdateCellMaster(t *testing.T) {
-	player1 := objects.NewPlayer(1, 1)
-	request := generated.NewCellMaster{Ip: "localhost", Port: 1337}
-	_, err := player1.UpdateCellMaster(context.Background(), &request)
-	failIfNotNull(err, "could not update cellmaster")
-
-	if player1.CellMaster.Port == -1 {
-		fatalFail(errors.New("player was not updated with cellmaster"))
-	}
-
-	if player1.CellMaster.Port != 1337 || player1.CellMaster.Ip != "localhost" {
-		fatalFail(errors.New("players cellmaster was not updated with correct variables"))
-	}
-}
-
 func TestSendUpdateSingleObject(t *testing.T) {
 	player1 := objects.NewPlayer(1, 1)
 

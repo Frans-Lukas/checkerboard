@@ -321,16 +321,16 @@ func (cellManager *CellManager) DivideCell(
 		if cell.Locked {
 			return &generated.CellChangeStatusReply{Succeeded: false}, errors.New("cell is locked")
 		}
-
-		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		newWidth := int64(UpDiv(int(cell.Width), 2))
+		newHeight := int64(UpDiv(int(cell.Height), 2))
+		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
-		cell2 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY + cell.Height/2, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cell2 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
-		cell3 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cell3 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
-		cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY + cell.Height/2, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
-
 		cellIndex := FindCell(*cellManager.Cells, in.CellId)
 		(*cellManager.Cells)[cellIndex] = cell1
 		cellManager.AppendCell(cell2)
@@ -345,6 +345,10 @@ func (cellManager *CellManager) DivideCell(
 
 func (cellManager *CellManager) AppendCell(cell objects.Cell) {
 	*cellManager.Cells = append(*cellManager.Cells, cell)
+}
+
+func UpDiv(divident int, divisor int) int {
+	return (divident + divisor - 1) / divisor
 }
 
 func FindCell(cells []objects.Cell, cellId string) int {

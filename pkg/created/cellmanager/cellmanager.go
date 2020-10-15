@@ -17,15 +17,15 @@ const requestCMWithPosPrint = true
 
 type CellManager struct {
 	generated.CellManagerServer
-	WorldWidth  int64
-	WorldHeight int64
-	Cells       *[]objects.Cell
-	CellNumber  int64
+	WorldWidth   int64
+	WorldHeight  int64
+	Cells        *[]objects.Cell
+	CellIDNumber int64
 }
 
 func NewCellManager() CellManager {
 	cells := make([]objects.Cell, 0)
-	return CellManager{Cells: &cells, CellNumber:0}
+	return CellManager{Cells: &cells, CellIDNumber: 0}
 }
 
 func (cellManager *CellManager) CreateCell(
@@ -101,15 +101,18 @@ func (cellManager *CellManager) RequestCellMasterWithPositions(
 		if cell.CollidesWith(in) {
 			cm, err := cellManager.selectCellMaster(cell, cellIndex)
 			if err != nil {
-				log.Fatalf("could not select cell as there is no player")
+				println("request cell master: no player")
+				return &generated.CellMasterReply{Ip: "no player", Port: - 1}, errors.New("no player in cell")
 			}
 			go func() {
 				NotifyOfCellMastership(*cm, cell)
 			}()
 			//helpers.DebugPrint(requestCMWithPosPrint, fmt.Sprintf("returning cm with port: $d", cm.Port))
+			println("request cell master: found cell master ", cm.Ip, ":", cm.Port)
 			return &generated.CellMasterReply{Ip: cm.Ip, Port: cm.Port}, nil
 		}
 	}
+	println("request cell master: invalid position ")
 	return &generated.CellMasterReply{Ip: "INVALID POSITION", Port: -1}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 }
 
@@ -316,17 +319,17 @@ func (cellManager *CellManager) DivideCell(
 		cell := (*cellManager.Cells)[cellIndex]
 
 		if cell.Locked {
-			return &generated.CellChangeStatusReply{Succeeded:false}, errors.New("cell is locked")
+			return &generated.CellChangeStatusReply{Succeeded: false}, errors.New("cell is locked")
 		}
 
-		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX, PosY:cell.PosY, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
-		cellManager.CellNumber++
-		cell2:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX, PosY:cell.PosY + cell.Height/2, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
-		cellManager.CellNumber++
-		cell3:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX + cell.Width/2, PosY:cell.PosY, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
-		cellManager.CellNumber++
-		cell4:= objects.Cell{CellId: strconv.Itoa(int(cellManager.CellNumber)), PosX:cell.PosX + cell.Width/2, PosY:cell.PosY + cell.Height/2, Width:cell.Width/2, Height:cell.Height/2, Players: make([]objects.Client, 0)}
-		cellManager.CellNumber++
+		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cellManager.CellIDNumber++
+		cell2 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY + cell.Height/2, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cellManager.CellIDNumber++
+		cell3 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cellManager.CellIDNumber++
+		cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY + cell.Height/2, Width: cell.Width / 2, Height: cell.Height / 2, Players: make([]objects.Client, 0)}
+		cellManager.CellIDNumber++
 
 		cellIndex := FindCell(*cellManager.Cells, in.CellId)
 		(*cellManager.Cells)[cellIndex] = cell1
@@ -334,9 +337,9 @@ func (cellManager *CellManager) DivideCell(
 		cellManager.AppendCell(cell3)
 		cellManager.AppendCell(cell4)
 
-		return &generated.CellChangeStatusReply{Succeeded:true}, nil
+		return &generated.CellChangeStatusReply{Succeeded: true}, nil
 	} else {
-		return &generated.CellChangeStatusReply{Succeeded:false}, errors.New("cellId does not match an existing cell")
+		return &generated.CellChangeStatusReply{Succeeded: false}, errors.New("cellId does not match an existing cell")
 	}
 }
 

@@ -627,7 +627,7 @@ func TestMergeCellsInformsCellMasterOfMergedCell(t *testing.T) {
 	playerServer := grpc.NewServer()
 	cellMasterServer := objects.NewPlayer(1, 1)
 	(*cellMasterServer.Cells)[testCell1.CellId] = testCell1
-	objects2.RegisterPlayerServer(playerServer, &cellMasterServer)
+	objects2.RegisterPlayerServer(playerServer, cellMasterServer)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
 			log.Fatalf("failed to serve %v", err)

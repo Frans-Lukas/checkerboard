@@ -26,10 +26,10 @@ message ChangedCellMasterReply {
 message MultipleObjects {
     repeated SingleObject objects = 1;
 }
+
 message CellList {
     repeated Cell cells = 1;
 }
-
 
 message SingleObject {
     string cellId = 1;

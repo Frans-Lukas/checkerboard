@@ -345,6 +345,112 @@ func (cellManager *CellManager) AppendCell(cell objects.Cell) {
 	*cellManager.Cells = append(*cellManager.Cells, cell)
 }
 
+func (cellManager *CellManager) TryToMergeCell(cell1 objects.Cell) bool {
+	cell1Corner1X := int64(0)
+	cell1Corner1Y := int64(0)
+	cell1Corner2X := int64(0)
+	cell1Corner2Y := int64(0)
+
+	cell2Corner1X := int64(0)
+	cell2Corner1Y := int64(0)
+	cell2Corner2X := int64(0)
+	cell2Corner2Y := int64(0)
+
+	// check left, up, right, down
+	for index, cell2 := range *cellManager.Cells {
+		// check if locked
+		if !cell2.Locked && cell2.CellId != cell1.CellId{
+			for direction := 0; direction < 4; direction++ {
+				switch direction {
+				case 0: // left
+					cell1Corner1X = cell1.PosX
+					cell1Corner1Y = cell1.PosY
+					cell1Corner2X = cell1.PosX
+					cell1Corner2Y = cell1.PosY + cell1.Height
+					cell2Corner1X = cell2.PosX + cell2.Width
+					cell2Corner1Y = cell2.PosY
+					cell2Corner2X = cell2Corner1X
+					cell2Corner2Y = cell2.PosY + cell2.Height
+					break
+				case 1: // up
+					cell1Corner1X = cell1.PosX
+					cell1Corner1Y = cell1.PosY
+					cell1Corner2X = cell1.PosX + cell1.Width
+					cell1Corner2Y = cell1.PosY
+					cell2Corner1X = cell2.PosX
+					cell2Corner1Y = cell2.PosY + cell2.Height
+					cell2Corner2X = cell2.PosX + cell2.Width
+					cell2Corner2Y = cell2.PosY + cell2.Height
+					break
+				case 2: // right
+					cell1Corner1X = cell1.PosX + cell1.Width
+					cell1Corner1Y = cell1.PosY
+					cell1Corner2X = cell1.PosX + cell1.Width
+					cell1Corner2Y = cell1.PosY + cell1.Height
+					cell2Corner1X = cell2.PosX
+					cell2Corner1Y = cell2.PosY
+					cell2Corner2X = cell2.PosX
+					cell2Corner2Y = cell2.PosY + cell2.Height
+					break
+				case 3: // down
+					cell1Corner1X = cell1.PosX
+					cell1Corner1Y = cell1.PosY + cell1.Height
+					cell1Corner2X = cell1.PosX + cell1.Width
+					cell1Corner2Y = cell1.PosY + cell1.Height
+					cell2Corner1X = cell2.PosX
+					cell2Corner1Y = cell2.PosY
+					cell2Corner2X = cell2.PosX + cell2.Width
+					cell2Corner2Y = cell2.PosY
+					break
+				}
+
+				// check if cell2 connects
+				if cell1Corner1X == cell2Corner1X && cell1Corner1Y == cell2Corner1Y && cell1Corner2X == cell2Corner2X && cell1Corner2Y == cell2Corner2Y {
+					// merge
+					newCell := objects.NewCellFromCells(strconv.Itoa(int(cellManager.CellNumber)), cell1, cell2)
+
+					// replace cell1 and remove cell2
+					cellIndex := FindCell(*cellManager.Cells, cell1.CellId)
+					(*cellManager.Cells)[cellIndex] = newCell
+					(*cellManager.Cells)[index] = (*cellManager.Cells)[len(*cellManager.Cells) - 1]
+					*cellManager.Cells = (*cellManager.Cells)[:len(*cellManager.Cells) - 1]
+
+					// inform all cell members of removal from cell
+					for _, client := range cell1.Players {
+						cellManager.InformClientOfCellMasterChange(client)
+					}
+					for _, client := range cell2.Players {
+						cellManager.InformClientOfCellMasterChange(client)
+					}
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (cellManager *CellManager) InformClientOfCellMasterChange(client objects.Client) {
+	address := fmt.Sprintf(client.Ip + ":" + strconv.Itoa(int(client.Port)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		println("did not connect: %v", err)
+		return
+	}
+	defer conn.Close()
+	c := objects2.NewPlayerClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_, err = c.ChangedCellMaster(ctx, &objects2.ChangedCellMasterRequest{})
+	if err != nil {
+		println("did not succeed to request changedCellMaster: %v", err)
+	}
+	return
+}
+
+
+
+
 func UpDiv(divident int, divisor int) int {
 	return (divident + divisor - 1) / divisor
 }

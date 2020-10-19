@@ -529,3 +529,71 @@ func TestDivideCell(t *testing.T) {
 		fatalFail(errors.New("at least one cell created incorrectly"))
 	}
 }
+
+func TestMergeCell(t *testing.T) {
+	testCell1 := objects.NewCell("testCell1")
+	testCell1.PosX = 100
+	testCell1.PosY = 0
+	testCell1.Width = 100
+	testCell1.Height = 100
+
+	testCell2 := objects.NewCell("testCell2")
+	testCell2.PosX = 0
+	testCell2.PosY = 0
+	testCell2.Width = 100
+	testCell2.Height = 100
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(testCell1)
+	cm.AppendCell(testCell2)
+
+	succeeded := cm.TryToMergeCell(testCell1)
+
+	if !succeeded {
+		fatalFail(errors.New("could not merge cell"))
+	}
+
+	if len(*cm.Cells) != 1 {
+		fatalFail(errors.New("cell did not merge but cell manager returned true"))
+	}
+
+	if (*cm.Cells)[0].PosX != 0 {
+		fatalFail(errors.New("x position not set correctly"))
+	}
+
+	if (*cm.Cells)[0].PosY != 0 {
+		fatalFail(errors.New("y position not set correctly"))
+	}
+
+	if (*cm.Cells)[0].Width != 200 {
+		fatalFail(errors.New("width not set correctly"))
+	}
+
+	if (*cm.Cells)[0].Height != 100 {
+		fatalFail(errors.New("height not set correctly"))
+	}
+}
+
+func TestMergeIncompatibleCells(t *testing.T) {
+	testCell1 := objects.NewCell("testCell1")
+	testCell1.PosX = 10
+	testCell1.PosY = 10
+	testCell1.Width = 100
+	testCell1.Height = 100
+
+	testCell2 := objects.NewCell("testCell2")
+	testCell2.PosX = 0
+	testCell2.PosY = 0
+	testCell2.Width = 100
+	testCell2.Height = 100
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(testCell1)
+	cm.AppendCell(testCell2)
+
+	succeeded := cm.TryToMergeCell(testCell1)
+
+	if succeeded {
+		fatalFail(errors.New("merged cell when they do not align"))
+	}
+}

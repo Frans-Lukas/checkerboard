@@ -83,8 +83,14 @@ func (cm *Player) ReceiveCellMastership(ctx context.Context, in *generated.CellL
 		println("Received cell mastership")
 	}
 	for _, cell := range in.Cells {
-		if _, ok := (*cm.Cells)[cell.CellId]; ok {
-			// cm is already aware of mastership over cell
+		if ownedCell, ok := (*cm.Cells)[cell.CellId]; ok {
+			// cm is already aware of mastership over cell, update cell status
+			ownedCell.PosX = cell.PosX
+			ownedCell.PosY = cell.PosY
+			ownedCell.Height = cell.Height
+			ownedCell.Width = cell.Width
+
+			(*cm.Cells)[cell.CellId] = ownedCell
 		} else {
 			(*cm.Cells)[cell.CellId] = Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
 		}

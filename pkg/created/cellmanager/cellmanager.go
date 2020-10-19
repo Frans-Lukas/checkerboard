@@ -407,17 +407,24 @@ func (cellManager *CellManager) TryToMergeCell(cell1 objects.Cell) bool {
 				// check if cell2 connects
 				if cell1Corner1X == cell2Corner1X && cell1Corner1Y == cell2Corner1Y && cell1Corner2X == cell2Corner2X && cell1Corner2Y == cell2Corner2Y {
 					// merge
-					newCell := objects.NewCellFromCells(strconv.Itoa(int(cellManager.CellNumber)), cell1, cell2)
+					tmpCell := objects.NewCellFromCells(strconv.Itoa(int(cellManager.CellNumber)), cell1, cell2)
+					cell1.PosX = tmpCell.PosX
+					cell1.PosY = tmpCell.PosY
+					cell1.Width = tmpCell.Width
+					cell1.Height = tmpCell.Height
 
 					// replace cell1 and remove cell2
 					cellIndex := FindCell(*cellManager.Cells, cell1.CellId)
-					(*cellManager.Cells)[cellIndex] = newCell
+					(*cellManager.Cells)[cellIndex] = cell1
 					(*cellManager.Cells)[index] = (*cellManager.Cells)[len(*cellManager.Cells) - 1]
 					*cellManager.Cells = (*cellManager.Cells)[:len(*cellManager.Cells) - 1]
 
 					// inform all cell members of removal from cell
-					for _, client := range cell1.Players {
-						cellManager.InformClientOfCellMasterChange(client)
+					//for _, client := range cell1.Players {
+					//	cellManager.InformClientOfCellMasterChange(client)
+					//}
+					if cell1.CellMaster != nil {
+						cellManager.InformCellMasterOfCellChange(*cell1.CellMaster, cell1)
 					}
 					for _, client := range cell2.Players {
 						cellManager.InformClientOfCellMasterChange(client)
@@ -428,6 +435,33 @@ func (cellManager *CellManager) TryToMergeCell(cell1 objects.Cell) bool {
 		}
 	}
 	return false
+}
+
+func (cellManager *CellManager) InformCellMasterOfCellChange(cellMaster objects.Client, cell objects.Cell) {
+	address := fmt.Sprintf(cellMaster.Ip + ":" + strconv.Itoa(int(cellMaster.Port)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		println("did not connect: %v", err)
+		return
+	}
+	defer conn.Close()
+	c := objects2.NewPlayerClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	objectCell := objects2.Cell{
+		CellId:cell.CellId,
+		PosX: cell.PosX,
+		PosY: cell.PosY,
+		Width: cell.Width,
+		Height: cell.Height,
+	}
+
+	_, err = c.ReceiveCellMastership(ctx, &objects2.CellList{Cells:[]*objects2.Cell{&objectCell}})
+	if err != nil {
+		println("did not succeed to request receiveCellMasterChip with upated cell: %v", err)
+	}
+	return
 }
 
 func (cellManager *CellManager) InformClientOfCellMasterChange(client objects.Client) {

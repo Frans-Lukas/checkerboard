@@ -3,9 +3,14 @@ package created
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+	objects2 "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
+	"log"
+	"net"
 	"testing"
 )
 
@@ -595,5 +600,63 @@ func TestMergeIncompatibleCells(t *testing.T) {
 
 	if succeeded {
 		fatalFail(errors.New("merged cell when they do not align"))
+	}
+}
+
+func TestMergeCellsInformsCellMasterOfMergedCell(t *testing.T) {
+	cellMaster := objects.Client{Ip: "localhost", Port: 8889}
+
+	testCell1 := objects.NewCell("testCell1")
+	testCell1.CellMaster = &cellMaster
+	testCell1.PosX = 100
+	testCell1.PosY = 0
+	testCell1.Width = 100
+	testCell1.Height = 100
+
+	testCell2 := objects.NewCell("testCell2")
+	testCell2.PosX = 0
+	testCell2.PosY = 0
+	testCell2.Width = 100
+	testCell2.Height = 100
+
+	lis, err := net.Listen("tcp", ":"+fmt.Sprint(8889))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	playerServer := grpc.NewServer()
+	cellMasterServer := objects.NewPlayer(1, 1)
+	(*cellMasterServer.Cells)[testCell1.CellId] = testCell1
+	objects2.RegisterPlayerServer(playerServer, &cellMasterServer)
+	go func() {
+		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
+			log.Fatalf("failed to serve %v", err)
+		}
+	}()
+
+	cm := cellmanager.NewCellManager()
+	cm.AppendCell(testCell1)
+	cm.AppendCell(testCell2)
+
+	succeeded := cm.TryToMergeCell(testCell1)
+
+	if !succeeded {
+		fatalFail(errors.New("could not merge cell"))
+	}
+
+	if (*cellMasterServer.Cells)[testCell1.CellId].PosX != 0 {
+		fatalFail(errors.New("x position not set correctly"))
+	}
+
+	if (*cellMasterServer.Cells)[testCell1.CellId].PosY != 0 {
+		fatalFail(errors.New("y position not set correctly"))
+	}
+
+	if (*cellMasterServer.Cells)[testCell1.CellId].Width != 200 {
+		fatalFail(errors.New("width not set correctly"))
+	}
+
+	if (*cellMasterServer.Cells)[testCell1.CellId].Height != 100 {
+		fatalFail(errors.New("height not set correctly"))
 	}
 }

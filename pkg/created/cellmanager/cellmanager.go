@@ -21,6 +21,7 @@ type CellManager struct {
 	WorldHeight  int64
 	Cells        *[]objects.Cell
 	CellIDNumber int64
+	CellTree     *CellTreeNode
 }
 
 func NewCellManager() CellManager {
@@ -28,10 +29,17 @@ func NewCellManager() CellManager {
 	return CellManager{Cells: &cells, CellIDNumber: 0}
 }
 
+// should only be called once!!!!!!!!!!!!!!!
 func (cellManager *CellManager) CreateCell(
 	ctx context.Context, in *generated.CellRequest,
 ) (*generated.CellStatusReply, error) {
-	cellManager.AppendCell(objects.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)})
+
+	cellToAdd := objects.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)}
+
+	cellManager.AppendCell(cellToAdd)
+
+	cellManager.CellTree = CreateCellTree(cellToAdd)
+
 	return &generated.CellStatusReply{WasPerformed: true}, nil
 }
 
@@ -80,6 +88,9 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 ) (*generated.TransactionSucceeded, error) {
 	for index, cell := range *cellManager.Cells {
 		if cell.CollidesWith(&generated.Position{PosY: in.PosY, PosX: in.PosX}) {
+
+			cellManager.CellTree.IncrementCount(cell.CellId)
+
 			(*cellManager.Cells)[index].AppendPlayer(
 				objects.Client{
 					Ip:         in.Ip,
@@ -231,6 +242,7 @@ func (cellManager *CellManager) PlayerLeftCell(
 ) (*generated.PlayerStatusReply, error) {
 	for _, cellToLeave := range *cellManager.Cells {
 		if cellToLeave.CellId == in.CellId {
+			cellManager.CellTree.DecrementCount(cellToLeave.CellId)
 			cellToLeave.DeletePlayer(objects.Client{Port: in.Port, Ip: in.Ip})
 		}
 	}
@@ -323,6 +335,9 @@ func (cellManager *CellManager) DivideCell(
 		}
 		newWidth := int64(UpDiv(int(cell.Width), 2))
 		newHeight := int64(UpDiv(int(cell.Height), 2))
+
+		nodeToAddChildrenTo := cellManager.CellTree.findNode(in.CellId)
+
 		cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
 		cell2 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
@@ -332,6 +347,9 @@ func (cellManager *CellManager) DivideCell(
 		cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 		cellManager.CellIDNumber++
 		cellIndex := FindCell(*cellManager.Cells, in.CellId)
+
+		nodeToAddChildrenTo.addChildren(cell1, cell2, cell3, cell4)
+
 		(*cellManager.Cells)[cellIndex] = cell1
 		cellManager.AppendCell(cell2)
 		cellManager.AppendCell(cell3)
@@ -361,7 +379,7 @@ func (cellManager *CellManager) TryToMergeCell(cell1 objects.Cell) bool {
 	// check left, up, right, down
 	for index, cell2 := range *cellManager.Cells {
 		// check if locked
-		if !cell2.Locked && cell2.CellId != cell1.CellId{
+		if !cell2.Locked && cell2.CellId != cell1.CellId {
 			for direction := 0; direction < 4; direction++ {
 				switch direction {
 				case 0: // left
@@ -418,8 +436,8 @@ func (cellManager *CellManager) TryToMergeCell(cell1 objects.Cell) bool {
 					// replace cell1 and remove cell2
 					cellIndex := FindCell(*cellManager.Cells, cell1.CellId)
 					(*cellManager.Cells)[cellIndex] = cell1
-					(*cellManager.Cells)[index] = (*cellManager.Cells)[len(*cellManager.Cells) - 1]
-					*cellManager.Cells = (*cellManager.Cells)[:len(*cellManager.Cells) - 1]
+					(*cellManager.Cells)[index] = (*cellManager.Cells)[len(*cellManager.Cells)-1]
+					*cellManager.Cells = (*cellManager.Cells)[:len(*cellManager.Cells)-1]
 
 					// inform all cell members of removal from cell
 					//for _, client := range cell1.Players {
@@ -452,14 +470,14 @@ func (cellManager *CellManager) InformCellMasterOfCellChange(cellMaster objects.
 	defer cancel()
 
 	objectCell := objects2.Cell{
-		CellId:cell.CellId,
-		PosX: cell.PosX,
-		PosY: cell.PosY,
-		Width: cell.Width,
+		CellId: cell.CellId,
+		PosX:   cell.PosX,
+		PosY:   cell.PosY,
+		Width:  cell.Width,
 		Height: cell.Height,
 	}
 
-	_, err = c.ReceiveCellMastership(ctx, &objects2.CellList{Cells:[]*objects2.Cell{&objectCell}})
+	_, err = c.ReceiveCellMastership(ctx, &objects2.CellList{Cells: []*objects2.Cell{&objectCell}})
 	if err != nil {
 		println("did not succeed to request receiveCellMasterChip with upated cell: %v", err)
 	}
@@ -483,9 +501,6 @@ func (cellManager *CellManager) InformClientOfCellMasterChange(client objects.Cl
 	}
 	return
 }
-
-
-
 
 func UpDiv(divident int, divisor int) int {
 	return (divident + divisor - 1) / divisor

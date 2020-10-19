@@ -282,7 +282,7 @@ func printMap(cellMaster *objects.Player) {
 		for column := 0; column < constants.MAP_SIZE; column++ {
 			printPosition(int64(row), int64(column), cellMaster)
 		}
-		print("\n")
+		print(row, "\n")
 	}
 }
 

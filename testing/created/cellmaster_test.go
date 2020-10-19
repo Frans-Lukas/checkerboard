@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"google.golang.org/grpc"
 	"log"
@@ -163,7 +164,7 @@ func TestSubscribePlayerToSingleCell(t *testing.T) {
 
 	playerServer := grpc.NewServer()
 	subscriber := objects.NewPlayer(1, 1)
-	generated.RegisterPlayerServer(playerServer, &subscriber)
+	generated.RegisterPlayerServer(playerServer, subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
 			log.Fatalf("failed to serve %v", err)
@@ -210,7 +211,7 @@ func TestSubscribePlayerToMultipleCells(t *testing.T) {
 
 	playerServer := grpc.NewServer()
 	subscriber := objects.NewPlayer(1, 1)
-	generated.RegisterPlayerServer(playerServer, &subscriber)
+	generated.RegisterPlayerServer(playerServer, subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
 			log.Fatalf("failed to serve %v", err)
@@ -256,7 +257,7 @@ func TestSubscribePlayerOutsideCells(t *testing.T) {
 
 	playerServer := grpc.NewServer()
 	subscriber := objects.NewPlayer(1, 1)
-	generated.RegisterPlayerServer(playerServer, &subscriber)
+	generated.RegisterPlayerServer(playerServer, subscriber)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil && err.Error() != "the server has been stopped" {
 			log.Fatalf("failed to serve %v", err)
@@ -314,4 +315,48 @@ func TestSubscribeUnConnectablePlayerCells(t *testing.T) {
 	if _, subscribed := (*cm.SubscribedPlayers)[cell2.CellId]["localhost:8888"]; subscribed {
 		fatalFail(errors.New("subscribed to cell2"))
 	}
+}
+
+func TestPlayerIsInOwnedCell(t *testing.T) {
+	cm := objects.NewPlayer(1, 1)
+	cell1 := objects.NewCell("cell1")
+	cell1.PosX = 0
+	cell1.PosY = 0
+	cell1.Height = 100
+	cell1.Width = 100
+	(*cm.Cells)[cell1.CellId] = cell1
+	//cell2 := objects.NewCell("cell2")
+	//cell2.PosX = 50
+	//cell2.PosY = 0
+	//cell2.Height = 100
+	//cell2.Width = 100
+	//(*cm.Cells)[cell2.CellId] = cell2
+
+	res := cm.PlayerIsInOwnedCell(cellmanager.Position{PosX: 50, PosY: 50})
+	if res {
+		return
+	}
+	fatalFail(errors.New("did not return correctly"))
+}
+
+func TestPlayerIsInOwnedCellReturnsFalseIfOutside(t *testing.T) {
+	cm := objects.NewPlayer(1, 1)
+	cell1 := objects.NewCell("cell1")
+	cell1.PosX = 0
+	cell1.PosY = 0
+	cell1.Height = 100
+	cell1.Width = 100
+	(*cm.Cells)[cell1.CellId] = cell1
+	//cell2 := objects.NewCell("cell2")
+	//cell2.PosX = 50
+	//cell2.PosY = 0
+	//cell2.Height = 100
+	//cell2.Width = 100
+	//(*cm.Cells)[cell2.CellId] = cell2
+
+	res := cm.PlayerIsInOwnedCell(cellmanager.Position{PosX: 150, PosY: 50})
+	if !res {
+		return
+	}
+	fatalFail(errors.New("did not return correctly"))
 }

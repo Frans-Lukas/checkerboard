@@ -69,6 +69,10 @@ func main() {
 
 	port, err := strconv.Atoi(os.Args[2])
 
+	if len(os.Args) >= 4 {
+		isBot = false
+	}
+
 	if err != nil {
 		log.Fatalf("invalid port argument: ./gameDemo ip port")
 	}
@@ -84,15 +88,12 @@ func main() {
 	thisPlayer.Ip = "localhost"
 	thisPlayer.PosX = int64(rand.Int() % constants.MAP_SIZE)
 	thisPlayer.PosY = int64(rand.Int() % constants.MAP_SIZE)
+	thisPlayer.ObjectId = objects.ToAddress(thisPlayer.Ip, int32(thisPlayer.Port))
 	OBJ.RegisterPlayerServer(playerServer, thisPlayer)
 	go func() {
 		if err := playerServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve %v", err)
 		}
-	}()
-
-	go func() {
-		updateWorld(thisPlayer)
 	}()
 
 	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
@@ -102,10 +103,18 @@ func main() {
 	defer conn.Close()
 	cellManager := NS.NewCellManagerClient(conn)
 
+	go func() {
+		updateWorld(thisPlayer, &cellManager)
+	}()
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
+	_, err = cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
+
+	if err != nil {
+		log.Fatalf("Failed to add player to cell: ", err.Error())
+	}
 
 	println("requesting cm")
 	RequestNewCellMaster(cellManager, thisPlayer)
@@ -115,14 +124,24 @@ func main() {
 		thisPlayer.SplitCellLoop(&cellManager)
 	}()
 
+	println("my objectid is: ", thisPlayer.ObjectId)
+
 	for {
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
-		_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: "localhost", Port: int32(port), PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
+		_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
+			Ip:       "localhost",
+			Port:     int32(port),
+			PosX:     thisPlayer.PosX,
+			PosY:     thisPlayer.PosY,
+			ObjectId: thisPlayer.ObjectId,
+		})
 		if err == nil {
 			break
 		} else {
+			RequestNewCellMaster(cellManager, thisPlayer)
 			println("got error ", err.Error())
+			time.Sleep(time.Second)
 		}
 	}
 	gameLoop(thisPlayer, cellManager)
@@ -142,6 +161,12 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 		} else {
 			input, _ := reader.ReadString('\n')
 			readInput(input)
+			println("Players: ")
+			for _, player := range playerList {
+				println(player.objectId)
+			}
+			println()
+
 		}
 
 		//TODO check so that defer is not needed
@@ -151,14 +176,20 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 			RequestNewCellMaster(cellManager, thisPlayer)
 			if thisPlayer.CellMaster != nil {
 				ctx, _ := context.WithTimeout(context.Background(), time.Second)
-				(*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{Ip: thisPlayer.Ip, Port: int32(thisPlayer.Port), PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
+				(*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
+					Ip:       thisPlayer.Ip,
+					Port:     int32(thisPlayer.Port),
+					PosX:     thisPlayer.PosX,
+					PosY:     thisPlayer.PosY,
+					ObjectId: thisPlayer.ObjectId,
+				})
 			}
 			time.Sleep(time.Second)
 		}
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		_, err := (*thisPlayer.CellMaster).RequestObjectMutation(ctx, &OBJ.SingleObject{
 			ObjectType: PlayerObjectType,
-			ObjectId:   objects.ToAddress(thisPlayer.Ip, int32(thisPlayer.Port)),
+			ObjectId:   thisPlayer.ObjectId,
 			PosX:       int64(thisPlayer.PosX),
 			PosY:       int64(thisPlayer.PosY),
 		})
@@ -216,7 +247,7 @@ func botMove() {
 func checkForPlayerUpdates(cellMaster *objects.Player) {
 	for _, object := range *cellMaster.MutatedObjects {
 		if _, ok := playerList[object.ObjectId]; ok {
-			if object.ObjectId != objects.ToAddress(thisPlayer.Ip, int32(thisPlayer.Port)) {
+			if object.ObjectId != thisPlayer.ObjectId {
 				updatePlayer(&object)
 			}
 		} else {
@@ -242,6 +273,12 @@ func readInput(input string) {
 
 func printMap(cellMaster *objects.Player) {
 	for row := 0; row < constants.MAP_SIZE; row++ {
+		if row < 10 {
+			print(row, " ")
+		} else {
+			print(row)
+		}
+		//fmt.Fprintf("%3d", row)
 		for column := 0; column < constants.MAP_SIZE; column++ {
 			printPosition(int64(row), int64(column), cellMaster)
 		}
@@ -257,7 +294,7 @@ func printPosition(row int64, column int64, cellMaster *objects.Player) {
 		printedPlayer = true
 	} else {
 		for _, player := range playerList {
-			if row == thisPlayer.PosY && column == player.posX {
+			if row == player.posY && column == player.posX && player.objectId != thisPlayer.ObjectId {
 				print("O ")
 				printedPlayer = true
 				break
@@ -310,7 +347,7 @@ func updatePlayer(object *OBJ.SingleObject) {
 	playerList[object.ObjectId].posY = object.PosY
 }
 
-func updateWorld(player *objects.Player) {
+func updateWorld(player *objects.Player, cellManager *NS.CellManagerClient) {
 	// poll mutatingobjects
 	for {
 
@@ -320,10 +357,11 @@ func updateWorld(player *objects.Player) {
 		copy(objectsToMutate, *player.MutatingObjects)
 		player.MutatingObjects = new([]OBJ.SingleObject)
 		for _, mutatingObject := range objectsToMutate {
-			mutatedObject := performGameLogic(mutatingObject)
-			if constants.DebugMode {
+			mutatedObject := performGameLogic(mutatingObject, cellManager)
+			if len(mutatedObject.CellId) == 0 {
 				println("mutated object cellId: ", mutatedObject.CellId)
 			}
+
 			if objectList, ok := objectsToCellMap[mutatingObject.CellId]; ok {
 				objectsToCellMap[mutatingObject.CellId] = append(objectList, &mutatedObject)
 			} else {
@@ -346,23 +384,17 @@ func updateWorld(player *objects.Player) {
 	// broadcast update
 }
 
-func performGameLogic(mutatingObject OBJ.SingleObject) OBJ.SingleObject {
+func performGameLogic(mutatingObject OBJ.SingleObject, cellManager *NS.CellManagerClient) OBJ.SingleObject {
 	switch mutatingObject.ObjectType {
 	case PlayerObjectType:
-		return performPlayerUpdate(mutatingObject)
+		return performPlayerUpdate(mutatingObject, cellManager)
 	}
 	return mutatingObject
 }
 
-func performPlayerUpdate(object OBJ.SingleObject) OBJ.SingleObject {
+func performPlayerUpdate(object OBJ.SingleObject, cellManager *NS.CellManagerClient) OBJ.SingleObject {
 	//playerToUpdate := singleObjectToPlayer(object)
 	//TODO: check for valid update
+	thisPlayer.PlayerMightLeaveCellHandle(object, cellManager)
 	return object
-}
-
-func singleObjectToPlayer(object OBJ.SingleObject) Player {
-	playerToUpdate := PlayerConstructor(0, 0)
-	playerToUpdate.posY = object.PosY
-	playerToUpdate.posX = object.PosX
-	return playerToUpdate
 }

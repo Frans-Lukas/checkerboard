@@ -8,6 +8,7 @@ import (
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
 	"google.golang.org/grpc"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -26,8 +27,9 @@ type CellMasterConnection struct {
 
 type PlayerInfoClient struct {
 	generated.PlayerClient
-	Port int
-	Ip   string
+	Port     int
+	Ip       string
+	ObjectId string
 }
 
 type Player struct {
@@ -38,14 +40,17 @@ type Player struct {
 	Port int
 	Ip   string
 
-	PosX int64
-	PosY int64
+	PosX     int64
+	PosY     int64
+	ObjectId string
 
 	MutatedObjects  *[]generated.SingleObject
 	MutatingObjects *[]generated.SingleObject
 
 	//map of cellid map of playerid
-	SubscribedPlayers    *map[string]map[string]*PlayerInfoClient
+	SubscribedPlayers *map[string]map[string]*PlayerInfoClient
+
+	cellMasterMutex      *sync.Mutex
 	Cells                *map[string]Cell
 	splitCellRequirement int
 	splitCheckInterval   int
@@ -57,11 +62,13 @@ func NewPlayer(splitCellRequirement int, splitCheckInterval int) *Player {
 	emptyPlayerMap := make(map[string]map[string]*PlayerInfoClient, 0)
 	mutatedObjects := make([]generated.SingleObject, 0)
 	cmConn := CellMasterConnection{}
+	mutex := &sync.Mutex{}
 	return &Player{
 		MutatedObjects:       &mutatedObjects,
 		CellMasterConnection: &cmConn,
 		SubscribedPlayers:    &emptyPlayerMap,
 		MutatingObjects:      &emptyObjectList,
+		cellMasterMutex:      mutex,
 		Cells:                &cells,
 		splitCellRequirement: splitCellRequirement,
 		splitCheckInterval:   splitCheckInterval,
@@ -101,7 +108,7 @@ func (cm *Player) ReceiveCellMastership(ctx context.Context, in *generated.CellL
 				println("Received cell mastership with (width, height)", cell.Width, ", ", cell.Height)
 			}
 			(*cm.Cells)[cell.CellId] = Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
-			cm.SubscribePlayer(ctx, &generated.PlayerInfo{Port: int32(cm.Port), Ip: cm.Ip, PosY: cm.PosY, PosX: cm.PosX})
+			cm.SubscribePlayer(ctx, &generated.PlayerInfo{Port: int32(cm.Port), Ip: cm.Ip, PosY: cm.PosY, PosX: cm.PosX, ObjectId: cm.ObjectId})
 		}
 	}
 
@@ -148,6 +155,7 @@ func (cm *Player) BroadcastMutatedObjects(ctx context.Context, in *generated.Mul
 		if constants.DebugMode {
 			println("checking cell with id ", object.CellId)
 		}
+
 		if playerList, ok := (*cm.SubscribedPlayers)[object.CellId]; ok {
 			if constants.DebugMode {
 				println("checking playerlist of size ", len(playerList))
@@ -218,10 +226,15 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 					println("Actually subscribing player: ", in.Port)
 				}
 
-				subscriberConn := PlayerInfoClient{PlayerClient: generated.NewPlayerClient(conn), Port: int(in.Port), Ip: in.Ip}
+				subscriberConn := PlayerInfoClient{
+					PlayerClient: generated.NewPlayerClient(conn),
+					Port:         int(in.Port),
+					Ip:           in.Ip,
+					ObjectId:     in.ObjectId,
+				}
 				subscribers[in.Ip+":"+strconv.Itoa(int(in.Port))] = &subscriberConn
-				subscribedToCell = true
 			}
+			subscribedToCell = true
 		}
 	}
 	if !subscribedToCell {
@@ -256,7 +269,7 @@ func (cm *Player) SplitCellLoop(client *cellmanager.CellManagerClient) {
 }
 
 func (cm *Player) SplitCell(client *cellmanager.CellManagerClient, cellID string) {
-
+	cm.cellMasterMutex.Lock()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	_, err := (*client).DivideCell(ctx, &cellmanager.CellRequest{CellId: cellID})
@@ -269,6 +282,7 @@ func (cm *Player) SplitCell(client *cellmanager.CellManagerClient, cellID string
 	// reset subscribed players map
 	newSubscribedPlayerMap := make(map[string]map[string]*PlayerInfoClient, 0)
 	cm.SubscribedPlayers = &newSubscribedPlayerMap
+	cm.cellMasterMutex.Unlock()
 
 }
 
@@ -278,4 +292,54 @@ func (cm *Player) DesubscribePlayers(ctx context.Context) {
 			(*player).ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
 		}
 	}
+}
+
+func (cm *Player) PlayerIsInOwnedCell(position cellmanager.Position) bool {
+	for _, cell := range *cm.Cells {
+		if cell.CollidesWith(&position) {
+			println("player is out of cell with x: ", position.PosX, " y: ", position.PosY, " and cellX: ", cell.PosX, ", cellY: ", cell.PosY, ", width: ", cell.Width, ", height: ", cell.Height)
+			return true
+		}
+	}
+	return false
+}
+
+func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cellManager *cellmanager.CellManagerClient) {
+	//cm.cellMasterMutex.Lock()
+	keysAndIndexesToRemove := make(map[string]string, 0)
+
+	println("player might leave cell! with cellid ", object.CellId, " and length: ", len(object.CellId), ", I am responsible for number of cells: ", len(*cm.Cells))
+
+	if len(object.CellId) > 0 {
+		return
+	}
+
+	for cellId, playerList := range *cm.SubscribedPlayers {
+		for playerKey, player := range playerList {
+			println("iteratedID: ", player.ObjectId, ", looking for ID: ", object.ObjectId)
+			if player.ObjectId == object.ObjectId {
+
+				println("Player left cell, kicking player ", player.Port)
+				ctx, _ := context.WithTimeout(context.Background(), time.Second)
+				player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+				if player.ObjectId == cm.ObjectId {
+					cm.stopBeingCellMasterForCell(cellManager, cellId)
+				}
+
+				keysAndIndexesToRemove[cellId] = playerKey
+
+			}
+		}
+	}
+
+	for cellKey, playerKey := range keysAndIndexesToRemove {
+		delete((*cm.SubscribedPlayers)[cellKey], playerKey)
+	}
+	//cm.cellMasterMutex.Unlock()
+}
+
+func (cm *Player) stopBeingCellMasterForCell(cellManager *cellmanager.CellManagerClient, cellId string) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	(*cellManager).UnregisterCellMaster(ctx, &cellmanager.CellMasterRequest{CellId: cellId})
+	delete(*cm.Cells, cellId)
 }

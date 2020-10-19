@@ -51,6 +51,7 @@ message PlayerInfo {
     int32 port = 2;
     int64 posX = 3;
     int64 posY = 4;
+    string objectId = 5;
 }
 
 message Cell {

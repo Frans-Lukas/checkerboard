@@ -1,20 +1,27 @@
 package cellmanager
 
-import "github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
+import (
+	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
+	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
+)
 
 type CellTreeNode struct {
 	Parent   *CellTreeNode
-	Children [4]*CellTreeNode
+	Children *[4]*CellTreeNode
 	count    int
-	objects.Cell
+	*objects.Cell
 }
 
-func CreateCellTree(cell objects.Cell) *CellTreeNode {
-	return &CellTreeNode{count: 0, Cell: cell, Parent: nil}
+func CreateCellTree(cell *objects.Cell) *CellTreeNode {
+
+	var children [4]*CellTreeNode
+
+	return &CellTreeNode{count: 0, Cell: cell, Children: &children, Parent: nil}
 }
 
-func (node CellTreeNode) CreateChild(cell objects.Cell) *CellTreeNode {
-	return &CellTreeNode{count: 0, Cell: cell, Parent: &node}
+func (node CellTreeNode) CreateChild(cell *objects.Cell) *CellTreeNode {
+	var children [4]*CellTreeNode
+	return &CellTreeNode{count: 0, Cell: cell, Children: &children, Parent: &node}
 }
 
 func (node CellTreeNode) isRoot() bool {
@@ -22,10 +29,10 @@ func (node CellTreeNode) isRoot() bool {
 }
 
 func (node CellTreeNode) isLeaf() bool {
-	return node.Children[0] == nil
+	return (*node.Children)[0] == nil
 }
 
-func (node CellTreeNode) addChildren(c1 objects.Cell, c2 objects.Cell, c3 objects.Cell, c4 objects.Cell) {
+func (node CellTreeNode) addChildren(c1 *objects.Cell, c2 *objects.Cell, c3 *objects.Cell, c4 *objects.Cell) {
 	node.Children[0] = node.CreateChild(c1)
 	node.Children[1] = node.CreateChild(c2)
 	node.Children[2] = node.CreateChild(c3)
@@ -69,6 +76,31 @@ func (node CellTreeNode) findNode(CellId string) *CellTreeNode {
 	}
 
 	return nil
+}
+
+func (node CellTreeNode) findCollidingCell(position *cellmanager.Position) *CellTreeNode {
+	if node.Cell.CollidesWith(position) && node.isLeaf() {
+		return &node
+	} else if node.Cell.CollidesWith(position) {
+		for _, child := range node.Children {
+			result := child.findCollidingCell(position)
+
+			if result != nil {
+				return result
+			}
+		}
+	}
+	return nil
+}
+
+func (node CellTreeNode) printTree() {
+	println(", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height)
+
+	for _, node := range node.Children {
+		if node != nil {
+			node.printTree()
+		}
+	}
 }
 
 // Leave cell decrement

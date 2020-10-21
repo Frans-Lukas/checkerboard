@@ -85,7 +85,7 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 		return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 	}
 
-	println("Adding player to cellID: ", collidingCell.CellId)
+	println("Adding player: ", in.Port, " to cellID: ", collidingCell.CellId)
 
 	playerToAdd := objects.Client{
 		Ip:         in.Ip,
@@ -249,6 +249,8 @@ func (cellManager *CellManager) PlayerLeftCell(
 	ctx context.Context, in *generated.PlayerInCellRequest,
 ) (*generated.PlayerStatusReply, error) {
 
+	println("Player left cell", in.CellId)
+
 	cellToLeave := cellManager.CellTree.findNode(in.CellId)
 
 	if cellToLeave == nil {
@@ -354,12 +356,12 @@ func (cellManager *CellManager) DivideCell(
 	cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: (*cell).PosX + (*cell).Width/2, PosY: (*cell).PosY + (*cell).Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 	cellManager.CellIDNumber++
 
-	node.changeCount(*node.count * -1)
+	*node.count = 0
 
 	node.addChildren(&cell1, &cell2, &cell3, &cell4)
 
-	println("TREEE IS SPLIT, PRINTING: ")
-	cellManager.CellTree.printTree()
+	//println("TREEE IS SPLIT, PRINTING: ")
+	//cellManager.CellTree.printTree(0)
 
 	return &generated.CellChangeStatusReply{Succeeded: true}, nil
 }
@@ -514,18 +516,53 @@ func (cellManager *CellManager) MergeLoop() {
 	for {
 
 		if cellManager.CellTree != nil {
-			println("root has count: ", *cellManager.CellTree.count)
+
+			println("Printing Tree: ")
+			cellManager.CellTree.printTree(0)
+			println()
+
+			//println("root has count: ", *cellManager.CellTree.count)
 			shouldMerge, cellToMerge := cellManager.CellTree.findMergableCell()
+			shouldSplit, cellToSplit := cellManager.CellTree.findSplittableCell()
 
 			if shouldMerge {
-
-				println("Merging cell with player count: ", cellToMerge.count)
+				println("Merging cell with player count: ", *cellToMerge.count)
 				cellManager.performMerge(cellToMerge.CellId)
+			}
+
+			if shouldSplit {
+				println("Splitting cell, ", cellToSplit.CellId)
+				cellManager.performSplit(cellToSplit.CellId)
 			}
 		}
 
-		time.Sleep(time.Second * constants.SplitCellInterval)
+		time.Sleep(time.Second * constants.SplitCellInterval * 2)
 	}
+}
+
+func (cellManager *CellManager) performSplit(cellId string) {
+	cellToSplit := cellManager.CellTree.findNode(cellId)
+	cellManager.DivideCell(context.Background(), &generated.CellRequest{CellId: cellId})
+	(cellToSplit).resetTimer()
+
+	cm := cellToSplit.CellMaster
+
+	if cm == nil {
+		return
+	}
+
+	address := fmt.Sprintf(cm.Ip + ":" + strconv.Itoa(int(cm.Port)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	cmConn := objects2.NewPlayerClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	cmConn.NotifyOfSplitCell(ctx, &objects2.Cell{CellId: cellId})
 }
 
 func (cellManager *CellManager) performMerge(cellId string) {
@@ -537,6 +574,7 @@ func (cellManager *CellManager) performMerge(cellId string) {
 	cellToMerge.retrieveChildren(cellToMerge.Cell)
 	*cellToMerge.count = len(cellToMerge.Players)
 	cellToMerge.killChildren()
+	cellToMerge.resetTimer()
 
 	for _, player := range cellToMerge.Players {
 		cellManager.InformClientOfCellMasterChange(player)

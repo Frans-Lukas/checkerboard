@@ -14,7 +14,13 @@ service Player {
 
     rpc SubscribePlayer (PlayerInfo) returns (SubscriptionReply) {}
 
+    rpc NotifyOfSplitCell (Cell) returns (NotifyOfSplitCellReply) {}
+
     rpc ChangedCellMaster (ChangedCellMasterRequest) returns (ChangedCellMasterReply) {}
+}
+
+message NotifyOfSplitCellReply {
+
 }
 
 message ChangedCellMasterRequest {

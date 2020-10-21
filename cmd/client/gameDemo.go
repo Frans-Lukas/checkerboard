@@ -110,7 +110,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err = cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: 0, PosY: 0})
+	_, err = cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: os.Args[1], Port: int32(port), PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
 
 	if err != nil {
 		log.Fatalf("Failed to add player to cell: ", err.Error())
@@ -120,13 +120,10 @@ func main() {
 	RequestNewCellMaster(cellManager, thisPlayer)
 	println("requested cm")
 
-	go func() {
-		thisPlayer.SplitCellLoop(&cellManager)
-	}()
-
 	println("my objectid is: ", thisPlayer.ObjectId)
 
 	for {
+
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
@@ -173,16 +170,31 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 		//defer cancel()
 
 		for thisPlayer.CellMaster == nil {
+			println("Requesting cellmaster")
 			RequestNewCellMaster(cellManager, thisPlayer)
 			if thisPlayer.CellMaster != nil {
+
 				ctx, _ := context.WithTimeout(context.Background(), time.Second)
-				(*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
+				println("Got cellmaster, subscribing")
+				_, err := (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
 					Ip:       thisPlayer.Ip,
 					Port:     int32(thisPlayer.Port),
 					PosX:     thisPlayer.PosX,
 					PosY:     thisPlayer.PosY,
 					ObjectId: thisPlayer.ObjectId,
 				})
+
+				if ctx.Err() != nil {
+					println("ctx error: ", ctx.Err().Error())
+
+				}
+
+				if err != nil {
+					println("Failed to subscribe: ", err.Error())
+					RequestNewCellMaster(cellManager, thisPlayer)
+				}
+				time.Sleep(time.Second)
+
 			}
 			time.Sleep(time.Second)
 		}

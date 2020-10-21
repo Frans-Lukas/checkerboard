@@ -50,7 +50,7 @@ type Player struct {
 	//map of cellid map of playerid
 	SubscribedPlayers *map[string]map[string]*PlayerInfoClient
 
-	cellMasterMutex      *sync.Mutex
+	CellMasterMutex      *sync.Mutex
 	Cells                *map[string]Cell
 	splitCellRequirement int
 	splitCheckInterval   int
@@ -68,7 +68,7 @@ func NewPlayer(splitCellRequirement int, splitCheckInterval int) *Player {
 		CellMasterConnection: &cmConn,
 		SubscribedPlayers:    &emptyPlayerMap,
 		MutatingObjects:      &emptyObjectList,
-		cellMasterMutex:      mutex,
+		CellMasterMutex:      mutex,
 		Cells:                &cells,
 		splitCellRequirement: splitCellRequirement,
 		splitCheckInterval:   splitCheckInterval,
@@ -202,8 +202,10 @@ func (cm *Player) IsAlive(ctx context.Context, in *generated.EmptyRequest) (*gen
 }
 
 func (cm *Player) ChangedCellMaster(ctx context.Context, in *generated.ChangedCellMasterRequest) (*generated.ChangedCellMasterReply, error) {
+	println("Nilling cell master")
 	cm.CellMaster = nil
 	cm.Connection.Close()
+	println("Cell master is nilled")
 	return &generated.ChangedCellMasterReply{}, nil
 }
 
@@ -261,42 +263,21 @@ func (cm *Player) ShouldSplitCell() (shouldSplit bool, cellId string) {
 	return false, ""
 }
 
-func (cm *Player) SplitCellLoop(client *cellmanager.CellManagerClient) {
-	for {
-		shouldSplit, cellId := cm.ShouldSplitCell()
-
-		if shouldSplit {
-			println("Splitting cell")
-			cm.SplitCell(client, cellId)
-			cellMap := make(map[string]Cell, 0)
-			cm.Cells = &cellMap
-		}
-
-		time.Sleep(time.Second * time.Duration(cm.splitCheckInterval))
-	}
-}
-
-func (cm *Player) SplitCell(client *cellmanager.CellManagerClient, cellID string) {
-	cm.cellMasterMutex.Lock()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	_, err := (*client).DivideCell(ctx, &cellmanager.CellRequest{CellId: cellID})
-	if err != nil {
-		println("Failed to split cell")
-		return
-	}
-
-	cm.DesubscribePlayers(ctx)
-	// reset subscribed players map
+func (cm *Player) NotifyOfSplitCell(ctx context.Context, in *generated.Cell) (*generated.NotifyOfSplitCellReply, error) {
+	cm.DesubscribePlayers()
 	newSubscribedPlayerMap := make(map[string]map[string]*PlayerInfoClient, 0)
 	cm.SubscribedPlayers = &newSubscribedPlayerMap
-	cm.cellMasterMutex.Unlock()
-
+	cellMap := make(map[string]Cell, 0)
+	cm.Cells = &cellMap
+	return &generated.NotifyOfSplitCellReply{}, nil
 }
 
-func (cm *Player) DesubscribePlayers(ctx context.Context) {
+
+func (cm *Player) DesubscribePlayers() {
 	for _, playerMap := range *cm.SubscribedPlayers {
 		for _, player := range playerMap {
+			println("Desubscribing player ", player.Port)
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			(*player).ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
 		}
 	}
@@ -313,7 +294,7 @@ func (cm *Player) PlayerIsInOwnedCell(position cellmanager.Position) bool {
 }
 
 func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cellManager *cellmanager.CellManagerClient) {
-	//cm.cellMasterMutex.Lock()
+	//cm.CellMasterMutex.Lock()
 	keysAndIndexesToRemove := make(map[string]string, 0)
 
 	println("player might leave cell! with cellid ", object.CellId, " and length: ", len(object.CellId), ", I am responsible for number of cells: ", len(*cm.Cells))
@@ -334,7 +315,10 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 					cm.stopBeingCellMasterForCell(cellManager, cellId)
 				}
 				ctx, _ = context.WithTimeout(context.Background(), time.Second)
-				(*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: player.ObjectId})
+				_, err := (*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: cellId})
+				if err != nil {
+					println("Failed to remove player from cell: ", cellId, ", ", err.Error())
+				}
 
 				keysAndIndexesToRemove[cellId] = playerKey
 
@@ -345,7 +329,7 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 	for cellKey, playerKey := range keysAndIndexesToRemove {
 		delete((*cm.SubscribedPlayers)[cellKey], playerKey)
 	}
-	//cm.cellMasterMutex.Unlock()
+	//cm.CellMasterMutex.Unlock()
 }
 
 func (cm *Player) stopBeingCellMasterForCell(cellManager *cellmanager.CellManagerClient, cellId string) {

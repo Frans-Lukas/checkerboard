@@ -1,6 +1,7 @@
 package cellmanager
 
 import (
+	"github.com/Frans-Lukas/checkerboard/cmd/constants"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	"github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 )
@@ -8,7 +9,7 @@ import (
 type CellTreeNode struct {
 	Parent   *CellTreeNode
 	Children *[4]*CellTreeNode
-	count    int
+	count    *int
 	*objects.Cell
 }
 
@@ -16,12 +17,14 @@ func CreateCellTree(cell *objects.Cell) *CellTreeNode {
 
 	var children [4]*CellTreeNode
 
-	return &CellTreeNode{count: 0, Cell: cell, Children: &children, Parent: nil}
+	count := 0
+	return &CellTreeNode{count: &count, Cell: cell, Children: &children, Parent: nil}
 }
 
 func (node CellTreeNode) CreateChild(cell *objects.Cell) *CellTreeNode {
 	var children [4]*CellTreeNode
-	return &CellTreeNode{count: 0, Cell: cell, Children: &children, Parent: &node}
+	count := 0
+	return &CellTreeNode{count: &count, Cell: cell, Children: &children, Parent: &node}
 }
 
 func (node CellTreeNode) isRoot() bool {
@@ -39,23 +42,21 @@ func (node CellTreeNode) addChildren(c1 *objects.Cell, c2 *objects.Cell, c3 *obj
 	node.Children[3] = node.CreateChild(c4)
 }
 
-func (node CellTreeNode) IncrementCount(CellID string) {
-	node.changeCount(CellID, 1)
+func (node CellTreeNode) IncrementCount() {
+	node.changeCount(1)
 }
 
-func (node CellTreeNode) DecrementCount(CellID string) {
-	node.changeCount(CellID, -1)
+func (node CellTreeNode) DecrementCount() {
+	node.changeCount(-1)
 }
 
-func (node CellTreeNode) changeCount(CellID string, count int) {
-	nodeToChange := node.findNode(CellID)
-
-	for !nodeToChange.isRoot() {
-		nodeToChange.count = nodeToChange.count + count
-		nodeToChange = nodeToChange.Parent
+func (node CellTreeNode) changeCount(count int) {
+	*node.count += count
+	if !node.isRoot() {
+		node.Parent.changeCount(count)
+	} else {
+		println("Incrementing root node")
 	}
-
-	nodeToChange.count = nodeToChange.count + count
 }
 
 func (node CellTreeNode) findNode(CellId string) *CellTreeNode {
@@ -100,6 +101,52 @@ func (node CellTreeNode) printTree() {
 		if node != nil {
 			node.printTree()
 		}
+	}
+}
+
+func (node CellTreeNode) killChildren() {
+	node.Children[0] = nil
+	node.Children[1] = nil
+	node.Children[2] = nil
+	node.Children[3] = nil
+}
+
+func (node CellTreeNode) findMergableCell() (bool, *CellTreeNode) {
+
+	if node.isLeaf() {
+		return false, nil
+	}
+
+	if node.shouldMerge() {
+		return true, &node
+	}
+
+	for _, child := range node.Children {
+		return child.findMergableCell()
+	}
+
+	// will never happen
+	return false, nil
+}
+
+func (node CellTreeNode) shouldMerge() (bool) {
+	return *node.count <= constants.MergeCellRequirement
+}
+
+func (node CellTreeNode) retrieveChildren(cell *objects.Cell) {
+	for _, player := range node.Cell.Players {
+		if cell.ContainsPlayer(player) {
+			continue
+		}
+		cell.AppendPlayer(player)
+	}
+
+	if node.isLeaf() {
+		return
+	}
+
+	for _, child := range node.Children {
+		child.retrieveChildren(cell)
 	}
 }
 

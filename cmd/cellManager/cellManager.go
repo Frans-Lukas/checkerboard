@@ -37,6 +37,11 @@ func main() {
 	cm := cellmanager.NewCellManager()
 	generated.RegisterCellManagerServer(s, &cm)
 	//pb.RegisterGreeterServer(s, &pb.GreeterServi)
+
+	go func() {
+		cm.MergeLoop()
+	}()
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

@@ -333,6 +333,8 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 				if player.ObjectId == cm.ObjectId {
 					cm.stopBeingCellMasterForCell(cellManager, cellId)
 				}
+				ctx, _ = context.WithTimeout(context.Background(), time.Second)
+				(*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: player.ObjectId})
 
 				keysAndIndexesToRemove[cellId] = playerKey
 

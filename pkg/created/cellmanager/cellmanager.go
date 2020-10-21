@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Frans-Lukas/checkerboard/cmd/constants"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	generated "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	objects2 "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
@@ -28,21 +29,6 @@ func NewCellManager() CellManager {
 	cells := make([]objects.Cell, 0)
 	return CellManager{Cells: &cells, CellIDNumber: 0}
 }
-
-//
-//// should only be called once!!!!!!!!!!!!!!!
-//func (cellManager *CellManager) CreateCell(
-//	ctx context.Context, in *generated.CellRequest,
-//) (*generated.CellStatusReply, error) {
-//
-//	cellToAdd := objects.Cell{CellId: in.CellId, Players: make([]objects.Client, 0)}
-//
-//	cellManager.AppendCell(cellToAdd)
-//
-//	cellManager.CellTree = CreateCellTree(cellToAdd)
-//
-//	return &generated.CellStatusReply{WasPerformed: true}, nil
-//}
 
 func (cellManager *CellManager) SetWorldSize(
 	ctx context.Context, in *generated.WorldSize,
@@ -99,32 +85,20 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 		return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 	}
 
-	cellManager.CellTree.IncrementCount(collidingCell.CellId)
-	collidingCell.AppendPlayer(objects.Client{
+	println("Adding player to cellID: ", collidingCell.CellId)
+
+	playerToAdd := objects.Client{
 		Ip:         in.Ip,
 		Port:       in.Port,
 		TrustLevel: 0,
-	}, )
-	return &generated.TransactionSucceeded{Succeeded: true}, nil
+	}
 
-	//
-	//for index, cell := range *cellManager.Cells {
-	//	if cell.CollidesWith(&generated.Position{PosY: in.PosY, PosX: in.PosX}) {
-	//
-	//		cellManager.CellTree.IncrementCount(cell.CellId)
-	//
-	//		(*cellManager.Cells)[index].AppendPlayer(
-	//			objects.Client{
-	//				Ip:         in.Ip,
-	//				Port:       in.Port,
-	//				TrustLevel: 0,
-	//			},
-	//		)
-	//		return &generated.TransactionSucceeded{Succeeded: true}, nil
-	//
-	//	}
-	//}
-	//return &generated.TransactionSucceeded{Succeeded: false}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
+	if collidingCell.ContainsPlayer(playerToAdd) {
+		return &generated.TransactionSucceeded{Succeeded: true}, nil
+	}
+	collidingCell.IncrementCount()
+	collidingCell.AppendPlayer(playerToAdd)
+	return &generated.TransactionSucceeded{Succeeded: true}, nil
 }
 
 func (cellManager *CellManager) RequestCellMasterWithPositions(
@@ -149,24 +123,6 @@ func (cellManager *CellManager) RequestCellMasterWithPositions(
 
 	println("request cell master: found cell master ", cm.Ip, ":", cm.Port)
 	return &generated.CellMasterReply{Ip: cm.Ip, Port: cm.Port}, nil
-	//
-	//for cellIndex, cell := range *cellManager.Cells {
-	//	if cell.CollidesWith(in) {
-	//		cm, err := cellManager.selectCellMaster(cell)
-	//		if err != nil {
-	//			println("request cell master: no player")
-	//			return &generated.CellMasterReply{Ip: "no player", Port: - 1}, errors.New("no player in cell")
-	//		}
-	//		go func() {
-	//			NotifyOfCellMastership(*cm, cell)
-	//		}()
-	//		//helpers.DebugPrint(requestCMWithPosPrint, fmt.Sprintf("returning cm with port: $d", cm.Port))
-	//		println("request cell master: found cell master ", cm.Ip, ":", cm.Port)
-	//		return &generated.CellMasterReply{Ip: cm.Ip, Port: cm.Port}, nil
-	//	}
-	//}
-	//println("request cell master: invalid position ")
-	//return &generated.CellMasterReply{Ip: "INVALID POSITION", Port: -1}, errors.New("Invalid position: x: " + strconv.FormatInt(in.PosX, 10) + ", y: " + strconv.FormatInt(in.PosY, 10))
 }
 
 func NotifyOfCellMastership(reply generated.CellMasterReply, cell objects.Cell) {
@@ -247,12 +203,6 @@ func (cellManager *CellManager) RequestCellMaster(
 	}
 
 	return cellManager.selectCellMaster(*node.Cell)
-
-	//for cellIndex, cell := range *cellManager.Cells {
-	//	if in.CellId == cell.CellId {
-	//		return cellManager.selectCellMaster(cell, cellIndex)
-	//	}
-	//}
 }
 
 func (cellManager *CellManager) selectCellMaster(cell objects.Cell) (*generated.CellMasterReply, error) {
@@ -274,8 +224,6 @@ func (cellManager *CellManager) selectCellMaster(cell objects.Cell) (*generated.
 
 		cellToAddTo.CellMaster = &newCM
 
-		//(*cellManager.Cells)[cellIndex].CellMaster = &newCM
-
 		return &generated.CellMasterReply{Ip: newCM.Ip, Port: newCM.Port}, nil
 	} else {
 		return &generated.CellMasterReply{Ip: cell.CellMaster.Ip, Port: cell.CellMaster.Port}, nil
@@ -294,13 +242,6 @@ func (cellManager *CellManager) UnregisterCellMaster(
 	}
 
 	cellToUnregister.Cell.CellMaster = nil
-
-	//for index, cell := range *cellManager.Cells {
-	//	if cell.CellId == in.CellId {
-	//		(*cellManager.Cells)[index].CellMaster = nil
-	//		success = true
-	//	}
-	//}
 	return &generated.CellMasterStatusReply{WasUnregistered: true}, nil
 }
 
@@ -314,14 +255,9 @@ func (cellManager *CellManager) PlayerLeftCell(
 		return &generated.PlayerStatusReply{PlayerLeft: false}, errors.New("invalid cell to delete from")
 	}
 
+	cellToLeave.DecrementCount()
+
 	cellToLeave.Cell.DeletePlayer(objects.Client{Port: in.Port, Ip: in.Ip})
-	//
-	//for _, cellToLeave := range *cellManager.Cells {
-	//	if cellToLeave.CellId == in.CellId {
-	//		cellManager.CellTree.DecrementCount(cellToLeave.CellId)
-	//		cellToLeave.DeletePlayer(objects.Client{Port: in.Port, Ip: in.Ip})
-	//	}
-	//}
 	return &generated.PlayerStatusReply{PlayerLeft: true}, nil
 }
 
@@ -359,29 +295,9 @@ func (cellManager *CellManager) LockCells(
 
 		treeNode.Cell.Locked = true
 		treeNode.Cell.Lockee = in.SenderCellId
-		//(*cellManager.Cells)[j].Locked = true
-		//(*cellManager.Cells)[j].Lockee = in.SenderCellId
 	}
 
 	return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
-	//for _, cellId := range in.CellId {
-	//	cellIsLockable := false
-	//	for i, storedCell := range *cellManager.Cells {
-	//		if cellId == storedCell.CellId {
-	//			if storedCell.Locked {
-	//				break
-	//			}
-	//			indexes = append(indexes, i)
-	//			cellIsLockable = true
-	//			break
-	//		}
-	//	}
-	//	if !cellIsLockable {
-	//		return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
-	//	}
-	//}
-
-	//return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
 }
 
 func (cellManager *CellManager) UnlockCells(
@@ -400,29 +316,11 @@ func (cellManager *CellManager) UnlockCells(
 			return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, errors.New("at least one cell is already locked")
 		}
 		cellsToUnlock = append(cellsToUnlock, storedCell)
-
-		//
-		//
-		//for i, storedCell := range *cellManager.Cells {
-		//	if cellId == storedCell.CellId {
-		//		if !storedCell.Locked || storedCell.Lockee != in.SenderCellId {
-		//			break
-		//		}
-		//		indexes = append(indexes, i)
-		//		cellIsUnlockable = true
-		//		break
-		//	}
-		//}
-		//if !cellIsUnlockable {
-		//	return &generated.CellLockStatusReply{Locked: true, Lockee: "TODO"}, nil
-		//}
 	}
 
 	for _, j := range cellsToUnlock {
 		j.Cell.Locked = false
 		j.Cell.Lockee = ""
-		//(*cellManager.Cells)[j].Locked = false
-		//(*cellManager.Cells)[j].Lockee = ""
 	}
 
 	return &generated.CellLockStatusReply{Locked: false, Lockee: "TODO"}, nil
@@ -456,47 +354,14 @@ func (cellManager *CellManager) DivideCell(
 	cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: (*cell).PosX + (*cell).Width/2, PosY: (*cell).PosY + (*cell).Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 	cellManager.CellIDNumber++
 
+	node.changeCount(*node.count * -1)
+
 	node.addChildren(&cell1, &cell2, &cell3, &cell4)
 
 	println("TREEE IS SPLIT, PRINTING: ")
 	cellManager.CellTree.printTree()
 
 	return &generated.CellChangeStatusReply{Succeeded: true}, nil
-
-	//
-	//cellIndex := FindCell(*cellManager.Cells, in.CellId)
-	//if cellIndex != len(*cellManager.Cells) {
-	//	cell := (*cellManager.Cells)[cellIndex]
-	//
-	//	if cell.Locked {
-	//		return &generated.CellChangeStatusReply{Succeeded: false}, errors.New("cell is locked")
-	//	}
-	//	newWidth := int64(UpDiv(int(cell.Width), 2))
-	//	newHeight := int64(UpDiv(int(cell.Height), 2))
-	//
-	//	nodeToAddChildrenTo := cellManager.CellTree.findNode(in.CellId)
-	//
-	//	cell1 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
-	//	cellManager.CellIDNumber++
-	//	cell2 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
-	//	cellManager.CellIDNumber++
-	//	cell3 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
-	//	cellManager.CellIDNumber++
-	//	cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: cell.PosX + cell.Width/2, PosY: cell.PosY + cell.Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
-	//	cellManager.CellIDNumber++
-	//	cellIndex := FindCell(*cellManager.Cells, in.CellId)
-	//
-	//	nodeToAddChildrenTo.addChildren(cell1, cell2, cell3, cell4)
-	//
-	//	(*cellManager.Cells)[cellIndex] = cell1
-	//	cellManager.AppendCell(cell2)
-	//	cellManager.AppendCell(cell3)
-	//	cellManager.AppendCell(cell4)
-	//
-	//	return &generated.CellChangeStatusReply{Succeeded: true}, nil
-	//} else {
-	//	return &generated.CellChangeStatusReply{Succeeded: false}, errors.New("cellId does not match an existing cell")
-	//}
 }
 
 func (cellManager *CellManager) AppendCell(cell objects.Cell) {
@@ -645,12 +510,38 @@ func UpDiv(divident int, divisor int) int {
 	return (divident + divisor - 1) / divisor
 }
 
-func (cellManager *CellManager) shouldMerge(cellId string) {
-	cellToMerge := cellManager.CellTree.findNode(cellId)
+func (cellManager *CellManager) MergeLoop() {
+	for {
 
-	//if cellToMerge.count < cellManager.
+		if cellManager.CellTree != nil {
+			println("root has count: ", *cellManager.CellTree.count)
+			shouldMerge, cellToMerge := cellManager.CellTree.findMergableCell()
+
+			if shouldMerge {
+
+				println("Merging cell with player count: ", cellToMerge.count)
+				cellManager.performMerge(cellToMerge.CellId)
+			}
+		}
+
+		time.Sleep(time.Second * constants.SplitCellInterval)
+	}
 }
 
+func (cellManager *CellManager) performMerge(cellId string) {
+	cellToMerge := cellManager.CellTree.findNode(cellId)
+	if cellToMerge.isLeaf() {
+		return
+	}
+
+	cellToMerge.retrieveChildren(cellToMerge.Cell)
+	*cellToMerge.count = len(cellToMerge.Players)
+	cellToMerge.killChildren()
+
+	for _, player := range cellToMerge.Players {
+		cellManager.InformClientOfCellMasterChange(player)
+	}
+}
 
 //func FindCell(cells []objects.Cell, cellId string) int {
 //	for i, n := range cells {

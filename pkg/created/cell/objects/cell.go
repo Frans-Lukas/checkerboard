@@ -71,8 +71,8 @@ func (cell *Cell) ContainsPlayer(player Client) bool {
 }
 
 func (cell *Cell) CollidesWith(in *generated.Position) bool {
-	return cell.PosX <= in.PosX && cell.PosX+cell.Width >= in.PosX &&
-		cell.PosY <= in.PosY && cell.PosY+cell.Height >= in.PosY
+	return cell.PosX <= in.PosX && cell.PosX+cell.Width > in.PosX &&
+		cell.PosY <= in.PosY && cell.PosY+cell.Height > in.PosY
 }
 
 func (cell *Cell) SelectNewCellMaster() int {

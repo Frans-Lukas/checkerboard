@@ -51,14 +51,13 @@ type Player struct {
 	SubscribedPlayers *map[string]map[string]*PlayerInfoClient
 
 	CellMasterMutex      *sync.Mutex
-	Cells                *map[string]Cell
+	Cells                *Cell
 	splitCellRequirement int
 	splitCheckInterval   int
 }
 
 func NewPlayer(splitCellRequirement int, splitCheckInterval int) *Player {
 	emptyObjectList := make([]generated.SingleObject, 0)
-	cells := make(map[string]Cell, 0)
 	emptyPlayerMap := make(map[string]map[string]*PlayerInfoClient, 0)
 	mutatedObjects := make([]generated.SingleObject, 0)
 	cmConn := CellMasterConnection{}
@@ -69,7 +68,7 @@ func NewPlayer(splitCellRequirement int, splitCheckInterval int) *Player {
 		SubscribedPlayers:    &emptyPlayerMap,
 		MutatingObjects:      &emptyObjectList,
 		CellMasterMutex:      mutex,
-		Cells:                &cells,
+		Cells:                nil,
 		splitCellRequirement: splitCellRequirement,
 		splitCheckInterval:   splitCheckInterval,
 	}
@@ -103,45 +102,33 @@ func (cm *Player) AppendMutatingObject(object generated.SingleObject) {
 
 func (cm *Player) ReceiveCellMastership(ctx context.Context, in *generated.CellList) (*generated.EmptyReply, error) {
 	for _, cell := range in.Cells {
-		if ownedCell, ok := (*cm.Cells)[cell.CellId]; ok {
-			// cm is already aware of mastership over cell, update cell status
+
+		println("Received cell mastership with (width, height)", cell.Width, ", ", cell.Height, " for cell: ", cell.CellId)
+
+		if cm.Cells != nil && cm.Cells.CellId == cell.CellId {
+			ownedCell := cm.Cells
 			ownedCell.PosX = cell.PosX
 			ownedCell.PosY = cell.PosY
 			ownedCell.Height = cell.Height
 			ownedCell.Width = cell.Width
-
-			(*cm.Cells)[cell.CellId] = ownedCell
 		} else {
-			if true {
-				println("Received cell mastership with (width, height)", cell.Width, ", ", cell.Height)
-			}
-			(*cm.Cells)[cell.CellId] = Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
+			cm.Cells = &Cell{CellId: cell.CellId, PosX: cell.PosX, PosY: cell.PosY, Width: cell.Width, Height: cell.Height}
 			cm.SubscribePlayer(ctx, &generated.PlayerInfo{Port: int32(cm.Port), Ip: cm.Ip, PosY: cm.PosY, PosX: cm.PosX, ObjectId: cm.ObjectId})
 		}
 	}
-
-	println("Cell list size: ", len(*cm.Cells))
 
 	return &generated.EmptyReply{}, nil
 }
 
 func (cm *Player) RequestObjectMutation(ctx context.Context, in *generated.SingleObject) (*generated.EmptyReply, error) {
-	if constants.DebugMode {
-		println("Received object mutation request for type: ", in.ObjectType)
+	if cm.Cells == nil {
+		return &generated.EmptyReply{}, errors.New("RequestObjectMutation: Cell is nil")
 	}
-	// TODO: make sure overlapping objects
-	for _, cell := range *cm.Cells {
-		if constants.DebugMode {
-			println("iterating cell with id ", cell.CellId)
-		}
-		if cell.CollidesWith(&cellmanager.Position{PosY: in.PosY, PosX: in.PosX}) {
-			if constants.DebugMode {
-				println("object collides with cell with id ", cell.CellId)
-			}
-			in.CellId = cell.CellId
-			break
-		}
+
+	if cm.Cells.CollidesWith(&cellmanager.Position{PosY: in.PosY, PosX: in.PosX}) {
+		in.CellId = cm.Cells.CellId
 	}
+
 	cm.AppendMutatingObject(*in)
 	return &generated.EmptyReply{}, nil
 }
@@ -211,42 +198,44 @@ func (cm *Player) ChangedCellMaster(ctx context.Context, in *generated.ChangedCe
 
 func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo) (*generated.SubscriptionReply, error) {
 	subscribedToCell := false
-	if constants.DebugMode {
-		println("Subscribing player: ", in.Port)
+	cell := cm.Cells
+
+	if cell == nil {
+		return nil, errors.New("SubscribePlayer: cell is nil")
 	}
-	for _, cell := range *cm.Cells {
-		println("collideCheck cell posX: ", cell.PosX, " posY: ", cell.PosY, " width: ", cell.Width, " height: ", cell.Height, " Player posX: ", in.PosX, " posY: ", in.PosY)
-		if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
-			if _, exists := (*cm.SubscribedPlayers)[cell.CellId]; !exists {
-				(*cm.SubscribedPlayers)[cell.CellId] = map[string]*PlayerInfoClient{}
-			}
 
-			subscribers := (*cm.SubscribedPlayers)[cell.CellId]
-
-			if _, exists := (subscribers)[in.Ip+":"+strconv.Itoa(int(in.Port))]; !exists {
-
-				conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
-				if err2 != nil {
-					if constants.DebugMode {
-						println("did not connect to subscriber: %v", err2)
-					}
-					return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
-				}
-				if true {
-					println("Actually subscribing player: ", in.Port)
-				}
-
-				subscriberConn := PlayerInfoClient{
-					PlayerClient: generated.NewPlayerClient(conn),
-					Port:         int(in.Port),
-					Ip:           in.Ip,
-					ObjectId:     in.ObjectId,
-				}
-				subscribers[in.Ip+":"+strconv.Itoa(int(in.Port))] = &subscriberConn
-			}
-			subscribedToCell = true
+	println("collideCheck cell posX: ", cell.PosX, " posY: ", cell.PosY, " width: ", cell.Width, " height: ", cell.Height, " Player posX: ", in.PosX, " posY: ", in.PosY)
+	if cell.CollidesWith(&cellmanager.Position{PosX: in.PosX, PosY: in.PosY}) {
+		if _, exists := (*cm.SubscribedPlayers)[cell.CellId]; !exists {
+			(*cm.SubscribedPlayers)[cell.CellId] = map[string]*PlayerInfoClient{}
 		}
+
+		subscribers := (*cm.SubscribedPlayers)[cell.CellId]
+
+		if _, exists := (subscribers)[in.Ip+":"+strconv.Itoa(int(in.Port))]; !exists {
+
+			conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
+			if err2 != nil {
+				if constants.DebugMode {
+					println("did not connect to subscriber: %v", err2)
+				}
+				return &generated.SubscriptionReply{Succeeded: false}, errors.New("could not connect")
+			}
+			if true {
+				println("Actually subscribing player: ", in.Port)
+			}
+
+			subscriberConn := PlayerInfoClient{
+				PlayerClient: generated.NewPlayerClient(conn),
+				Port:         int(in.Port),
+				Ip:           in.Ip,
+				ObjectId:     in.ObjectId,
+			}
+			subscribers[in.Ip+":"+strconv.Itoa(int(in.Port))] = &subscriberConn
+		}
+		subscribedToCell = true
 	}
+
 	if !subscribedToCell {
 		return &generated.SubscriptionReply{Succeeded: false}, errors.New("no colliding cell")
 	} else {
@@ -267,11 +256,9 @@ func (cm *Player) NotifyOfSplitCell(ctx context.Context, in *generated.Cell) (*g
 	cm.DesubscribePlayers()
 	newSubscribedPlayerMap := make(map[string]map[string]*PlayerInfoClient, 0)
 	cm.SubscribedPlayers = &newSubscribedPlayerMap
-	cellMap := make(map[string]Cell, 0)
-	cm.Cells = &cellMap
+	cm.Cells = nil
 	return &generated.NotifyOfSplitCellReply{}, nil
 }
-
 
 func (cm *Player) DesubscribePlayers() {
 	for _, playerMap := range *cm.SubscribedPlayers {
@@ -284,12 +271,17 @@ func (cm *Player) DesubscribePlayers() {
 }
 
 func (cm *Player) PlayerIsInOwnedCell(position cellmanager.Position) bool {
-	for _, cell := range *cm.Cells {
-		if cell.CollidesWith(&position) {
-			println("player is out of cell with x: ", position.PosX, " y: ", position.PosY, " and cellX: ", cell.PosX, ", cellY: ", cell.PosY, ", width: ", cell.Width, ", height: ", cell.Height)
-			return true
-		}
+
+	cell := cm.Cells
+	if cell == nil {
+		return false
 	}
+
+	if cell.CollidesWith(&position) {
+		println("player is out of cell with x: ", position.PosX, " y: ", position.PosY, " and cellX: ", cell.PosX, ", cellY: ", cell.PosY, ", width: ", cell.Width, ", height: ", cell.Height)
+		return true
+	}
+
 	return false
 }
 
@@ -297,7 +289,7 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 	//cm.CellMasterMutex.Lock()
 	keysAndIndexesToRemove := make(map[string]string, 0)
 
-	println("player might leave cell! with cellid ", object.CellId, " and length: ", len(object.CellId), ", I am responsible for number of cells: ", len(*cm.Cells))
+	println("player might leave cell! with cellid ", object.CellId, " and length: ", len(object.CellId), ", I am responsible for number of cells: 1")
 
 	if len(object.CellId) > 0 {
 		return
@@ -310,12 +302,16 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 
 				println("Player left cell, kicking player ", player.Port)
 				ctx, _ := context.WithTimeout(context.Background(), time.Second)
-				player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+				_, err := player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+				if err != nil {
+					println("failed to call ChangedCellMaster ", err.Error())
+				}
+
 				if player.ObjectId == cm.ObjectId {
 					cm.stopBeingCellMasterForCell(cellManager, cellId)
 				}
 				ctx, _ = context.WithTimeout(context.Background(), time.Second)
-				_, err := (*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: cellId})
+				_, err = (*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: cellId})
 				if err != nil {
 					println("Failed to remove player from cell: ", cellId, ", ", err.Error())
 				}
@@ -335,5 +331,8 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 func (cm *Player) stopBeingCellMasterForCell(cellManager *cellmanager.CellManagerClient, cellId string) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second)
 	(*cellManager).UnregisterCellMaster(ctx, &cellmanager.CellMasterRequest{CellId: cellId})
-	delete(*cm.Cells, cellId)
+
+	if cm.Cells != nil && cellId == cm.Cells.CellId {
+		cm.Cells = nil
+	}
 }

@@ -205,5 +205,9 @@ func (node *CellTreeNode) retrieveChildren(cell *objects.Cell) {
 	}
 }
 
+func (node *CellTreeNode) retrieveCellMasters() []ClientRe{
+
+}
+
 // Leave cell decrement
 // Join cell increment

@@ -108,7 +108,6 @@ func (node *CellTreeNode) printTree(level int) {
 	}
 }
 
-
 func (node *CellTreeNode) countPlayers() int {
 	count := len(node.Players)
 	if node.isLeaf() {
@@ -208,6 +207,22 @@ func (node *CellTreeNode) retrieveChildrenAndCellMasters(cell *objects.Cell) ([]
 		childrensCellMasters = append(childrensCellMasters, child.retrieveChildrenAndCellMasters(cell)...)
 	}
 	return childrensCellMasters
+}
+
+func (node *CellTreeNode) retrieveCellMasters() []*ClientCellRelation {
+	cms := make([]*ClientCellRelation, 0)
+	if node.CellMaster != nil {
+		cms = append(cms, &ClientCellRelation{Client: node.CellMaster, cellId: node.CellId})
+	}
+	if node.isLeaf() {
+		return cms
+	}
+
+	for _, child := range node.Children {
+		cms = append(cms, child.retrieveCellMasters()...)
+	}
+
+	return cms
 }
 
 // Leave cell decrement

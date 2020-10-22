@@ -356,7 +356,7 @@ func (cellManager *CellManager) DivideCell(
 	cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: (*cell).PosX + (*cell).Width/2, PosY: (*cell).PosY + (*cell).Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 	cellManager.CellIDNumber++
 
-	*node.count = 0
+	node.changeCount(*node.count * -1)
 
 	node.addChildren(&cell1, &cell2, &cell3, &cell4)
 

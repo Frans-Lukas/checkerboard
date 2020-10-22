@@ -214,7 +214,7 @@ func (cm *Player) SubscribePlayer(ctx context.Context, in *generated.PlayerInfo)
 
 		if _, exists := (subscribers)[in.Ip+":"+strconv.Itoa(int(in.Port))]; !exists {
 
-			conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithBlock())
+			conn, err2 := grpc.Dial(ToAddress(in.Ip, in.Port), grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 			if err2 != nil {
 				if constants.DebugMode {
 					println("did not connect to subscriber: %v", err2)

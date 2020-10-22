@@ -42,6 +42,10 @@ func main() {
 		cm.MergeLoop()
 	}()
 
+	go func() {
+		cm.IsAliveLoop()
+	}()
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

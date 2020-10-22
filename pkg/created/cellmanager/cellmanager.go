@@ -128,7 +128,7 @@ func (cellManager *CellManager) RequestCellMasterWithPositions(
 
 func NotifyOfCellMastership(reply generated.CellMasterReply, cell objects.Cell) {
 	address := fmt.Sprintf(reply.Ip + ":" + strconv.Itoa(int(reply.Port)))
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -367,7 +367,7 @@ func (cellManager *CellManager) DivideCell(
 
 func (cellManager *CellManager) InformCellMasterOfCellChange(cellMaster objects.Client, cell objects.Cell) {
 	address := fmt.Sprintf(cellMaster.Ip + ":" + strconv.Itoa(int(cellMaster.Port)))
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		println("did not connect: %v", err)
 		return
@@ -394,7 +394,7 @@ func (cellManager *CellManager) InformCellMasterOfCellChange(cellMaster objects.
 
 func (cellManager *CellManager) InformClientOfCellMasterChange(client objects.Client) {
 	address := fmt.Sprintf(client.Ip + ":" + strconv.Itoa(int(client.Port)))
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		println("did not connect: %v", err)
 		return
@@ -444,6 +444,41 @@ func (cellManager *CellManager) MergeLoop() {
 
 func (cellManager *CellManager) IsAliveLoop() {
 
+	for {
+		if cellManager.CellTree != nil {
+			cellMasters := cellManager.CellTree.retrieveCellMasters()
+
+			println("Checking cellmasters alive status")
+			for _, cellMaster := range cellMasters {
+				if !isAlive(cellMaster) {
+					println("cellMaster: ", cellMaster.Port, " is dead!")
+					nodeWithDeadCm := cellManager.CellTree.findNode(cellMaster.cellId)
+					cellManager.PlayerLeftCell(context.Background(), &generated.PlayerInCellRequest{
+						Ip:     cellMaster.Ip,
+						Port:   cellMaster.Port,
+						CellId: cellMaster.cellId,
+					})
+					nodeWithDeadCm.CellMaster = nil
+					cellManager.notifyCellSubscribersOfNewCellMaster(nodeWithDeadCm)
+				}
+			}
+		}
+		time.Sleep(time.Second * constants.AliveCheckInterval)
+	}
+
+}
+func isAlive(cm *ClientCellRelation) bool {
+	address := fmt.Sprintf(cm.Ip + ":" + strconv.Itoa(int(cm.Port)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	cmConn := objects2.NewPlayerClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	defer cancel()
+	_, err = cmConn.IsAlive(ctx, &objects2.EmptyRequest{})
+	return err == nil && ctx.Err() == nil
 }
 
 func (cellManager *CellManager) performSplit(cellId string) {
@@ -462,7 +497,7 @@ func (cellManager *CellManager) performSplit(cellId string) {
 
 func (cellManager *CellManager) removeCellMastership(cm *objects.Client, cellId string) {
 	address := fmt.Sprintf(cm.Ip + ":" + strconv.Itoa(int(cm.Port)))
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -493,11 +528,15 @@ func (cellManager *CellManager) performMerge(cellId string) {
 		}
 	}
 
-	println("performMerge: informing clients of cellmaster change")
+	cellManager.notifyCellSubscribersOfNewCellMaster(cellToMerge)
+}
+
+func (cellManager *CellManager) notifyCellSubscribersOfNewCellMaster(cellToMerge *CellTreeNode) {
+	println("informing clients of cellmaster change")
 	for _, player := range cellToMerge.Players {
 		cellManager.InformClientOfCellMasterChange(player)
 	}
-	println("performMerge: finished")
+	println("finished")
 }
 
 //func FindCell(cells []objects.Cell, cellId string) int {

@@ -96,7 +96,7 @@ func main() {
 		}
 	}()
 
-	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -236,7 +236,7 @@ func RequestNewCellMaster(cellManager NS.CellManagerClient, thisPlayer *objects.
 		log.Println("did not find new cell master: %v", err)
 		return
 	}
-	conn, err2 := grpc.Dial(objects.ToAddress(cm.Ip, cm.Port), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err2 := grpc.Dial(objects.ToAddress(cm.Ip, cm.Port), grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err2 != nil {
 		log.Println("did not connect to new cell master: %v", err2)
 	}

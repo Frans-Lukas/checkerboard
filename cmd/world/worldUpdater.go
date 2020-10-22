@@ -13,7 +13,7 @@ import (
 func main() {
 	//1. connect to cell manager
 
-	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(constants.CellManagerAddress, grpc.WithInsecure(), grpc.WithTimeout(time.Millisecond*constants.DialTimeoutMilli))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

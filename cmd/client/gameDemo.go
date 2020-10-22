@@ -124,7 +124,6 @@ func main() {
 
 	for {
 
-
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
 			Ip:       "localhost",
@@ -213,7 +212,7 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 			PosY:       int64(thisPlayer.PosY),
 		})
 		if err != nil {
-			log.Fatalf("request object mutation failed: %v", err.Error())
+			println("request object mutation failed: %v", err.Error())
 		}
 		checkForPlayerUpdates(thisPlayer)
 		printMap(thisPlayer)
@@ -328,7 +327,8 @@ func printPosition(row int64, column int64, cellMaster *objects.Player) {
 	}
 
 	if !printedPlayer {
-		for _, c := range *cellMaster.Cells {
+		c := cellMaster.Cells
+		if c != nil {
 			if row == c.PosY && column == c.PosX {
 				print("+-")
 				printedMap = true
@@ -346,13 +346,11 @@ func printPosition(row int64, column int64, cellMaster *objects.Player) {
 					print("--")
 					printedMap = true
 				}
-				break
 			} else if column == c.PosX || column == c.PosX+c.Width-1 {
 				if row >= c.PosY && row < c.PosY+c.Height {
 					print("| ")
 					printedMap = true
 				}
-				break
 			}
 		}
 		if !printedMap {

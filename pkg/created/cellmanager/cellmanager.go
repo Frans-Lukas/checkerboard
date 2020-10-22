@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-const requestCMWithPosPrint = true
-
 type CellManager struct {
 	generated.CellManagerServer
 	WorldWidth   int64
@@ -102,7 +100,6 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 		return &generated.TransactionSucceeded{Succeeded: true}, nil
 	}
 	println("Added player successfully")
-	collidingCell.IncrementCount()
 	collidingCell.AppendPlayer(playerToAdd)
 	return &generated.TransactionSucceeded{Succeeded: true}, nil
 }
@@ -263,8 +260,6 @@ func (cellManager *CellManager) PlayerLeftCell(
 		return &generated.PlayerStatusReply{PlayerLeft: false}, errors.New("invalid cell to delete from")
 	}
 
-	cellToLeave.DecrementCount()
-
 	cellToLeave.Cell.DeletePlayer(objects.Client{Port: in.Port, Ip: in.Ip})
 	return &generated.PlayerStatusReply{PlayerLeft: true}, nil
 }
@@ -362,7 +357,6 @@ func (cellManager *CellManager) DivideCell(
 	cell4 := objects.Cell{CellId: strconv.Itoa(int(cellManager.CellIDNumber)), PosX: (*cell).PosX + (*cell).Width/2, PosY: (*cell).PosY + (*cell).Height/2, Width: newWidth, Height: newHeight, Players: make([]objects.Client, 0)}
 	cellManager.CellIDNumber++
 
-	node.changeCount(*node.count * -1)
 	node.Players = make([]objects.Client, 0)
 
 	node.addChildren(&cell1, &cell2, &cell3, &cell4)
@@ -533,7 +527,7 @@ func (cellManager *CellManager) MergeLoop() {
 			shouldSplit, cellToSplit := cellManager.CellTree.findSplittableCell()
 
 			if shouldMerge {
-				println("Merging cell with player count: ", *cellToMerge.count)
+				println("Merging cell with player count: ", cellToMerge.countPlayers())
 				cellManager.performMerge(cellToMerge.CellId)
 			}
 
@@ -584,7 +578,6 @@ func (cellManager *CellManager) performMerge(cellId string) {
 	}
 
 	cmList := cellToMerge.retrieveChildrenAndCellMasters(cellToMerge.Cell)
-	*cellToMerge.count = len(cellToMerge.Players)
 	cellToMerge.killChildren()
 	cellToMerge.resetTimer()
 

@@ -10,7 +10,6 @@ import (
 type CellTreeNode struct {
 	Parent       *CellTreeNode
 	Children     *[4]*CellTreeNode
-	count        *int
 	CreationTime *time.Duration
 	*objects.Cell
 }
@@ -23,12 +22,9 @@ func CreateCellTree(cell *objects.Cell) *CellTreeNode {
 
 func CreateCellTreeNode(cell *objects.Cell) *CellTreeNode {
 	var children [4]*CellTreeNode
-
-	count := 0
-
 	timeNow := timeNowInSeconds()
 
-	return &CellTreeNode{count: &count, Cell: cell, Children: &children, Parent: nil, CreationTime: &timeNow}
+	return &CellTreeNode{Cell: cell, Children: &children, Parent: nil, CreationTime: &timeNow}
 }
 
 func (node *CellTreeNode) CreateChild(cell *objects.Cell) *CellTreeNode {
@@ -51,23 +47,6 @@ func (node *CellTreeNode) addChildren(c1 *objects.Cell, c2 *objects.Cell, c3 *ob
 	node.Children[1] = node.CreateChild(c2)
 	node.Children[2] = node.CreateChild(c3)
 	node.Children[3] = node.CreateChild(c4)
-}
-
-func (node *CellTreeNode) IncrementCount() {
-	node.changeCount(1)
-}
-
-func (node *CellTreeNode) DecrementCount() {
-	node.changeCount(-1)
-}
-
-func (node *CellTreeNode) changeCount(count int) {
-	*node.count += count
-	if !node.isRoot() {
-		node.Parent.changeCount(count)
-	} else {
-		println("change root count by: ", count)
-	}
 }
 
 func (node *CellTreeNode) findNode(CellId string) *CellTreeNode {
@@ -112,14 +91,14 @@ func (node *CellTreeNode) printTree(level int) {
 	}
 
 	if node.isLeaf() {
-		print("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", *node.count, ", len(players): ", len(node.Players))
+		print("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", node.countPlayers(), ", len(players): ", len(node.Players))
 		print(", players: [ ")
 		for _, player := range node.Players {
 			print(player.Port, " ")
 		}
 		println("]")
 	} else {
-		println("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", *node.count, ", len(players): ", len(node.Players))
+		println("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", node.countPlayers(), ", len(players): ", len(node.Players))
 	}
 
 	for _, node := range node.Children {
@@ -206,10 +185,10 @@ func (node *CellTreeNode) resetTimer() {
 
 func (node *CellTreeNode) shouldMerge() (bool) {
 	println(timeNowInSeconds() - *node.CreationTime)
-	return *node.count <= constants.MergeCellRequirement && (timeNowInSeconds()-*node.CreationTime) > constants.MergeAgeRequirement
+	return node.countPlayers() <= constants.MergeCellRequirement && (timeNowInSeconds()-*node.CreationTime) > constants.MergeAgeRequirement
 }
 func (node *CellTreeNode) shouldSplit() (bool) {
-	return *node.count >= constants.SplitCellRequirement
+	return node.countPlayers() >= constants.SplitCellRequirement
 }
 
 func (node *CellTreeNode) retrieveChildrenAndCellMasters(cell *objects.Cell) ([]*ClientCellRelation) {

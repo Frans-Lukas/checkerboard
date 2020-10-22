@@ -310,12 +310,16 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 
 				println("Player left cell, kicking player ", player.Port)
 				ctx, _ := context.WithTimeout(context.Background(), time.Second)
-				player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+				_, err := player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
+				if err != nil {
+					println("failed to call ChangedCellMaster ", err.Error())
+				}
+
 				if player.ObjectId == cm.ObjectId {
 					cm.stopBeingCellMasterForCell(cellManager, cellId)
 				}
 				ctx, _ = context.WithTimeout(context.Background(), time.Second)
-				_, err := (*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: cellId})
+				_, err = (*cellManager).PlayerLeftCell(ctx, &cellmanager.PlayerInCellRequest{Ip: player.Ip, Port: int32(player.Port), CellId: cellId})
 				if err != nil {
 					println("Failed to remove player from cell: ", cellId, ", ", err.Error())
 				}

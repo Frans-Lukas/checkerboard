@@ -66,7 +66,7 @@ func (node *CellTreeNode) changeCount(count int) {
 	if !node.isRoot() {
 		node.Parent.changeCount(count)
 	} else {
-		println("Incrementing root node")
+		println("change root count by: ", count)
 	}
 }
 
@@ -110,13 +110,37 @@ func (node *CellTreeNode) printTree(level int) {
 		print("\t")
 
 	}
-	println("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", *node.count, ", len(players): ", len(node.Players))
+
+	if node.isLeaf() {
+		print("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", *node.count, ", len(players): ", len(node.Players))
+		print(", players: [ ")
+		for _, player := range node.Players {
+			print(player.Port, " ")
+		}
+		println("]")
+	} else {
+		println("id: ", node.CellId, ", x: ", node.PosX, ", y: ", node.PosY, ", w: ", node.Width, ", h: ", node.Height, ", count: ", *node.count, ", len(players): ", len(node.Players))
+	}
 
 	for _, node := range node.Children {
 		if node != nil {
 			node.printTree(level + 1)
 		}
 	}
+}
+
+
+func (node *CellTreeNode) countPlayers() int {
+	count := len(node.Players)
+	if node.isLeaf() {
+		return count
+	}
+
+	for _, child := range node.Children {
+		count += child.countPlayers()
+	}
+
+	return count
 }
 
 func (node *CellTreeNode) killChildren() {
@@ -188,7 +212,7 @@ func (node *CellTreeNode) shouldSplit() (bool) {
 	return *node.count >= constants.SplitCellRequirement
 }
 
-func (node *CellTreeNode) retrieveChildren(cell *objects.Cell) {
+func (node *CellTreeNode) retrieveChildrenAndCellMasters(cell *objects.Cell) ([]*ClientCellRelation) {
 	for _, player := range node.Cell.Players {
 		if cell.ContainsPlayer(player) {
 			continue
@@ -197,12 +221,14 @@ func (node *CellTreeNode) retrieveChildren(cell *objects.Cell) {
 	}
 
 	if node.isLeaf() {
-		return
+		return []*ClientCellRelation{{Client: node.CellMaster, cellId: node.CellId}}
 	}
 
+	childrensCellMasters := make([]*ClientCellRelation, 0)
 	for _, child := range node.Children {
-		child.retrieveChildren(cell)
+		childrensCellMasters = append(childrensCellMasters, child.retrieveChildrenAndCellMasters(cell)...)
 	}
+	return childrensCellMasters
 }
 
 // Leave cell decrement

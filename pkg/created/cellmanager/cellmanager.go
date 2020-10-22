@@ -25,6 +25,11 @@ type CellManager struct {
 	CellTree     *CellTreeNode
 }
 
+type ClientCellRelation struct {
+	*objects.Client
+	cellId string
+}
+
 func NewCellManager() CellManager {
 	cells := make([]objects.Cell, 0)
 	return CellManager{Cells: &cells, CellIDNumber: 0}
@@ -96,6 +101,7 @@ func (cellManager *CellManager) AddPlayerToCellWithPositions(
 	if collidingCell.ContainsPlayer(playerToAdd) {
 		return &generated.TransactionSucceeded{Succeeded: true}, nil
 	}
+	println("Added player successfully")
 	collidingCell.IncrementCount()
 	collidingCell.AppendPlayer(playerToAdd)
 	return &generated.TransactionSucceeded{Succeeded: true}, nil
@@ -249,7 +255,7 @@ func (cellManager *CellManager) PlayerLeftCell(
 	ctx context.Context, in *generated.PlayerInCellRequest,
 ) (*generated.PlayerStatusReply, error) {
 
-	println("Player left cell", in.CellId)
+	println("Player: ", in.Port, " left cell", in.CellId)
 
 	cellToLeave := cellManager.CellTree.findNode(in.CellId)
 
@@ -357,6 +363,7 @@ func (cellManager *CellManager) DivideCell(
 	cellManager.CellIDNumber++
 
 	node.changeCount(*node.count * -1)
+	node.Players = make([]objects.Client, 0)
 
 	node.addChildren(&cell1, &cell2, &cell3, &cell4)
 
@@ -551,6 +558,10 @@ func (cellManager *CellManager) performSplit(cellId string) {
 		return
 	}
 
+	cellManager.removeCellMastership(cm, cellId)
+}
+
+func (cellManager *CellManager) removeCellMastership(cm *objects.Client, cellId string) {
 	address := fmt.Sprintf(cm.Ip + ":" + strconv.Itoa(int(cm.Port)))
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -558,11 +569,12 @@ func (cellManager *CellManager) performSplit(cellId string) {
 	}
 	defer conn.Close()
 	cmConn := objects2.NewPlayerClient(conn)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-
-	cmConn.NotifyOfSplitCell(ctx, &objects2.Cell{CellId: cellId})
+	_, err = cmConn.NotifyOfSplitCell(ctx, &objects2.Cell{CellId: cellId})
+	if err != nil {
+		log.Fatalf("failed to removeCellMastership: %v", err)
+	}
 }
 
 func (cellManager *CellManager) performMerge(cellId string) {
@@ -571,14 +583,23 @@ func (cellManager *CellManager) performMerge(cellId string) {
 		return
 	}
 
-	cellToMerge.retrieveChildren(cellToMerge.Cell)
+	cmList := cellToMerge.retrieveChildrenAndCellMasters(cellToMerge.Cell)
 	*cellToMerge.count = len(cellToMerge.Players)
 	cellToMerge.killChildren()
 	cellToMerge.resetTimer()
 
+	println("performMerge: removing cellMastership")
+	for _, clientCell := range cmList {
+		if clientCell.Client != nil {
+			cellManager.removeCellMastership(clientCell.Client, clientCell.cellId)
+		}
+	}
+
+	println("performMerge: informing clients of cellmaster change")
 	for _, player := range cellToMerge.Players {
 		cellManager.InformClientOfCellMasterChange(player)
 	}
+	println("performMerge: finished")
 }
 
 //func FindCell(cells []objects.Cell, cellId string) int {

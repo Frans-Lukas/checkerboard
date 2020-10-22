@@ -184,15 +184,22 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 					ObjectId: thisPlayer.ObjectId,
 				})
 
-				if ctx.Err() != nil {
-					println("ctx error: ", ctx.Err().Error())
-
-				}
-
-				if err != nil {
+				for err != nil {
 					println("Failed to subscribe: ", err.Error())
 					RequestNewCellMaster(cellManager, thisPlayer)
+
+					if thisPlayer.CellMaster != nil {
+						ctx, _ := context.WithTimeout(context.Background(), time.Second)
+						_, err = (*thisPlayer.CellMaster).SubscribePlayer(ctx, &OBJ.PlayerInfo{
+							Ip:       thisPlayer.Ip,
+							Port:     int32(thisPlayer.Port),
+							PosX:     thisPlayer.PosX,
+							PosY:     thisPlayer.PosY,
+							ObjectId: thisPlayer.ObjectId,
+						})
+					}
 				}
+
 				time.Sleep(time.Second)
 
 			}
@@ -218,7 +225,13 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 
 func RequestNewCellMaster(cellManager NS.CellManagerClient, thisPlayer *objects.Player) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second)
-	cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: thisPlayer.Ip, Port: int32(thisPlayer.Port), PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
+	_, err := cellManager.AddPlayerToCellWithPositions(ctx, &NS.PlayerInCellRequestWithPositions{Ip: thisPlayer.Ip, Port: int32(thisPlayer.Port), PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
+
+	if err != nil {
+		log.Println("RequestNewCellMaster: failed AddyerToCellWithPosition: ", err.Error())
+		return
+	}
+
 	cm, err := cellManager.RequestCellMasterWithPositions(ctx, &NS.Position{PosX: thisPlayer.PosX, PosY: thisPlayer.PosY})
 	if err != nil {
 		log.Println("did not find new cell master: %v", err)

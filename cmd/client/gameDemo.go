@@ -24,17 +24,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/Frans-Lukas/checkerboard/cmd/constants"
+	"github.com/Frans-Lukas/checkerboard/cmd/mapDrawer"
 	"github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	NS "github.com/Frans-Lukas/checkerboard/pkg/generated/cellmanager"
 	OBJ "github.com/Frans-Lukas/checkerboard/pkg/generated/objects"
+	"google.golang.org/grpc"
 	"log"
 	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
 const (
@@ -56,6 +56,8 @@ var thisPlayer = objects.NewPlayer(constants.SplitCellRequirement, constants.Spl
 
 var isBot = true
 
+var playersMap = mapDrawer.MapInfo{}
+
 const PlayerObjectType = "player"
 
 func PlayerConstructor(posX int64, posY int64) Player {
@@ -68,6 +70,9 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	port, err := strconv.Atoi(os.Args[2])
+
+	// test map drawing
+	playersMap = mapDrawer.SetupMap(strconv.Itoa(port), constants.MAP_SIZE*constants.IconSize, constants.MAP_SIZE*constants.IconSize)
 
 	if len(os.Args) >= 4 {
 		isBot = false
@@ -299,6 +304,10 @@ func readInput(input string) {
 }
 
 func printMap(cellMaster *objects.Player) {
+	playersMap.ClearMap()
+	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), true)
+	playersMap.SaveMapAsPNG()
+
 	for row := 0; row < constants.MAP_SIZE; row++ {
 		if row < 10 {
 			print(row, " ")

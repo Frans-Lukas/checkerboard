@@ -170,6 +170,9 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 
 		for thisPlayer.CellMaster == nil {
 			println("Requesting cellmaster")
+
+			playerList = make(map[string]*Player, 0)
+
 			RequestNewCellMaster(cellManager, thisPlayer)
 			if thisPlayer.CellMaster != nil {
 

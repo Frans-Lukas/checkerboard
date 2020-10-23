@@ -56,7 +56,7 @@ var thisPlayer = objects.NewPlayer(constants.SplitCellRequirement, constants.Spl
 
 var isBot = true
 
-var playersMap = mapDrawer.MapInfo{}
+var playersMap = &mapDrawer.MapInfo{}
 
 const PlayerObjectType = "player"
 
@@ -302,7 +302,14 @@ func readInput(input string) {
 
 func printMap(cellMaster *objects.Player) {
 	playersMap.ClearMap()
-	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), true)
+
+	for _, player := range playerList {
+		if player.objectId != thisPlayer.ObjectId {
+			playersMap.DrawClient(int(player.posX), int(player.posY), constants.ClientImage)
+		}
+	}
+	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), constants.PlayerImage)
+
 	playersMap.SaveMapAsPNG()
 
 	for row := 0; row < constants.MAP_SIZE; row++ {

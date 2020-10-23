@@ -10,5 +10,6 @@ const SplitCellInterval = 3
 const MergeAgeRequirement = 30
 const ClientImage = "client.png"
 const PlayerImage = "player.png"
+const IconSize = 50
 const AliveCheckInterval = 5
 const DialTimeoutMilli = 100

@@ -2,39 +2,123 @@ package mapDrawer
 
 import (
 	"github.com/Frans-Lukas/checkerboard/cmd/constants"
+	"github.com/mattn/go-gtk/gdk"
+	"github.com/mattn/go-gtk/glib"
+	"github.com/mattn/go-gtk/gtk"
 	"github.com/nfnt/resize"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
+	"unsafe"
 )
 
 type MapInfo struct {
 	name string
 	draw.Image
+	gdkwin      *gdk.Window
+	drawingarea *gtk.DrawingArea
+	pixmap      *gdk.Pixmap
+	gc          *gdk.GC
 	sizeX       int
 	sizeY       int
-	playerImage image.Image
-	//clientImage draw.Image
 }
 
-func SetupMap(name string, sizeX int, sizeY int) MapInfo {
+func SetupMap(name string, sizeX int, sizeY int) *MapInfo {
 
 	newImage := image.NewRGBA(image.Rectangle{Min: image.Pt(0, 0), Max: image.Pt(sizeX, sizeY)})
 
-	f, err := os.Open(constants.PlayerImage)
-	if err != nil {
-		println("SetupMap: failed to load image: ", err.Error())
+	thisMap := MapInfo{name: name, Image: newImage, sizeX: sizeX, sizeY: sizeY}
+
+	///////////////////////////////////////////////////
+
+	gtk.Init(&os.Args)
+	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
+	window.SetTitle(name)
+	window.Connect("destroy", gtk.MainQuit)
+
+	vbox := gtk.NewVBox(true, 0)
+	vbox.SetBorderWidth(5)
+	thisMap.drawingarea = gtk.NewDrawingArea()
+
+	var p1, p2 gdk.Point
+	p1.X = -1
+	p1.Y = -1
+	colors := []string{
+		"black",
+		"gray",
+		"blue",
+		"purple",
+		"red",
+		"orange",
+		"yellow",
+		"green",
+		"darkgreen",
 	}
 
-	newPlayerImage, _, err := image.Decode(f)
-	newPlayerImage = resize.Resize(uint(sizeX/constants.MAP_SIZE), uint(sizeX/constants.MAP_SIZE), newPlayerImage, resize.Lanczos3)
-	if err != nil {
-		println("SetupMap: failed to decode image: ", err.Error())
-	}
+	thisMap.drawingarea.Connect("configure-event", func() {
+		if thisMap.pixmap != nil {
+			thisMap.pixmap.Unref()
+		}
+		allocation := thisMap.drawingarea.GetAllocation()
+		thisMap.pixmap = gdk.NewPixmap(thisMap.drawingarea.GetWindow().GetDrawable(), allocation.Width, allocation.Height, 24)
+		thisMap.gc = gdk.NewGC(thisMap.pixmap.GetDrawable())
+		thisMap.gc.SetRgbFgColor(gdk.NewColor("white"))
+		thisMap.pixmap.GetDrawable().DrawRectangle(thisMap.gc, true, 0, 0, -1, -1)
+		thisMap.gc.SetRgbFgColor(gdk.NewColor(colors[0]))
+		thisMap.gc.SetRgbBgColor(gdk.NewColor("white"))
+	})
 
-	return MapInfo{name: name, Image: newImage, sizeX: sizeX, sizeY: sizeY, playerImage: newPlayerImage}
+	thisMap.drawingarea.Connect("motion-notify-event", func(ctx *glib.CallbackContext) {
+		arg := ctx.Args(0)
+		mev := *(**gdk.EventMotion)(unsafe.Pointer(&arg))
+		var mt gdk.ModifierType
+		if mev.IsHint != 0 {
+			thisMap.gdkwin.GetPointer(&p2.X, &p2.Y, &mt)
+		} else {
+			p2.X, p2.Y = int(mev.X), int(mev.Y)
+		}
+		if p1.X != -1 && p2.X != -1 && (gdk.EventMask(mt)&gdk.BUTTON_PRESS_MASK) != 0 {
+			thisMap.pixmap.GetDrawable().DrawLine(thisMap.gc, p1.X, p1.Y, p2.X, p2.Y)
+			thisMap.gdkwin.Invalidate(nil, false)
+		}
+		colors = append(colors[1:], colors[0])
+		thisMap.gc.SetRgbFgColor(gdk.NewColor(colors[0]))
+		p1 = p2
+	})
+
+	thisMap.drawingarea.Connect("expose-event", func() {
+		thisMap.Redraw()
+	})
+
+	glib.TimeoutAdd(1000, thisMap.Redraw, thisMap.drawingarea)
+
+	thisMap.drawingarea.SetEvents(int(gdk.POINTER_MOTION_MASK | gdk.POINTER_MOTION_HINT_MASK | gdk.BUTTON_PRESS_MASK))
+	vbox.Add(thisMap.drawingarea)
+
+	window.Add(vbox)
+	window.SetSizeRequest(sizeX, sizeY)
+	window.ShowAll()
+
+	thisMap.gdkwin = thisMap.drawingarea.GetWindow()
+
+	go func() {
+		gtk.Main()
+	}()
+
+	return &thisMap
+}
+
+func (thisMap *MapInfo) Redraw() bool {
+	if thisMap.pixmap == nil {
+		return true
+	}
+	tmpImage := gtk.NewImageFromFile(thisMap.name + ".png")
+	thisMap.pixmap.GetDrawable().DrawPixbuf(thisMap.gc, tmpImage.GetPixbuf(), 0, 0, 0, 0, -1, -1, gdk.RGB_DITHER_NONE, 0, 0)
+	//gdkwin.GetDrawable().DrawDrawable(gc, &gdk.Drawable{GDrawable: newPlayerImage}, 0, 0, 0, 0, -1, -1)
+	thisMap.gdkwin.GetDrawable().DrawDrawable(thisMap.gc, thisMap.pixmap.GetDrawable(), 0, 0, 0, 0, -1, -1)
+	return true
 }
 
 func (thisMap *MapInfo) ClearMap() {
@@ -59,12 +143,25 @@ func (thisMap *MapInfo) ClearMap() {
 	}
 }
 
-func (thisMap *MapInfo) DrawClient(posX int, posY int, isPlayer bool) {
+func (thisMap *MapInfo) DrawClient(posX int, posY int, imagePath string) {
 	startPoint := image.Pt(posX*(thisMap.sizeX/constants.MAP_SIZE), posY*(thisMap.sizeX/constants.MAP_SIZE))
-	if isPlayer {
-		r := image.Rectangle{Min: startPoint, Max: startPoint.Add(startPoint.Add(thisMap.playerImage.Bounds().Size()))}
-		draw.Draw(thisMap.Image, r, thisMap.playerImage, thisMap.playerImage.Bounds().Min, draw.Src)
+
+	f, err := os.Open(imagePath)
+	if err != nil {
+		println("SetupMap: failed to load image: ", err.Error())
 	}
+
+	drawableImage, _, err := image.Decode(f)
+
+	if err != nil {
+		println("SetupMap: failed to decode image: ", err.Error())
+	}
+
+	drawableImage = resize.Resize(uint(thisMap.sizeX/constants.MAP_SIZE), uint(thisMap.sizeX/constants.MAP_SIZE), drawableImage, resize.Lanczos3)
+
+	r := image.Rectangle{Min: startPoint, Max: startPoint.Add(startPoint.Add(drawableImage.Bounds().Size()))}
+	draw.Draw(thisMap.Image, r, drawableImage, drawableImage.Bounds().Min, draw.Src)
+
 }
 
 func (thisMap *MapInfo) SaveMapAsPNG() {
@@ -73,4 +170,6 @@ func (thisMap *MapInfo) SaveMapAsPNG() {
 		println("SaveMapAsPNG: ", err.Error())
 	}
 	png.Encode(file, thisMap.Image)
+
+	gtk.EventsPending()
 }

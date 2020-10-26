@@ -299,9 +299,19 @@ func (cm *Player) PlayerMightLeaveCellHandle(object generated.SingleObject, cell
 		for playerKey, player := range playerList {
 			println("iteratedID: ", player.ObjectId, ", looking for ID: ", object.ObjectId)
 			if player.ObjectId == object.ObjectId {
+				ctx, _ := context.WithTimeout(context.Background(), time.Second)
+
+				clonedObject := object
+
+				clonedObject.UpdateKey = append(clonedObject.UpdateKey, constants.RemovedKey)
+				clonedObject.NewValue = append(clonedObject.NewValue, "")
+				clonedObject.CellId = cm.Cells.CellId
+
+				//TODO: this is ugly and should be boy scouted. V
+				cm.BroadcastMutatedObjects(ctx, &generated.MultipleObjects{Objects: []*generated.SingleObject{&clonedObject}})
 
 				println("Player left cell, kicking player ", player.Port)
-				ctx, _ := context.WithTimeout(context.Background(), time.Second)
+				ctx, _ = context.WithTimeout(context.Background(), time.Second)
 				_, err := player.ChangedCellMaster(ctx, &generated.ChangedCellMasterRequest{})
 				if err != nil {
 					println("failed to call ChangedCellMaster ", err.Error())

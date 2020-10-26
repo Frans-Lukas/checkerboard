@@ -288,13 +288,24 @@ func botMove() {
 
 func checkForPlayerUpdates(cellMaster *objects.Player) {
 	for _, object := range *cellMaster.MutatedObjects {
-		if _, ok := playerList[object.ObjectId]; ok {
-			updatePlayer(&object)
-		} else {
-			playerList[object.ObjectId] = PlayerFromObject(&object)
-		}
+		addRemoveOrUpdatePlayer(object)
 	}
 	cellMaster.MutatedObjects = new([]OBJ.SingleObject)
+}
+
+func addRemoveOrUpdatePlayer(object OBJ.SingleObject) {
+	for _, key := range object.UpdateKey {
+		if key == constants.RemovedKey {
+			println("Removing player from list, ", object.ObjectId)
+			delete(playerList, object.ObjectId)
+			return
+		}
+	}
+	if _, ok := playerList[object.ObjectId]; ok {
+		updatePlayer(&object)
+	} else {
+		playerList[object.ObjectId] = PlayerFromObject(&object)
+	}
 }
 
 func readInput(input string) {
@@ -328,18 +339,18 @@ func printMap(cellMaster *objects.Player) {
 
 	playersMap.SaveMapAsPNG()
 
-	for row := 0; row < constants.MAP_SIZE; row++ {
-		if row < 10 {
-			print(row, " ")
-		} else {
-			print(row)
-		}
-		//fmt.Fprintf("%3d", row)
-		for column := 0; column < constants.MAP_SIZE; column++ {
-			printPosition(int64(row), int64(column), cellMaster)
-		}
-		print(row, "\n")
-	}
+	//for row := 0; row < constants.MAP_SIZE; row++ {
+	//	if row < 10 {
+	//		print(row, " ")
+	//	} else {
+	//		print(row)
+	//	}
+	//	//fmt.Fprintf("%3d", row)
+	//	for column := 0; column < constants.MAP_SIZE; column++ {
+	//		printPosition(int64(row), int64(column), cellMaster)
+	//	}
+	//	print(row, "\n")
+	//}
 }
 
 func printPosition(row int64, column int64, cellMaster *objects.Player) {

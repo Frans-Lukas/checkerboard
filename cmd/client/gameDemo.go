@@ -150,20 +150,20 @@ func main() {
 			time.Sleep(time.Second)
 		}
 	}
+
 	gameLoop(thisPlayer, cellManager)
+
 }
 
 func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 	reader := bufio.NewReader(os.Stdin)
 
-	printMap(thisPlayer)
 	println()
 	println()
 	println()
 	for {
 		if isBot {
 			botMove()
-			time.Sleep(time.Second * 3)
 		} else {
 			input, _ := reader.ReadString('\n')
 			readInput(input)
@@ -229,11 +229,14 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 		if err != nil {
 			println("request object mutation failed: %v", err.Error())
 		}
-		checkForPlayerUpdates(thisPlayer)
-		printMap(thisPlayer)
 		println()
 		println()
 		println()
+		for i := 0; i < 10; i++ {
+			checkForPlayerUpdates(thisPlayer)
+			printMap(thisPlayer)
+			time.Sleep(time.Millisecond * 100)
+		}
 	}
 }
 
@@ -286,9 +289,7 @@ func botMove() {
 func checkForPlayerUpdates(cellMaster *objects.Player) {
 	for _, object := range *cellMaster.MutatedObjects {
 		if _, ok := playerList[object.ObjectId]; ok {
-			if object.ObjectId != thisPlayer.ObjectId {
-				updatePlayer(&object)
-			}
+			updatePlayer(&object)
 		} else {
 			playerList[object.ObjectId] = PlayerFromObject(&object)
 		}
@@ -315,11 +316,11 @@ func printMap(cellMaster *objects.Player) {
 
 	for _, player := range playerList {
 		if player.objectId != thisPlayer.ObjectId {
-			playersMap.DrawClient(int(player.posX), int(player.posY), constants.ClientImage)
+			playersMap.DrawClient(int(player.posX), int(player.posY), player.icon)
 		}
 	}
 
-	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), constants.PlayerImage)
+	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), thisPlayerIcon)
 
 	if cellMaster.Cells != nil {
 		playersMap.DrawCellBoundaries(*cellMaster.Cells)
@@ -344,16 +345,17 @@ func printMap(cellMaster *objects.Player) {
 func printPosition(row int64, column int64, cellMaster *objects.Player) {
 	printedPlayer := false
 	printedMap := false
-	if row == thisPlayer.PosY && column == thisPlayer.PosX {
-		print("P ")
-		printedPlayer = true
-	} else {
-		for _, player := range playerList {
-			if row == player.posY && column == player.posX && player.objectId != thisPlayer.ObjectId {
+
+	for _, player := range playerList {
+		if row == player.posY && column == player.posX {
+			if row == thisPlayer.PosY && column == thisPlayer.PosX {
+				print("P ")
+				printedPlayer = true
+			} else {
 				print("O ")
 				printedPlayer = true
-				break
 			}
+			break
 		}
 	}
 
@@ -394,7 +396,7 @@ func PlayerFromObject(object *OBJ.SingleObject) *Player {
 	player := PlayerConstructor(object.PosX, object.PosY)
 	player.objectId = object.ObjectId
 
-	iconKeyPos := sort.Search(len(object.UpdateKey), func(i int) bool {return object.UpdateKey[i] == "icon"})
+	iconKeyPos := sort.Search(len(object.UpdateKey), func(i int) bool { return object.UpdateKey[i] == "icon" })
 	if iconKeyPos < len(object.UpdateKey) {
 		player.icon = object.NewValue[iconKeyPos]
 	} else {
@@ -438,7 +440,7 @@ func updateWorld(player *objects.Player, cellManager *NS.CellManagerClient) {
 			player.BroadcastMutatedObjects(ctx, &OBJ.MultipleObjects{Objects: objectList})
 		}
 		player.MutatingObjects = new([]OBJ.SingleObject)
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 50)
 	}
 
 	// if found -> apply game logic

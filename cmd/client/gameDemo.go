@@ -33,6 +33,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -48,10 +49,12 @@ type Player struct {
 	posX     int64
 	posY     int64
 	objectId string
+	icon     string
 }
 
 var playerList = make(map[string]*Player, 0)
 
+var thisPlayerIcon = ""
 var thisPlayer = objects.NewPlayer(constants.SplitCellRequirement, constants.SplitCellInterval)
 
 var isBot = true
@@ -88,6 +91,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	playerServer := grpc.NewServer()
+
+	thisPlayerIcon = string("icon" + strconv.Itoa(port) + ".png")
 
 	thisPlayer.Port = port
 	thisPlayer.Ip = "localhost"
@@ -218,6 +223,8 @@ func gameLoop(thisPlayer *objects.Player, cellManager NS.CellManagerClient) {
 			ObjectId:   thisPlayer.ObjectId,
 			PosX:       int64(thisPlayer.PosX),
 			PosY:       int64(thisPlayer.PosY),
+			UpdateKey:  []string{"icon"},
+			NewValue:   []string{thisPlayerIcon},
 		})
 		if err != nil {
 			println("request object mutation failed: %v", err.Error())
@@ -311,7 +318,12 @@ func printMap(cellMaster *objects.Player) {
 			playersMap.DrawClient(int(player.posX), int(player.posY), constants.ClientImage)
 		}
 	}
+
 	playersMap.DrawClient(int(thisPlayer.PosX), int(thisPlayer.PosY), constants.PlayerImage)
+
+	if cellMaster.Cells != nil {
+		playersMap.DrawCellBoundaries(*cellMaster.Cells)
+	}
 
 	playersMap.SaveMapAsPNG()
 
@@ -381,6 +393,13 @@ func printPosition(row int64, column int64, cellMaster *objects.Player) {
 func PlayerFromObject(object *OBJ.SingleObject) *Player {
 	player := PlayerConstructor(object.PosX, object.PosY)
 	player.objectId = object.ObjectId
+
+	iconKeyPos := sort.Search(len(object.UpdateKey), func(i int) bool {return object.UpdateKey[i] == "icon"})
+	if iconKeyPos < len(object.UpdateKey) {
+		player.icon = object.NewValue[iconKeyPos]
+	} else {
+		player.icon = thisPlayerIcon // TODO should have default
+	}
 	return &player
 }
 

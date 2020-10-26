@@ -2,6 +2,7 @@ package mapDrawer
 
 import (
 	"github.com/Frans-Lukas/checkerboard/cmd/constants"
+	objects2 "github.com/Frans-Lukas/checkerboard/pkg/created/cell/objects"
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
@@ -162,6 +163,39 @@ func (thisMap *MapInfo) DrawClient(posX int, posY int, imagePath string) {
 	r := image.Rectangle{Min: startPoint, Max: startPoint.Add(startPoint.Add(drawableImage.Bounds().Size()))}
 	draw.Draw(thisMap.Image, r, drawableImage, drawableImage.Bounds().Min, draw.Src)
 
+}
+
+func (thisMap *MapInfo) DrawCellBoundaries(cell objects2.Cell) {
+	topLeft := image.Pt(int(cell.PosX)*(thisMap.sizeX/constants.MAP_SIZE), int(cell.PosY)*(thisMap.sizeX/constants.MAP_SIZE))
+	bottomLeft := image.Pt(int(cell.PosX)*(thisMap.sizeX/constants.MAP_SIZE), int(cell.PosY+cell.Height)*(thisMap.sizeX/constants.MAP_SIZE))
+	topRight := image.Pt(int(cell.PosX+cell.Width)*(thisMap.sizeX/constants.MAP_SIZE), int(cell.PosY)*(thisMap.sizeX/constants.MAP_SIZE))
+	bottomRight := image.Pt(int(cell.PosX+cell.Width)*(thisMap.sizeX/constants.MAP_SIZE), int(cell.PosY+cell.Height)*(thisMap.sizeX/constants.MAP_SIZE))
+
+	borderColor := color.RGBA{R: 100, G: 0, B: 0, A: 0xff}
+
+	for i := topLeft; i.X < topRight.X; i.X++ {
+		thisMap.Image.Set(i.X, i.Y-1, borderColor)
+		thisMap.Image.Set(i.X, i.Y, borderColor)
+		thisMap.Image.Set(i.X, i.Y+1, borderColor)
+	}
+
+	for i := topLeft; i.Y < bottomLeft.Y; i.Y++ {
+		thisMap.Image.Set(i.X-1, i.Y, borderColor)
+		thisMap.Image.Set(i.X, i.Y, borderColor)
+		thisMap.Image.Set(i.X+1, i.Y, borderColor)
+	}
+
+	for i := bottomLeft; i.X < bottomRight.X; i.X++ {
+		thisMap.Image.Set(i.X, i.Y-1, borderColor)
+		thisMap.Image.Set(i.X, i.Y, borderColor)
+		thisMap.Image.Set(i.X, i.Y+1, borderColor)
+	}
+
+	for i := topRight; i.Y < bottomRight.Y; i.Y++ {
+		thisMap.Image.Set(i.X-1, i.Y, borderColor)
+		thisMap.Image.Set(i.X, i.Y, borderColor)
+		thisMap.Image.Set(i.X+1, i.Y, borderColor)
+	}
 }
 
 func (thisMap *MapInfo) SaveMapAsPNG() {
